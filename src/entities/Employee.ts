@@ -2,7 +2,7 @@ import { Field, Int, ObjectType, registerEnumType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Booking } from "./Booking.ts";
 import { AuditLog } from "./AuditLog.ts";
-import { IsDate, IsEmail, IsEnum, IsNotEmpty, Length } from "class-validator";
+import { IsDateString, IsEmail, IsEnum, IsNotEmpty, Length, Matches } from "class-validator";
 
 export enum Role {
     ADMIN = 'ADMIN',
@@ -29,26 +29,29 @@ export class Employee {
 
     @Field(() => String)
     @Column({ type: 'varchar', length: 255, unique: true })
-    @IsEmail({}, { message: "Invalid email address format" })
+    @IsNotEmpty({ message: "Email cannot be empty" })
+    @IsEmail({}, { message: "Invalid email format" })
     email!: string;
 
-    @Column({ type: 'varchar', length: 255, nullable: true })
+    @Column({ type: 'varchar', length: 255 })
+    @IsNotEmpty({ message: "Password cannot be empty" })
     @Length(6, 100, { message: "Password must be at least 6 characters long" })
     password!: string;
 
     @Field(() => Role, { nullable: false })
     @Column({ type: 'enum', enum: Role, default: Role.EMPLOYEE })
+    @IsNotEmpty({ message: "Role cannot be empty" })
     @IsEnum(Role)
     role!: Role;
 
     @Field(() => Date)
     @CreateDateColumn({ type: 'timestamptz' })
-    @IsDate()
+    @IsDateString()
     created_at!: Date;
 
     @Field(() => Date)
     @UpdateDateColumn({ type: 'timestamptz' })
-    @IsDate()
+    @IsDateString()
     updated_at!: Date;
 
     @Field(() => [Booking])

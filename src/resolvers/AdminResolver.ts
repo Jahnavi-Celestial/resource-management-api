@@ -5,6 +5,7 @@ import { MeetingRoom } from "../entities/MeetingRoom.ts";
 import { Booking } from "../entities/Booking.ts";
 import { Equipment } from "../entities/Equipment.ts";
 import bcrypt from "bcrypt";
+import { isEmail, isNotEmpty } from "class-validator";
 
 export interface AppContext {
   user: Employee; 
@@ -13,7 +14,7 @@ export interface AppContext {
 @Resolver()
 export class AdminResolver {
 
-    @Authorized("ADMIN")
+    @Authorized(["ADMIN","MANAGER"])
     @Query(() => [Booking])
     async viewAllBookings(
         @Ctx() context: AppContext,
@@ -39,6 +40,18 @@ export class AdminResolver {
     ){
         if (!context?.user || context.user.role !== "ADMIN") {
             throw new Error("Permission Denied")
+        }
+
+        if(!isNotEmpty(firstName) || !isNotEmpty(email) || !isNotEmpty(password) || !isNotEmpty(role)){
+            throw new Error("FirstName, email, password, role can't be empty")
+        }
+        
+        if (!isEmail(email, { require_tld: true })) {
+            throw new Error("Invalid email format");
+        }
+        
+        if(password.length < 6){
+            throw new Error("Password should contain atleast 6 characters")
         }
 
         const empRepo = AppDataSource.getRepository(Employee)
@@ -74,6 +87,14 @@ export class AdminResolver {
             throw new Error("Permission Denied")
         }
 
+        if(!isNotEmpty(firstName) || !isNotEmpty(email) || !isNotEmpty(id) || !isNotEmpty(role)){
+            throw new Error("FirstName, email, employee id, role can't be empty")
+        }
+        
+        if (email && !isEmail(email, { require_tld: true })) {
+            throw new Error("Invalid email format");
+        }
+
         const empRepo = AppDataSource.getRepository(Employee)
 
         const searchEmp = await empRepo.findOne({ where: { id } })
@@ -99,6 +120,10 @@ export class AdminResolver {
             throw new Error("Permission Denied")
         }
 
+        if(!isNotEmpty(id)){
+            throw new Error("employee id can't be empty")
+        }
+
         const empRepo = AppDataSource.getRepository(Employee);
 
         const searchEmp = await empRepo.findOne({ where: { id } })
@@ -122,13 +147,17 @@ export class AdminResolver {
             throw new Error("Permission Denied")
         }
 
+        if(!isNotEmpty(name) || !isNotEmpty(location) || !isNotEmpty(capacity)){
+            throw new Error("Room name, location, capacity can't be empty")
+        }
+
         const meetingRoomRepo = AppDataSource.getRepository(MeetingRoom)
 
         const newRoom = meetingRoomRepo.create({ 
             name, 
             location, 
             capacity, 
-            isActive 
+            isActive
         })
 
         return await meetingRoomRepo.save(newRoom)
@@ -146,6 +175,10 @@ export class AdminResolver {
     ){
         if (!context?.user || context.user.role !== "ADMIN") {
             throw new Error("Permission Denied")
+        }
+
+        if(!isNotEmpty(id) || !isNotEmpty(name) || !isNotEmpty(location) || !isNotEmpty(capacity)){
+            throw new Error("Room id, name, location, capacity can't be empty")
         }
 
         const meetingRoomRepo = AppDataSource.getRepository(MeetingRoom)
@@ -173,6 +206,10 @@ export class AdminResolver {
             throw new Error("Permission Denied")
         }
 
+        if(!isNotEmpty(id)){
+            throw new Error("room id can't be empty")
+        }
+
         const meetingRoomRepo = AppDataSource.getRepository(MeetingRoom);
 
         const searchRoom = await meetingRoomRepo.findOne({ where: { id } })
@@ -194,6 +231,10 @@ export class AdminResolver {
     ){
         if (!context?.user || context.user.role !== "ADMIN") {
             throw new Error("Permission Denied")
+        }
+
+        if(!isNotEmpty(name) || !isNotEmpty(quantityAvailable)){
+            throw new Error("Equipment Name, available quantity can't be empty")
         }
 
         const equipRepo = AppDataSource.getRepository(Equipment)
@@ -219,6 +260,10 @@ export class AdminResolver {
             throw new Error("Permission Denied")
         }
 
+        if(!isNotEmpty(id) || !isNotEmpty(name) || !isNotEmpty(quantityAvailable)){
+            throw new Error("Equipment id, name, available quantity can't be empty")
+        }
+
         const equipRepo = AppDataSource.getRepository(Equipment)
 
         const searchEquip = await equipRepo.findOne({ where: { id } })
@@ -241,6 +286,10 @@ export class AdminResolver {
     ){
         if (!context?.user || context.user.role !== "ADMIN") {
             throw new Error("Permission Denied")
+        }
+
+        if(!isNotEmpty(id)){
+            throw new Error("equipment id can't be empty")
         }
 
         const equipRepo = AppDataSource.getRepository(Equipment)

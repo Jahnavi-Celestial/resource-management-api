@@ -13,7 +13,7 @@ const AppDataSource = new DataSource({
     host: "localhost",
     port: 5432,
     username: "postgres",
-    password: String(process.env.DB_PASSWORD),
+    password: String(process.env.DB_PASSWORD)!,
     database: "resource_management_db",
     entities: [Employee, Equipment, MeetingRoom, Booking, AuditLog],
     synchronize: true

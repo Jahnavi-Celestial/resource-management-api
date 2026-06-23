@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Booking } from "./Booking.ts";
-import { IsDate } from "class-validator";
+import { IsDateString, IsNotEmpty } from "class-validator";
 
 @ObjectType()
 @Entity({ name: "meeting_room" })
@@ -12,14 +12,17 @@ export class MeetingRoom {
 
     @Field(() => String)
     @Column({ type: 'text', nullable: false })
+    @IsNotEmpty({message: "Room name can't be empty"})
     name!: string;
 
     @Field(() => String)
-    @Column({ type: 'text' })
+    @Column({ type: 'text', nullable: false })
+    @IsNotEmpty({message: "Room location can't be empty"})
     location!: string;
 
     @Field(() => Int)
     @Column({ type: 'integer' })
+    @IsNotEmpty({message: "Room capacity can't be empty"})
     capacity!: number;
 
     @Field(() => Boolean)
@@ -28,12 +31,12 @@ export class MeetingRoom {
 
     @Field(() => Date)
     @CreateDateColumn({ type: 'timestamptz' })
-    @IsDate()
+    @IsDateString()
     created_at!: Date;
     
     @Field(() => Date)
     @UpdateDateColumn({ type: 'timestamptz' })
-    @IsDate()
+    @IsDateString()
     updated_at!: Date;
 
     @Field(() => [Booking])

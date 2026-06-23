@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, ManyToMany, Jo
 import { Employee } from "./Employee.ts";
 import { MeetingRoom } from "./MeetingRoom.ts";
 import { Equipment } from "./Equipment.ts";
-import { IsDate } from "class-validator";
+import { IsDateString, IsEnum } from "class-validator";
 
 export enum BookingStatus {
     PENDING = "PENDING",
@@ -38,16 +38,17 @@ export class Booking {
 
     @Field(() => BookingStatus)
     @Column({ type: "varchar", default: BookingStatus.PENDING })
+    @IsEnum(BookingStatus)
     status!: BookingStatus;
 
     @Field(() => Date)
     @CreateDateColumn({ type: "timestamptz" })
-    @IsDate()
+    @IsDateString()
     createdAt!: Date;
 
     @Field(() => Date)
     @UpdateDateColumn({ type: "timestamptz" })
-    @IsDate()
+    @IsDateString()
     updatedAt!: Date;
 
     @Field(() => Int)

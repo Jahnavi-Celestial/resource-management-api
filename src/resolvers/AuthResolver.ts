@@ -4,6 +4,7 @@ import { Employee, Role } from "../entities/Employee.ts";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { isEmail, isNotEmpty } from "class-validator";
 
 dotenv.config();
 
@@ -17,6 +18,18 @@ export class AuthResolver {
         @Arg("password", () => String) password: string,
         @Arg("role", () => String) role: string,
     ) {
+        if(!isNotEmpty(firstName) || !isNotEmpty(email) || !isNotEmpty(password) || !isNotEmpty(role)){
+            throw new Error("FirstName, email, password, role can't be empty")
+        }
+
+        if (!isEmail(email, { require_tld: true })) {
+            throw new Error("Invalid email format");
+        }
+
+        if(password.length < 6){
+            throw new Error("Password should contain atleast 6 characters")
+        }
+
         const empRepo = AppDataSource.getRepository(Employee);
 
         const isEmpExist = await empRepo.findOne({
@@ -45,6 +58,18 @@ export class AuthResolver {
         @Arg("email", () => String) email: string,
         @Arg("password", () => String) password: string
     ) {
+        if(!isNotEmpty(email) || !isNotEmpty(password)){
+            throw new Error("email, password can't be empty")
+        }
+        
+        if (!isEmail(email, { require_tld: true })) {
+            throw new Error("Invalid email format");
+        }
+
+        if(password.length < 6){
+            throw new Error("Password should contain atleast 6 characters")
+        }
+        
         const empRepo = AppDataSource.getRepository(Employee);
 
         const isEmpExist = await empRepo.findOne({

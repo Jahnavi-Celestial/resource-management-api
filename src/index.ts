@@ -48,7 +48,7 @@ async function main() {
 
         const { url } = await server.listen(4000);
 
-        console.log(`Server ready at ${url}`);
+        console.log(`Server ready at ${url}graphql`);
     } catch (err) {
         console.log("Error in initialization", err);
     }

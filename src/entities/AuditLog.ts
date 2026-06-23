@@ -2,7 +2,7 @@ import { ObjectType, Field, registerEnumType, Int } from "type-graphql";
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { BookingStatus } from "./Booking.ts"; 
 import { Employee } from "./Employee.ts";
-import { IsEnum } from "class-validator";
+import { IsDateString, IsEnum } from "class-validator";
 
 export enum AuditAction {
   BOOKING_CREATED = "BOOKING_CREATED",
@@ -38,6 +38,7 @@ export class AuditLog {
 
   @Field(() => Date)
   @CreateDateColumn({ type: "timestamptz" })
+  @IsDateString()
   createdAt!: Date;
 
   @Field(() => Int)
