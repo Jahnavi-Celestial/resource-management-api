@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany } from "typeorm";
 import { Booking } from "./Booking.ts";
-import { IsDateString, IsNotEmpty } from "class-validator";
+import { IsDateString, IsNotEmpty, IsPositive } from "class-validator";
 
 @ObjectType()
 @Entity({ name: "equipments" })
@@ -18,6 +18,7 @@ export class Equipment {
     @Field(() => Int)
     @Column({ type: 'integer', nullable: false })
     @IsNotEmpty({message: "Equipment available quantity can't be empty"})
+    @IsPositive({message: 'Quantity must be greater than 0'})
     quantityAvailable!: number;
 
     @Field(() => Boolean)

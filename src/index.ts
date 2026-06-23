@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import { Employee } from "./entities/Employee.ts";
 import { AdminResolver } from "./resolvers/AdminResolver.ts";
 import { AuthResolver } from "./resolvers/AuthResolver.ts";
+import { EmployeeResolver } from "./resolvers/EmployeeResolver.ts";
+import { ManagerResolver } from "./resolvers/ManagerResolver.ts";
 
 dotenv.config();
 
@@ -16,7 +18,7 @@ async function main() {
         console.log("Database connected successfully");
 
         const schema = await buildSchema({
-            resolvers: [AuthResolver, AdminResolver],
+            resolvers: [AuthResolver, AdminResolver, EmployeeResolver, ManagerResolver],
             validate: true, 
             authChecker: ({ context }, roles) => {
                 if (!context.user) return false;
