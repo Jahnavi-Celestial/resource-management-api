@@ -19,7 +19,7 @@ export class AdminResolver {
     async viewAllBookings(
         @Ctx() context: AppContext,
     ) {
-        if (!context?.user || context.user.role !== "ADMIN") {
+        if (!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")) {
             throw new Error("Permission Denied")
         }
 
