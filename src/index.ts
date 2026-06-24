@@ -5,10 +5,12 @@ import { ApolloServer } from "apollo-server";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Employee } from "./entities/Employee.ts";
-import { AdminResolver } from "./resolvers/AdminResolver.ts";
-import { AuthResolver } from "./resolvers/AuthResolver.ts";
-import { EmployeeResolver } from "./resolvers/EmployeeResolver.ts";
-import { ManagerResolver } from "./resolvers/ManagerResolver.ts";
+import { AdminResolver } from "./resolvers/mutations/AdminResolver.ts";
+import { AuthResolver } from "./resolvers/mutations/AuthResolver.ts";
+import { EmployeeResolver } from "./resolvers/mutations/EmployeeResolver.ts";
+import { ManagerResolver } from "./resolvers/mutations/ManagerResolver.ts";
+import { GeneralQueries } from "./resolvers/queries/GeneralQueries.ts";
+import { ReportQueries } from "./resolvers/queries/ReportQueries.ts";
 
 dotenv.config();
 
@@ -18,7 +20,7 @@ async function main() {
         console.log("Database connected successfully");
 
         const schema = await buildSchema({
-            resolvers: [AuthResolver, AdminResolver, EmployeeResolver, ManagerResolver],
+            resolvers: [AuthResolver, AdminResolver, EmployeeResolver, ManagerResolver, GeneralQueries, ReportQueries],
             validate: true, 
             authChecker: ({ context }, roles) => {
                 if (!context.user) return false;

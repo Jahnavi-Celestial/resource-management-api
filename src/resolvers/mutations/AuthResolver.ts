@@ -1,6 +1,6 @@
 import { Arg, Mutation, Resolver } from "type-graphql";
-import AppDataSource from "../database/db.ts";
-import { Employee, Role } from "../entities/Employee.ts"; 
+import AppDataSource from "../../database/db.ts";
+import { Employee, Role } from "../../entities/Employee.ts"; 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";

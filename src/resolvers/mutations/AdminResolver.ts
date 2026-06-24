@@ -1,9 +1,9 @@
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
-import { Employee, Role } from "../entities/Employee.ts";
-import AppDataSource from "../database/db.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
-import { Booking } from "../entities/Booking.ts";
-import { Equipment } from "../entities/Equipment.ts";
+import { Employee, Role } from "../../entities/Employee.ts";
+import AppDataSource from "../../database/db.ts";
+import { MeetingRoom } from "../../entities/MeetingRoom.ts";
+import { Booking } from "../../entities/Booking.ts";
+import { Equipment } from "../../entities/Equipment.ts";
 import bcrypt from "bcrypt";
 import { isEmail, isNotEmpty } from "class-validator";
 
@@ -13,20 +13,6 @@ export interface AppContext {
 
 @Resolver()
 export class AdminResolver {
-
-    @Authorized(["ADMIN","MANAGER"])
-    @Query(() => [Booking])
-    async viewAllBookings(
-        @Ctx() context: AppContext,
-    ) {
-        if (!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")) {
-            throw new Error("Permission Denied")
-        }
-
-        const bookingRepo = AppDataSource.getRepository(Booking)
-
-        return await bookingRepo.find()
-    }
 
     @Authorized("ADMIN")
     @Mutation(() => Employee)

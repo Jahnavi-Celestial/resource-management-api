@@ -1,8 +1,9 @@
 import { Arg, Authorized, Ctx, Int, Mutation, Resolver } from "type-graphql";
 import { type AppContext } from "./AdminResolver.ts";
-import { Booking, BookingStatus } from "../entities/Booking.ts";
-import AppDataSource from "../database/db.ts";
-import { AuditAction, AuditLog } from "../entities/AuditLog.ts";
+import { Booking, BookingStatus } from "../../entities/Booking.ts";
+import AppDataSource from "../../database/db.ts";
+import { AuditAction, AuditLog } from "../../entities/AuditLog.ts";
+import { LessThan, MoreThan } from "typeorm";
 
 @Resolver()
 export class ManagerResolver{
@@ -18,7 +19,12 @@ export class ManagerResolver{
 
         return await AppDataSource.transaction(async (tem) => {
             const booking = await tem.findOne(Booking, { 
-                where: { id: bookingId } 
+                where: { id: bookingId },
+                relations:{
+                    employee: true,
+                    equipments: true,
+                    meetingRoom: true
+                }
             })
 
             if(!booking){
@@ -27,6 +33,19 @@ export class ManagerResolver{
 
             if(booking.status !== BookingStatus.PENDING){
                 throw new Error("Only pending requests can be resolved")
+            }
+
+            const alreadyApproved = await tem.findOne(Booking, {
+                where: {
+                    meetingRoom: { id: booking.meetingRoom.id },
+                    status: BookingStatus.APPROVED,
+                    startTime: LessThan(booking.endTime),
+                    endTime: MoreThan(booking.startTime),
+                }
+            })
+
+            if(alreadyApproved){
+                throw new Error("This room is already booked and approved for this time slot")
             }
 
             const oldStatus = booking.status;
@@ -59,7 +78,12 @@ export class ManagerResolver{
 
         return await AppDataSource.transaction(async (tem) => {
             const booking = await tem.findOne(Booking, { 
-                where: { id: bookingId } 
+                where: { id: bookingId },
+                relations:{
+                    employee: true,
+                    equipments: true,
+                    meetingRoom: true
+                }
             })
 
             if (!booking){

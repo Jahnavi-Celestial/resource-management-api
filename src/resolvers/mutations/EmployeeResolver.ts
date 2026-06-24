@@ -1,21 +1,13 @@
-import { Arg, Authorized, Ctx, Int, Mutation, Resolver, InputType, Field } from "type-graphql";
-import { Booking, BookingStatus } from "../entities/Booking.ts";
+import { Arg, Authorized, Ctx, Int, Mutation, Resolver } from "type-graphql";
+import { Booking, BookingStatus } from "../../entities/Booking.ts";
 import { type AppContext } from "./AdminResolver.ts";
 import { isNotEmpty } from "class-validator";
-import AppDataSource from "../database/db.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
+import AppDataSource from "../../database/db.ts";
+import { MeetingRoom } from "../../entities/MeetingRoom.ts";
 import { LessThan, MoreThan } from "typeorm";
-import { Equipment } from "../entities/Equipment.ts";
-import { AuditAction, AuditLog } from "../entities/AuditLog.ts";
-
-@InputType()
-export class EquipRequestInput{
-  @Field(() => Int)
-  equipId!: number;
-
-  @Field(() => Int)
-  quantity!: number;
-}
+import { Equipment } from "../../entities/Equipment.ts";
+import { AuditAction, AuditLog } from "../../entities/AuditLog.ts";
+import { EquipRequestInput } from "../../types/InputType.ts";
 
 @Resolver()
 export class EmployeeResolver{
@@ -36,6 +28,10 @@ export class EmployeeResolver{
 
         if(!isNotEmpty(startTime) || !isNotEmpty(endTime) || !isNotEmpty(purpose) || !isNotEmpty(numberOfAttendees) || !isNotEmpty(meetingRoomId)){
             throw new Error("Start time, end-time, purpose, numberOfAttendees and room id can't be empty")
+        }
+
+        if(numberOfAttendees < 0){
+            throw new Error("number of attendees cant be negative")
         }
 
         if (new Date(startTime) >= new Date(endTime)) {
@@ -92,6 +88,10 @@ export class EmployeeResolver{
 
                     if(!equipment.isActive){
                         throw new Error(`Equipment ${equipment.name} is inactive`)
+                    }
+
+                    if(eqObj.quantity < 0){
+                        throw new Error('Equipment quantity requested cant be negative')
                     }
     
                     if(equipment.quantityAvailable < eqObj.quantity){
