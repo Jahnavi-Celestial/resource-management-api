@@ -43,7 +43,6 @@ export const up = (pgm) => {
         "startTime" TIMESTAMP NOT NULL,
         "endTime" TIMESTAMP NOT NULL,
         purpose VARCHAR(255) NOT NULL,
-        "rejectionReason" TEXT,
         "numberOfAttendees" INTEGER NOT NULL,
         status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -75,7 +74,7 @@ export const up = (pgm) => {
         action audit_action_enum NOT NULL,
         "oldStatus" VARCHAR(50),
         "newStatus" VARCHAR(50) NOT NULL,
-        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         "performedById" INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     );
   `);

@@ -164,7 +164,7 @@ export class GeneralQueries{
         }
     }
 
-    @Authorized()
+    @Authorized(["ADMIN","MANAGER"])
     @Query(() => PaginatedEmployees)
     async employees(
         @Ctx() context: AppContext,
@@ -172,8 +172,8 @@ export class GeneralQueries{
         @Arg("limit", () => Int, {defaultValue: 10}) limit: number,
         @Arg("searchTerm", () => String, {nullable: true}) searchTerm?: string
     ){
-        if(!context?.user){
-            throw new Error('Unauthorized')
+        if(!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")){
+            throw new Error("Permission Denied")
         }
 
         const skip = (page - 1) * limit
@@ -226,14 +226,14 @@ export class GeneralQueries{
         }
     }
 
-    @Authorized()
+    @Authorized(["ADMIN","MANAGER"])
     @Query(() => Employee)
     async employee(
         @Arg("id", () => Int) id: number,
         @Ctx() context: AppContext,
     ){
-        if(!context?.user){
-            throw new Error('Unauthorized')
+        if(!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")){
+            throw new Error("Permission Denied")
         }
 
         const empRepo = AppDataSource.getRepository(Employee)

@@ -1,0 +1,83 @@
+import bcrypt from 'bcrypt';
+
+export const up = async (pgm)=>{
+    const hashedPassword = await bcrypt.hash('123456', 10);
+
+    pgm.sql(`
+        INSERT INTO employees(id, "firstName", "lastName", email, password, role)
+        VALUES
+        (1, 'Pallavi', 'Pathak', 'pallavi@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (2, 'Rahul', 'Sharma', 'rahul@gmail.com', '${hashedPassword}', 'ADMIN'),
+        (3, 'Raj', 'Singh', 'raj@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (4, 'Priya', 'Mittal', 'priya@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (5, 'Manshi', 'Rajput', 'manshi@gmail.com', '${hashedPassword}', 'ADMIN'),
+        (6, 'Rishi', 'Upadhaya', 'rishi@gmail.com', '${hashedPassword}', 'MANAGER'),
+        (7, 'Yug', 'Mehta', 'yug@gmail.com', '${hashedPassword}', 'MANAGER'),
+        (8, 'Gauri', 'Mehta', 'gauri@gmail.com', '${hashedPassword}', 'ADMIN'),
+        (9, 'Kajal', 'Soni', 'kajal@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (10, 'Kartik', 'Singh', 'kartik@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (11, 'Krishna', 'Mittal', 'krishna@gmail.com', '${hashedPassword}', 'ADMIN'),
+        (12, 'Piyush', 'Agrawal', 'piyush@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (13, 'Gayu', 'Shrivastav', 'gayu@gmail.com', '${hashedPassword}', 'MANAGER'),
+        (14, 'Kinjal', 'Chaudhary', 'kinjal@gmail.com', '${hashedPassword}', 'EMPLOYEE'),
+        (15, 'Rohan', 'Chaudhary', 'rohan@gmail.com', '${hashedPassword}', 'MANAGER')
+        ON CONFLICT DO NOTHING;
+    `)
+
+    pgm.sql(`
+        INSERT INTO meeting_room(id, name, location, capacity, "isActive")
+        VALUES
+        (1, 'Room 1', 'First Floor', 50, true),
+        (2, 'Room 2', 'First Floor', 40, true),
+        (3, 'Room 3', 'First Floor', 45, true),
+        (4, 'Room 4', 'Second Floor', 30, false),
+        (5, 'Room 5', 'Second Floor', 45, true),
+        (6, 'Room 6', 'Second Floor', 50, true),
+        (7, 'Room 7', 'Third Floor', 40, false),
+        (8, 'Room 8', 'Third Floor', 55, true),
+        (9, 'Room 9', 'Third Floor', 35, true),
+        (10, 'Room 10', 'Third Floor', 40, false)
+        ON CONFLICT DO NOTHING;
+    `)
+
+    pgm.sql(`
+        INSERT INTO bookings(id, "startTime", "endTime", purpose, "numberOfAttendees", status, "employeeId", "meetingRoomId")
+        VALUES 
+        (1, '2026-07-01 09:00:00', '2026-07-01 10:30:00', 'Sprint Planning', 15, 'APPROVED', 6, 1),
+        (2, '2026-07-01 11:00:00', '2026-07-01 12:00:00', 'Client Demo', 8, 'APPROVED', 1, 2),
+        (3, '2026-07-01 14:00:00', '2026-07-01 15:30:00', 'Tech Architecture Sync', 5, 'PENDING', 12, 3),
+        (4, '2026-07-02 10:00:00', '2026-07-02 11:00:00', 'Quarterly Review', 45, 'APPROVED', 7, 8),
+        (5, '2026-07-02 13:00:00', '2026-07-02 14:00:00', 'HR Induction', 20, 'APPROVED', 13, 5),
+        (6, '2026-07-02 15:00:00', '2026-07-02 16:00:00', '1-on-1 Performance Talk', 2, 'APPROVED', 15, 6),
+        (7, '2026-07-03 09:30:00', '2026-07-03 10:30:00', 'Marketing Brainstorm', 12, 'PENDING', 3, 9),
+        (8, '2026-07-03 11:00:00', '2026-07-03 13:00:00', 'Product Roadmap', 25, 'APPROVED', 6, 1),
+        (9, '2026-07-03 14:30:00', '2026-07-03 15:30:00', 'Code Review', 4, 'REJECTED', 4, 2),
+        (10, '2026-07-06 10:00:00', '2026-07-06 11:30:00', 'All Hands Sync', 48, 'APPROVED', 2, 6),
+        (11, '2026-07-06 13:00:00', '2026-07-06 14:00:00', 'Design Critique', 6, 'CANCELLED', 9, 3),
+        (12, '2026-07-06 15:00:00', '2026-07-06 16:30:00', 'Budget Allocation', 10, 'APPROVED', 8, 5),
+        (13, '2026-07-07 09:00:00', '2026-07-07 10:00:00', 'Daily Standup', 14, 'APPROVED', 14, 2),
+        (14, '2026-07-07 11:00:00', '2026-07-07 12:30:00', 'DevOps Strategy', 8, 'PENDING', 10, 3),
+        (15, '2026-07-07 14:00:00', '2026-07-07 15:00:00', 'Feedback Session', 3, 'APPROVED', 7, 9),
+        (16, '2026-07-08 10:00:00', '2026-07-08 12:00:00', 'Board Meeting', 35, 'APPROVED', 11, 8),
+        (17, '2026-07-08 13:30:00', '2026-07-08 14:30:00', 'Project Handover', 5, 'APPROVED', 4, 1),
+        (18, '2026-07-08 15:00:00', '2026-07-08 16:00:00', 'UI/UX Alignment', 7, 'PENDING', 9, 5),
+        (19, '2026-07-09 11:00:00', '2026-07-09 12:00:00', 'Security Audit', 4, 'APPROVED', 2, 2),
+        (20, '2026-07-09 14:00:00', '2026-07-09 15:30:00', 'Sales Pitch Prep', 18, 'APPROVED', 15, 3)
+        ON CONFLICT DO NOTHING;
+    `)
+}
+
+
+export const down = (pgm)=>{
+    pgm.sql(`
+        DELETE FROM bookings WHERE id BETWEEN 1 AND 20;
+    `);
+
+    pgm.sql(`
+        DELETE FROM meeting_room WHERE id BETWEEN 1 AND 10;
+    `);
+
+    pgm.sql(`
+        DELETE FROM employees WHERE id BETWEEN 1 AND 15;
+    `);
+}
