@@ -37,14 +37,14 @@ export class ReportQueries{
         }
     }
 
-    @Authorized()
+    @Authorized(["ADMIN", "MANAGER"])
     @Query(() => BookingsPerEmployee)
     async bookingsPerEmployee(
         @Arg("empId", () => Int) empId: number,
         @Ctx() context: AppContext
     ){
-        if(!context?.user){
-            throw new Error('Unauthorized')
+        if(!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")){
+            throw new Error("Permission Denied")
         }
 
         const emp = await AppDataSource.getRepository(Employee).findOne({where: {id: empId}})
@@ -73,14 +73,14 @@ export class ReportQueries{
         }
     }
 
-    @Authorized()
+    @Authorized(["ADMIN", "MANAGER"])
     @Query(() => EquipmentUsage)
     async equipmentUsage(
         @Arg("equipId", () => Int) equipId: number,
         @Ctx() context: AppContext
     ){
-        if(!context?.user){
-            throw new Error('Unauthorized')
+        if(!context?.user || (context.user.role !== "ADMIN" && context.user.role !== "MANAGER")){
+            throw new Error("Permission Denied")
         }
 
         const equipRepo = AppDataSource.getRepository(Equipment)
@@ -108,15 +108,15 @@ export class ReportQueries{
         }
     }
 
-    @Authorized()
+    @Authorized(["MANAGER"])
     @Query(() => MonthlyBookingStatics)
     async monthlyBookingStatics(
         @Arg("month", () => Int) month: number,
         @Arg("year", () => Int) year: number,
         @Ctx() context: AppContext
     ){
-        if(!context?.user){
-            throw new Error('Unauthorized')
+        if(!context?.user || (context.user.role !== "MANAGER")){
+            throw new Error("Permission Denied")
         }
 
         if(month < 1 || month > 12){
