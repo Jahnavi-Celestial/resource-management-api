@@ -50,7 +50,7 @@ async function main() {
             }
         });
 
-        const { url } = await server.listen(4000);
+        const { url } = await server.listen(process.env.PORT || 10000);
 
         console.log(`Server ready at ${url}graphql`);
     } catch (err) {
