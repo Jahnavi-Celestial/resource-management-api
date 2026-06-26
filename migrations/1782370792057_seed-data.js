@@ -41,28 +41,28 @@ export const up = async (pgm)=>{
     `)
 
     pgm.sql(`
-        INSERT INTO bookings(id, "startTime", "endTime", purpose, "numberOfAttendees", status, "employeeId", "meetingRoomId")
+        INSERT INTO bookings(id, "startTime", "endTime", purpose, "rejectionReason", "numberOfAttendees", status, "employeeId", "meetingRoomId")
         VALUES 
-        (1, '2026-07-01T09:00:00Z', '2026-07-01 10:30:00', 'Sprint Planning', 15, 'APPROVED', 6, 1),
-        (2, '2026-07-01T11:00:00Z', '2026-07-01 12:00:00', 'Client Demo', 8, 'APPROVED', 1, 2),
-        (3, '2026-07-01T14:00:00Z', '2026-07-01 15:30:00', 'Tech Architecture Sync', 5, 'PENDING', 12, 3),
-        (4, '2026-07-02T10:00:00Z', '2026-07-02 11:00:00', 'Quarterly Review', 45, 'APPROVED', 7, 8),
-        (5, '2026-07-02T13:00:00Z', '2026-07-02 14:00:00', 'HR Induction', 20, 'APPROVED', 13, 5),
-        (6, '2026-07-02T15:00:00Z', '2026-07-02 16:00:00', '1-on-1 Performance Talk', 2, 'APPROVED', 15, 6),
-        (7, '2026-07-03T09:30:00Z', '2026-07-03 10:30:00', 'Marketing Brainstorm', 12, 'PENDING', 3, 9),
-        (8, '2026-07-03T11:00:00Z', '2026-07-03 13:00:00', 'Product Roadmap', 25, 'APPROVED', 6, 1),
-        (9, '2026-07-03T14:30:00Z', '2026-07-03 15:30:00', 'Code Review', 4, 'REJECTED', 4, 2),
-        (10, '2026-07-06T10:00:00Z', '2026-07-06 11:30:00', 'All Hands Sync', 48, 'APPROVED', 2, 6),
-        (11, '2026-07-06T13:00:00Z', '2026-07-06 14:00:00', 'Design Critique', 6, 'CANCELLED', 9, 3),
-        (12, '2026-07-06T15:00:00Z', '2026-07-06 16:30:00', 'Budget Allocation', 10, 'APPROVED', 8, 5),
-        (13, '2026-07-07T09:00:00Z', '2026-07-07 10:00:00', 'Daily Standup', 14, 'APPROVED', 14, 2),
-        (14, '2026-07-07T11:00:00Z', '2026-07-07 12:30:00', 'DevOps Strategy', 8, 'PENDING', 10, 3),
-        (15, '2026-07-07T14:00:00Z', '2026-07-07 15:00:00', 'Feedback Session', 3, 'APPROVED', 7, 9),
-        (16, '2026-07-08T10:00:00Z', '2026-07-08 12:00:00', 'Board Meeting', 35, 'APPROVED', 11, 8),
-        (17, '2026-07-08T13:30:00Z', '2026-07-08 14:30:00', 'Project Handover', 5, 'APPROVED', 4, 1),
-        (18, '2026-07-08T15:00:00Z', '2026-07-08 16:00:00', 'UI/UX Alignment', 7, 'PENDING', 9, 5),
-        (19, '2026-07-09T11:00:00Z', '2026-07-09 12:00:00', 'Security Audit', 4, 'APPROVED', 2, 2),
-        (20, '2026-07-09T14:00:00Z', '2026-07-09 15:30:00', 'Sales Pitch Prep', 18, 'APPROVED', 15, 3)
+        (1, '2026-07-01T09:00:00Z', '2026-07-01 10:30:00', 'Sprint Planning', NULL, 15, 'APPROVED', 6, 1),
+        (2, '2026-07-01T11:00:00Z', '2026-07-01 12:00:00', 'Client Demo', NULL, 8, 'APPROVED', 1, 2),
+        (3, '2026-07-01T14:00:00Z', '2026-07-01 15:30:00', 'Tech Architecture Sync', NULL, 5, 'PENDING', 12, 3),
+        (4, '2026-07-02T10:00:00Z', '2026-07-02 11:00:00', 'Quarterly Review', NULL, 45, 'APPROVED', 7, 8),
+        (5, '2026-07-02T13:00:00Z', '2026-07-02 14:00:00', 'HR Induction', NULL, 20, 'APPROVED', 13, 5),
+        (6, '2026-07-02T15:00:00Z', '2026-07-02 16:00:00', '1-on-1 Performance Talk', NULL, 2, 'APPROVED', 15, 6),
+        (7, '2026-07-03T09:30:00Z', '2026-07-03 10:30:00', 'Marketing Brainstorm', NULL, 12, 'PENDING', 3, 9),
+        (8, '2026-07-03T11:00:00Z', '2026-07-03 13:00:00', 'Product Roadmap', NULL, 25, 'APPROVED', 6, 1),
+        (9, '2026-07-03T14:30:00Z', '2026-07-03 15:30:00', 'Code Review', 'Approving for another task', 4, 'REJECTED', 4, 2),
+        (10, '2026-07-06T10:00:00Z', '2026-07-06 11:30:00', 'All Hands Sync', NULL, 48, 'APPROVED', 2, 6),
+        (11, '2026-07-06T13:00:00Z', '2026-07-06 14:00:00', 'Design Critique', NULL, 6, 'CANCELLED', 9, 3),
+        (12, '2026-07-06T15:00:00Z', '2026-07-06 16:30:00', 'Budget Allocation', NULL, 10, 'APPROVED', 8, 5),
+        (13, '2026-07-07T09:00:00Z', '2026-07-07 10:00:00', 'Daily Standup', NULL, 14, 'APPROVED', 14, 2),
+        (14, '2026-07-07T11:00:00Z', '2026-07-07 12:30:00', 'DevOps Strategy', NULL, 8, 'PENDING', 10, 3),
+        (15, '2026-07-07T14:00:00Z', '2026-07-07 15:00:00', 'Feedback Session', NULL, 3, 'APPROVED', 7, 9),
+        (16, '2026-07-08T10:00:00Z', '2026-07-08 12:00:00', 'Board Meeting', NULL, 35, 'APPROVED', 11, 8),
+        (17, '2026-07-08T13:30:00Z', '2026-07-08 14:30:00', 'Project Handover', NULL, 5, 'APPROVED', 4, 1),
+        (18, '2026-07-08T15:00:00Z', '2026-07-08 16:00:00', 'UI/UX Alignment', NULL, 7, 'PENDING', 9, 5),
+        (19, '2026-07-09T11:00:00Z', '2026-07-09 12:00:00', 'Security Audit', NULL, 4, 'APPROVED', 2, 2),
+        (20, '2026-07-09T14:00:00Z', '2026-07-09 15:30:00', 'Sales Pitch Prep', NULL, 18, 'APPROVED', 15, 3)
         ON CONFLICT DO NOTHING;
     `)
 }

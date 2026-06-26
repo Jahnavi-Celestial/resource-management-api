@@ -76,7 +76,7 @@ export const up = (pgm) => {
         "oldStatus" VARCHAR(50),
         "newStatus" VARCHAR(50) NOT NULL,
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        "performedById" INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        "performedById" INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE
     );
   `);
 };
