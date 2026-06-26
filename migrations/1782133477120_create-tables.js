@@ -43,6 +43,7 @@ export const up = (pgm) => {
         "startTime" TIMESTAMP NOT NULL,
         "endTime" TIMESTAMP NOT NULL,
         purpose VARCHAR(255) NOT NULL,
+        "rejectionReason" TEXT,
         "numberOfAttendees" INTEGER NOT NULL,
         status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),

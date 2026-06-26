@@ -32,6 +32,10 @@ export class Booking {
     @Column({ type: "varchar", length: 255 })
     purpose!: string;
 
+    @Field(() => String)
+    @Column({ type: "text", nullable: true})
+    rejectionReason!: string;
+
     @Field(() => Int)
     @Column({ type: "integer" })
     numberOfAttendees!: number;
