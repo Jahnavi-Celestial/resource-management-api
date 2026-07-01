@@ -50,7 +50,20 @@ async function main() {
             }
         });
 
-        const { url } = await server.listen(process.env.PORT || 10000);
+        const { url } = await server.listen({
+            port: process.env.PORT || 10000,
+            cors: {
+                origin: process.env.FRONTEND_URL,
+                methods: ["GET", "POST", "PUT", "DELETE"],
+                allowedHeaders: [
+                    'Content-Type',
+                    'Authorization',
+                    'apollo-require-preflight',
+                ],
+                credentials: true,
+                optionsSuccessStatus: 200,
+            }
+        })
 
         console.log(`Server ready at ${url}graphql`);
     } catch (err) {

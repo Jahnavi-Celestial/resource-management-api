@@ -66,6 +66,7 @@ export class AdminResolver {
         @Arg("firstName", () => String) firstName: string,
         @Arg("lastName", () => String) lastName: string,
         @Arg("email", () => String) email: string,
+        @Arg("password", () => String) password: string,
         @Arg("role", () => Role) role: Role,
         @Ctx() context: AppContext,
     ){
@@ -87,11 +88,14 @@ export class AdminResolver {
 
         if (!searchEmp) throw new Error("Employee does not exist")
 
+        const hashedPassword = await bcrypt.hash(password, 10)
+
         return await empRepo.save({
             ...searchEmp,
             firstName, 
             lastName, 
             email, 
+            password: hashedPassword,
             role 
         })
     }
