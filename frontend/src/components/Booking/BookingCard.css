@@ -1,0 +1,147 @@
+.bc-card { 
+    background-color: #ffffff; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 1rem; 
+    padding: 1.25rem; 
+    margin-bottom: 1rem; 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.875rem; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; 
+    outline: none; 
+} 
+
+.bc-card:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05); 
+    border-color: #d1d5db; 
+} 
+
+.bc-card:focus-visible { 
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); 
+    border-color: #2563eb; 
+} 
+
+.bc-card-header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 1rem; 
+} 
+
+.bc-room-info { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    min-width: 0; 
+} 
+
+.bc-room-icon { 
+    font-size: 1.1rem; 
+    flex-shrink: 0; 
+} 
+
+.bc-room-name { 
+    font-size: 0.95rem; 
+    font-weight: 700; 
+    color: #111827; 
+    margin: 0; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+} 
+
+.bc-purpose { 
+    font-size: 1.125rem; 
+    font-weight: 500; 
+    color: #111827; 
+    margin: 0; 
+    line-height: 1.4; 
+} 
+
+.bc-card-footer { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem; 
+    border-top: 1px solid #f3f4f6; 
+    padding-top: 0.75rem; 
+    margin-top: 0.25rem; 
+} 
+
+@media (min-width: 640px) { 
+    .bc-card-footer { 
+        flex-direction: row; 
+        align-items: center; 
+        justify-content: space-between; 
+        gap: 1.5rem; 
+    } 
+} 
+
+.bc-meta-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.375rem; 
+    color: #4b5563; 
+    font-size: 0.815rem; 
+} 
+
+.bc-meta-icon { 
+    font-size: 0.9rem; 
+    flex-shrink: 0; 
+    opacity: 0.86; 
+} 
+
+.bc-meta-text strong { 
+    color: #111827; 
+    font-weight: 600; 
+} 
+
+@media (min-width: 640px) { 
+    .bc-time-wrapper { 
+        justify-content: flex-end; 
+        text-align: right; 
+    } 
+} 
+
+.bc-time-text { 
+    font-family: sans-serif; 
+    letter-spacing: -0.01em; 
+} 
+
+.bc-status-badge { 
+    padding: 0.25rem 0.5rem; 
+    border-radius: 9999px; 
+    font-size: 0.7rem; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.025em; 
+    border: 1px solid transparent; 
+    white-space: nowrap; 
+    flex-shrink: 0; 
+} 
+
+.bc-status-confirmed { 
+    background-color: #ecfdf5; 
+    color: #047857; 
+    border-color: #a7f3d0; 
+} 
+
+.bc-status-pending { 
+    background-color: #fffbeb; 
+    color: #b45309; 
+    border-color: #fde68a; 
+} 
+
+.bc-status-cancelled { 
+    background-color: #fef2f2; 
+    color: #b91c1c; 
+    border-color: #fca5a5; 
+} 
+
+.bc-status-default { 
+    background-color: #f3f4f6; 
+    color: #374151; 
+    border-color: #e5e7eb; 
+}
