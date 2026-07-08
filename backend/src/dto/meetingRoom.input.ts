@@ -17,6 +17,7 @@ export class CreateMeetingRoomInput{
   @Field(() => Int)
   @IsNotEmpty({ message: "Room name, location, capacity can't be empty" })
   @IsInt()
+  @Min(0, { message: "Capacity must be positive" })
   capacity!: number;
 
   @Field(() => Boolean)
@@ -44,6 +45,7 @@ export class UpdateMeetingRoomInput{
   @Field(() => Int)
   @IsNotEmpty({ message: "Room id, name, location, capacity can't be empty" })
   @IsInt()
+  @Min(0, { message: "Capacity must be positive" })
   capacity!: number;
 
   @Field(() => Boolean)

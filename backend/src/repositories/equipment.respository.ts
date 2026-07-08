@@ -9,6 +9,10 @@ export class EquipmentRepository {
   async findById(id: number){
     return this.repo.findOne({ where: { id } });
   }
+  
+  async findByName(name: string){
+    return this.repo.findOne({ where: { name } });
+  }
 
   create(data: Partial<Equipment>): Equipment {
     return this.repo.create(data);

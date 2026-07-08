@@ -2,12 +2,21 @@ import { EquipmentRepository } from "../repositories/equipment.respository.ts";
 import { CreateEquipmentInput, EquipmentsFilterInput, UpdateEquipmentInput } from "../dto/equipment.input.ts";
 import { Equipment } from "../entities/Equipment.ts";
 import { FindOptionsWhere, ILike } from "typeorm";
-import { NotFoundError } from "../errors/AppErrors.ts";
+import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 
 export class EquipmentService {
   constructor(private equipmentRepo = new EquipmentRepository()) {}
 
   async createEquipment(input: CreateEquipmentInput){
+    const {name} = input
+    console.log(name)
+
+    const isExist = await this.equipmentRepo.findByName(name.toLowerCase())
+
+    if(isExist){
+        throw new ConflictError("Equipment already exists, you can only update it.");
+    }
+
     const newEquip = this.equipmentRepo.create(input);
     return this.equipmentRepo.save(newEquip);
   }
