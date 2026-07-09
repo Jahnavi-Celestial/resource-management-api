@@ -1,5 +1,5 @@
 import { BookingRepository } from "../repositories/booking.repository.ts";
-import { CreateBookingInput, ApproveBookingInput, RejectBookingInput, BookingsFilterInput, PaginatedBookings } from "../dto/booking.input.ts";
+import { CreateBookingInput, ApproveBookingInput, RejectBookingInput, BookingsFilterInput } from "../dto/booking.input.ts";
 import { Employee } from "../entities/Employee.ts";
 import { Booking, BookingStatus } from "../entities/Booking.ts";
 import { Equipment } from "../entities/Equipment.ts";
@@ -7,6 +7,7 @@ import { AuditLog, AuditAction } from "../entities/AuditLog.ts";
 import { FindOptionsWhere } from "typeorm";
 import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import AppDataSource from "../config/db.ts";
+import { sendMail } from "../jobs/emailService.ts";
 
 
 export class BookingService {
@@ -180,6 +181,13 @@ export class BookingService {
         pendingBooking.rejectionReason = "Another Booking is approved for same time slot";
 
         await repo.saveEntity(Booking, pendingBooking);
+
+        const to = `${pendingBooking.employee.email}`
+        const subject = 'Booking Request Reject'
+        const text = `Your Booking Request is Reject for room - ${pendingBooking.meetingRoom.name}, location - ${pendingBooking.meetingRoom.location} at (${pendingBooking.startTime} to ${pendingBooking.endTime}) becuase ${pendingBooking.rejectionReason}`
+
+        sendMail(to, subject, text)
+
         await repo.saveEntity(AuditLog, {
           bookingId: pendingBooking.id,
           action: AuditAction.BOOKING_REJECTED,
@@ -188,6 +196,12 @@ export class BookingService {
           newStatus: BookingStatus.REJECTED
         });
       }
+
+      const to = `${booking.employee.email}`
+      const subject = 'Booking Request Approved'
+      const text = `Your Booking Request is Approved for room - ${booking.meetingRoom.name}, location - ${booking.meetingRoom.location} at (${booking.startTime} to ${booking.endTime})`
+
+      sendMail(to, subject, text)
 
       return updatedBooking;
     });
@@ -217,6 +231,12 @@ export class BookingService {
         oldStatus,
         newStatus: BookingStatus.REJECTED
       });
+
+      const to = `${booking.employee.email}`
+      const subject = 'Booking Request Reject'
+      const text = `Your Booking Request is Reject for room - ${booking.meetingRoom.name}, location - ${booking.meetingRoom.location} at (${booking.startTime} to ${booking.endTime}) becuase ${booking.rejectionReason}`
+
+      sendMail(to, subject, text)
 
       return updatedBooking;
     });

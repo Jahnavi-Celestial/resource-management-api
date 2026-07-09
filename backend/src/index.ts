@@ -11,6 +11,7 @@ import { MeetingRoomResolver } from "./resolvers/meetingRoom.resolver.ts";
 import { EquipmentResolver } from "./resolvers/equipment.resolver.ts";
 import { BookingResolver } from "./resolvers/booking.resolver.ts";
 import { ReportResolver } from "./resolvers/report.reolver.ts";
+import bookingCron from "./jobs/bookingCron.ts";
 
 dotenv.config();
 
@@ -68,6 +69,8 @@ async function main() {
                 optionsSuccessStatus: 200,
             }
         })
+
+        bookingCron()
 
         console.log(`Server ready at ${url}graphql`);
     } catch (err) {

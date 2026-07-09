@@ -4,6 +4,7 @@ import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, Paginat
 import { Employee } from "../entities/Employee.ts";
 import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import { FindOptionsWhere, ILike } from "typeorm";
+import { sendMail } from "../jobs/emailService.ts";
 
 export class EmployeeService {
   constructor(private employeeRepo = new EmployeeRepository()) {}
@@ -20,6 +21,12 @@ export class EmployeeService {
       password: hashedPassword,
     });
 
+    const to = `${employee.email}`
+    const subject = 'Your Login Credentials Details'
+    const text = `You are now the ${employee.role} and your login creadentials are: email- ${employee.email} and password- ${input.password}`
+    
+    sendMail(to, subject, text)
+
     return this.employeeRepo.save(employee);
   }
 
@@ -30,6 +37,13 @@ export class EmployeeService {
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 10);
+
+    const to = `${employee.email}`
+    const subject = 'Your Updated Login Credentials Details'
+    const text = `Your login creadentials are: email- ${employee.email} and password- ${input.password}`
+    
+    sendMail(to, subject, text)
+
     return this.employeeRepo.save({
       ...employee,
       ...input,
