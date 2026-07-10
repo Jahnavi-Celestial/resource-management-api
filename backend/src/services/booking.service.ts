@@ -1,6 +1,6 @@
 import { BookingRepository } from "../repositories/booking.repository.ts";
 import { CreateBookingInput, ApproveBookingInput, RejectBookingInput, BookingsFilterInput } from "../dto/booking.input.ts";
-import { Employee } from "../entities/Employee.ts";
+import { Employee, Role } from "../entities/Employee.ts";
 import { Booking, BookingStatus } from "../entities/Booking.ts";
 import { Equipment } from "../entities/Equipment.ts";
 import { AuditLog, AuditAction } from "../entities/AuditLog.ts";
@@ -8,12 +8,14 @@ import { FindOptionsWhere } from "typeorm";
 import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import AppDataSource from "../config/db.ts";
 import { sendMail } from "../jobs/emailService.ts";
+import { Server } from "socket.io";
+import { dispatchSystemNotification } from "../sockets/notification.socket.ts";
 
 
 export class BookingService {
   private bookingRepo = new BookingRepository();
 
-  async createBooking(input: CreateBookingInput, user: Employee){
+  async createBooking(input: CreateBookingInput, user: Employee, io: Server){
     if (new Date(input.startTime) >= new Date(input.endTime)){
       throw new AppError("Start time must be before end time.", 400, "BAD_USER_INPUT");
     }
@@ -87,11 +89,24 @@ export class BookingService {
         newStatus: BookingStatus.PENDING
       });
 
+      const managers = await transactionalManager.getRepository(Employee).find({
+        where: { role: Role.MANAGER }
+      });
+      for (const manager of managers) {
+        await dispatchSystemNotification(
+          io,
+          manager.id,
+          "New Booking Activity",
+          `Employee ${user.firstName} created a pending booking request for room ${room.name}.`,
+          savedBooking.id
+        );
+      }
+
       return savedBooking;
     });
   }
 
-  async cancelBooking(bookingId: number, user: Employee){
+  async cancelBooking(bookingId: number, user: Employee, io: Server){
     return AppDataSource.transaction(async (transactionalManager) => {
       const repo = new BookingRepository(transactionalManager);
 
@@ -135,11 +150,24 @@ export class BookingService {
         newStatus: BookingStatus.CANCELLED
       });
 
+      const managers = await transactionalManager.getRepository(Employee).find({
+        where: { role: Role.MANAGER }
+      });
+      for (const manager of managers) {
+        await dispatchSystemNotification(
+          io,
+          manager.id,
+          "Booking Cancelled",
+          `Employee ${user.firstName} has cancelled their booking request.`,
+          updatedBooking.id
+        );
+      }
+
       return updatedBooking;
     });
   }
 
-  async approveBooking(input: ApproveBookingInput, userId: number){
+  async approveBooking(input: ApproveBookingInput, userId: number, io: Server){
     return await AppDataSource.transaction(async (transactionalManager) => {
       const repo = new BookingRepository(transactionalManager);
       
@@ -168,6 +196,14 @@ export class BookingService {
         newStatus: BookingStatus.APPROVED
       });
 
+      await dispatchSystemNotification(
+        io,
+        booking.employeeId,
+        "Booking Request Approved",
+        `Your request for room ${booking.meetingRoom.name} was approved.`,
+        updatedBooking.id
+      );
+
       const remainingBookings = await repo.findConflictingPendingBookings(
         booking.meetingRoom.id, 
         updatedBooking.id, 
@@ -195,6 +231,14 @@ export class BookingService {
           oldStatus: prevStatus,
           newStatus: BookingStatus.REJECTED
         });
+
+        await dispatchSystemNotification(
+          io,
+          pendingBooking.employeeId,
+          "Booking Request Rejected",
+          `Your request for ${pendingBooking.meetingRoom.name} was rejected due to a scheduling conflict.`,
+          pendingBooking.id
+        );
       }
 
       const to = `${booking.employee.email}`
@@ -207,7 +251,7 @@ export class BookingService {
     });
   }
 
-  async rejectBooking(input: RejectBookingInput, userId: number){
+  async rejectBooking(input: RejectBookingInput, userId: number, io: Server){
     return await AppDataSource.transaction(async (transactionalManager) => {
       const repo = new BookingRepository(transactionalManager);
 
@@ -231,6 +275,14 @@ export class BookingService {
         oldStatus,
         newStatus: BookingStatus.REJECTED
       });
+
+      await dispatchSystemNotification(
+        io,
+        booking.employeeId, 
+        "Booking Request Rejected",
+        `Your request for room ${booking.meetingRoom.name} was rejected. Reason: ${input.rejectionReason}`,
+        updatedBooking.id
+      );
 
       const to = `${booking.employee.email}`
       const subject = 'Booking Request Reject'

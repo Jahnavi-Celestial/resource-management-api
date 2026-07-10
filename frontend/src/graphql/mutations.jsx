@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const Register = gql`
-mutation Register($role: String!, $password: String!, $email: String!, $lastName: String!, $firstName: String!) {
-  register(role: $role, password: $password, email: $email, lastName: $lastName, firstName: $firstName) {
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
     id
     firstName
     lastName
@@ -15,14 +15,14 @@ mutation Register($role: String!, $password: String!, $email: String!, $lastName
 `
 
 export const Login = gql`
-mutation Login($password: String!, $email: String!) {
-  login(password: $password, email: $email)
+mutation Login($input: LoginInput!) {
+  login(input: $input)
 }
 `
 
 export const CreateBooking = gql`
-mutation CreateBooking($meetingRoomId: Int!, $numberOfAttendees: Int!, $purpose: String!, $endTime: DateTimeISO!, $startTime: DateTimeISO!, $equipmentRequested: [EquipRequestInput!]) {
-  createBooking(meetingRoomId: $meetingRoomId, numberOfAttendees: $numberOfAttendees, purpose: $purpose, endTime: $endTime, startTime: $startTime, equipmentRequested: $equipmentRequested) {
+mutation CreateBooking($input: CreateBookingInput!) {
+  createBooking(input: $input) {
     id
     startTime
     endTime
@@ -41,8 +41,8 @@ mutation CreateBooking($meetingRoomId: Int!, $numberOfAttendees: Int!, $purpose:
 `
 
 export const CreateEmployee = gql`
-mutation CreateEmployee($role: Role!, $password: String!, $email: String!, $lastName: String!, $firstName: String!) {
-  createEmployee(role: $role, password: $password, email: $email, lastName: $lastName, firstName: $firstName) {
+mutation CreateEmployee($input: CreateEmployeeInput!) {
+  createEmployee(input: $input) {
     id
     firstName
     lastName
@@ -55,8 +55,8 @@ mutation CreateEmployee($role: Role!, $password: String!, $email: String!, $last
 `
 
 export const CreateEquipment = gql`
-mutation CreateEquipment($isActive: Boolean!, $quantityAvailable: Int!, $name: String!) {
-  createEquipment(isActive: $isActive, quantityAvailable: $quantityAvailable, name: $name) {
+mutation CreateEquipment($input: CreateEquipmentInput!) {
+  createEquipment(input: $input) {
     id
     name
     quantityAvailable
@@ -68,8 +68,8 @@ mutation CreateEquipment($isActive: Boolean!, $quantityAvailable: Int!, $name: S
 `
 
 export const CreateRoom = gql`
-mutation CreateRoom($isActive: Boolean!, $capacity: Int!, $location: String!, $name: String!) {
-  createRoom(isActive: $isActive, capacity: $capacity, location: $location, name: $name) {
+mutation CreateRoom($input: CreateMeetingRoomInput!) {
+  createRoom(input: $input) {
     id
     name
     location
@@ -102,8 +102,8 @@ mutation CancelBooking($bookingId: Int!) {
 `
 
 export const ApproveBooking = gql`
-mutation ApproveBooking($bookingId: Int!) {
-  approveBooking(bookingId: $bookingId) {
+mutation ApproveBooking($input: ApproveBookingInput!) {
+  approveBooking(input: $input) {
     id
     startTime
     endTime
@@ -125,8 +125,8 @@ mutation ApproveBooking($bookingId: Int!) {
 `
 
 export const RejectBooking = gql`
-mutation RejectBooking($bookingId: Int!, $rejectionReason: String!) {
-  rejectBooking(bookingId: $bookingId, rejectionReason: $rejectionReason) {
+mutation RejectBooking($input: RejectBookingInput!) {
+  rejectBooking(input: $input) {
     id
     startTime
     endTime
@@ -146,8 +146,8 @@ mutation RejectBooking($bookingId: Int!, $rejectionReason: String!) {
 `
 
 export const UpdateRoom = gql`
-mutation UpdateRoom($isActive: Boolean!, $capacity: Int!, $location: String!, $name: String!, $updateRoomId: Int!) {
-  updateRoom(isActive: $isActive, capacity: $capacity, location: $location, name: $name, id: $updateRoomId) {
+mutation UpdateRoom($input: UpdateMeetingRoomInput!) {
+  updateRoom(input: $input) {
     id
     name
     location
@@ -172,8 +172,8 @@ mutation DeleteEquipment($deleteEquipmentId: Int!) {
 `
 
 export const UpdateEquipment = gql`
-mutation UpdateEquipment($isActive: Boolean!, $quantityAvailable: Int!, $name: String!, $updateEquipmentId: Int!) {
-  updateEquipment(isActive: $isActive, quantityAvailable: $quantityAvailable, name: $name, id: $updateEquipmentId) {
+mutation UpdateEquipment($input: UpdateEquipmentInput!) {
+  updateEquipment(input: $input) {
     id
     name
     quantityAvailable
@@ -185,8 +185,8 @@ mutation UpdateEquipment($isActive: Boolean!, $quantityAvailable: Int!, $name: S
 `
 
 export const UpdateEmployee = gql`
-mutation UpdateEmployee($role: Role!, $email: String!, $lastName: String!, $firstName: String!, $updateEmployeeId: Int!, $password: String!) {
-  updateEmployee(role: $role, email: $email, lastName: $lastName, firstName: $firstName, id: $updateEmployeeId, password: $password) {
+mutation UpdateEmployee($input: UpdateEmployeeInput!) {
+  updateEmployee(input: $input) {
     id
     firstName
     lastName

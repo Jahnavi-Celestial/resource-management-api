@@ -19,10 +19,12 @@ const CreateRoom = ({ onSubmitSuccess }) => {
     try {
       await createRoomAction({
         variables: {
-          name: formData.name,
-          location: formData.location,
-          capacity: parseInt(formData.capacity),
-          isActive: formData.isActive,
+          input:{
+            name: formData.name,
+            location: formData.location,
+            capacity: parseInt(formData.capacity),
+            isActive: formData.isActive,
+          }
         },
       });
 

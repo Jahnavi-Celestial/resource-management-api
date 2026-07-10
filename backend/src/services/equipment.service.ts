@@ -3,13 +3,13 @@ import { CreateEquipmentInput, EquipmentsFilterInput, UpdateEquipmentInput } fro
 import { Equipment } from "../entities/Equipment.ts";
 import { FindOptionsWhere, ILike } from "typeorm";
 import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
+import AppDataSource from "../config/db.ts";
 
 export class EquipmentService {
   constructor(private equipmentRepo = new EquipmentRepository()) {}
 
   async createEquipment(input: CreateEquipmentInput){
     const {name} = input
-    console.log(name)
 
     const isExist = await this.equipmentRepo.findByName(name.toLowerCase())
 
@@ -38,6 +38,11 @@ export class EquipmentService {
     if (!searchEquip) {
       throw new NotFoundError("Equipment");
     }
+
+    await AppDataSource.query(`
+      DELETE FROM booking_equipments
+      WHERE "equipmentId" = $1
+    `, [id]);
 
     return this.equipmentRepo.delete(id);
   }

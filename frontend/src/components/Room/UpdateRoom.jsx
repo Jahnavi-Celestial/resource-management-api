@@ -19,11 +19,13 @@ const UpdateRoom = ({ onSubmitSuccess, room }) => {
     try {
       await updateRoomAction({
         variables: {
-          updateRoomId: room.id,
-          name: formData.name,
-          location: formData.location,
-          capacity: parseInt(formData.capacity),
-          isActive: formData.isActive,
+          input:{
+            id: room.id,
+            name: formData.name,
+            location: formData.location,
+            capacity: parseInt(formData.capacity),
+            isActive: formData.isActive,
+          }
         },
       })
 

@@ -12,9 +12,11 @@ const ViewOwnBookings = () => {
 
   const { data, loading, refetch } = useQuery(ViewOwnBookingsQuery, {
     variables: {
-      page: page,
-      limit: 5,
-      bookingStatus: status || null,
+      input:{
+        page: page,
+        limit: 5,
+        bookingStatus: status || null,
+      }
     },
     skip: !user?.id,
     fetchPolicy: 'network-only'
@@ -35,6 +37,7 @@ const ViewOwnBookings = () => {
           }}
         >
           <option value="">All Statuses</option>
+          <option value="COMPLETED">Completed</option>
           <option value="PENDING">Pending</option>
           <option value="APPROVED">Approved</option>
           <option value="REJECTED">Rejected</option>

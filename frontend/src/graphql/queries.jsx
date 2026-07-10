@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const Rooms = gql`
-query Rooms($page: Int!, $limit: Int!, $searchTerm: String) {
-  rooms(page: $page, limit: $limit, searchTerm: $searchTerm) {
+query Rooms($input: RoomsFilterInput!) {
+  rooms(input: $input) {
     rooms {
       id
     name
@@ -45,8 +45,8 @@ query Rooms($page: Int!, $limit: Int!, $searchTerm: String) {
 `
 
 export const Equipments = gql`
-query Equipments($page: Int!, $limit: Int!, $searchTerm: String) {
-  equipments(page: $page, limit: $limit, searchTerm: $searchTerm) {
+query Equipments($input: EquipmentsFilterInput!) {
+  equipments(input: $input) {
     equipments {
       id
     name
@@ -88,8 +88,8 @@ query Equipments($page: Int!, $limit: Int!, $searchTerm: String) {
 `
 
 export const ViewOwnBookings = gql`
-query ViewOwnBooking($page: Int!, $limit: Int!, $bookingStatus: BookingStatus) {
-  viewOwnBooking(page: $page, limit: $limit, bookingStatus: $bookingStatus) {
+query ViewOwnBooking($input: BookingsFilterInput!) {
+  viewOwnBooking(input: $input) {
     bookings {
       id
     startTime
@@ -230,8 +230,8 @@ query Equipment($equipmentId: Int!) {
 `
 
 export const Employees = gql`
-query Employees($page: Int!, $limit: Int!, $searchTerm: String) {
-  employees(page: $page, limit: $limit, searchTerm: $searchTerm) {
+query Employees($input: EmployeesFilterInput!) {
+  employees(input: $input) {
     employees {
       id
     firstName
@@ -316,8 +316,8 @@ query Employee($employeeId: Int!) {
 `
 
 export const Bookings = gql`
-query Bookings($page: Int!, $limit: Int!, $bookingStatus: BookingStatus) {
-  bookings(page: $page, limit: $limit, bookingStatus: $bookingStatus) {
+query Bookings($input: BookingsFilterInput!) {
+  bookings(input: $input) {
     bookings {
       id
     startTime
@@ -351,8 +351,8 @@ query Bookings($page: Int!, $limit: Int!, $bookingStatus: BookingStatus) {
 `
 
 export const EquipmentUsage = gql`
-query EquipmentUsage($equipId: Int!) {
-  equipmentUsage(equipId: $equipId) {
+query EquipmentUsage($input: EquipmentUsageInput!) {
+  equipmentUsage(input: $input) {
     equipmentName
     timesUsage
   }
@@ -360,8 +360,8 @@ query EquipmentUsage($equipId: Int!) {
 `
 
 export const BookingPerEmployee = gql`
-query BookingsPerEmployee($empId: Int!) {
-  bookingsPerEmployee(empId: $empId) {
+query BookingsPerEmployee($input: BookingsPerEmployeeInput!) {
+  bookingsPerEmployee(input: $input) {
     employeeName
     bookingCount
   }
@@ -378,8 +378,8 @@ query MostBookedRoom {
 `
 
 export const MonthlyBookingStatics = gql`
-query MonthlyBookingStatics($year: Int!, $month: Int!) {
-  monthlyBookingStatics(year: $year, month: $month) {
+query MonthlyBookingStatics($input: MonthlyBookingStatisticsInput!) {
+  monthlyBookingStatics(input: $input) {
     month
     totalBookings
     approvedBookings

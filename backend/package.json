@@ -13,6 +13,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
     "@sendgrid/mail": "^8.1.6",
     "apollo-server": "^3.13.0",
     "bcrypt": "^6.0.0",
@@ -25,6 +27,7 @@
     "node-pg-migrate": "^8.0.4",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.3",
     "type-graphql": "^2.0.0-rc.3",
     "typeorm": "^1.0.0"
   },
@@ -33,7 +36,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.1",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "tsc": "^2.0.4",

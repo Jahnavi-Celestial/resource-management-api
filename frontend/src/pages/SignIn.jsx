@@ -18,8 +18,10 @@ const SignIn = () => {
       if(isLogin){
         const loginData = await loginAction({ 
             variables: { 
-                email: formData.email, 
-                password: formData.password 
+                input:{
+                  email: formData.email, 
+                  password: formData.password
+                } 
             } 
         })
 
@@ -31,11 +33,13 @@ const SignIn = () => {
       } else {
         const registerData = await registerAction({ 
             variables: { 
-                firstName: formData.firstName, 
-                lastName: formData.lastName, 
-                email: formData.email, 
-                password: formData.password, 
-                role: formData.role 
+                input:{
+                  firstName: formData.firstName, 
+                  lastName: formData.lastName, 
+                  email: formData.email, 
+                  password: formData.password, 
+                  role: formData.role 
+                }
             } 
         })
 

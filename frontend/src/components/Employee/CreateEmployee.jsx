@@ -19,11 +19,13 @@ const CreateEmployee = ({ onSubmitSuccess }) => {
     try {
       await createEmployeeAction({
         variables: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
+          input:{
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          }
         },
       })
 

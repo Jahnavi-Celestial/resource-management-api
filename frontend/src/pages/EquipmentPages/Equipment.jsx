@@ -10,10 +10,13 @@ const Equipment = () => {
 
   const { data, loading, refetch } = useQuery(Equipments, {
     variables: {
-      page: page,
-      limit: 6,
-      searchTerm: searchTerm,
+      input:{
+        page: page,
+        limit: 6,
+        searchTerm: searchTerm,
+      }
     },
+    fetchPolicy: 'network-only'
   })
 
   const equipments = data?.equipments?.equipments || [];

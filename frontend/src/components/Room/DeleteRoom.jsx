@@ -18,7 +18,7 @@ const DeleteRoom = ({ onSubmitSuccess, id }) => {
         onSubmitSuccess()
       }
 
-      navigate("/meetingRoom")
+      navigate("/home")
     } catch (err) {
       alert(err.message)
     }

@@ -19,12 +19,14 @@ const UpdateEmployee = ({ onSubmitSuccess, employee}) => {
     try {
       await updateEmployeeAction({
         variables: {
-          updateEmployeeId: employee.id,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
+          input:{
+            id: employee.id,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          }
         }
       })
 

@@ -23,7 +23,12 @@ const EmployeeDetail = () => {
   const employee = data?.employee
 
   const { data: bookingsData } = useQuery(BookingPerEmployee, {
-    variables: { empId: Number(id) }
+    variables: { 
+      input:{
+        empId: Number(id)
+      }
+    },
+    fetchPolicy: 'network-only'
   })
 
   if (loading) {

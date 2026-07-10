@@ -18,7 +18,8 @@ const RoomDetail = () => {
   const closeModal = () => setActiveModal(null)
 
   const { data, loading } = useQuery(Room, {
-    variables: { roomId: Number(id) }
+    variables: { roomId: Number(id) },
+    fetchPolicy: 'network-only'
   })
 
   const room = data?.room;

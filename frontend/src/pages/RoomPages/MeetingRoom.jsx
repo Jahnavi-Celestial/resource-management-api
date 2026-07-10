@@ -10,10 +10,13 @@ const MeetingRoom = () => {
 
   const { data, loading, refetch } = useQuery(Rooms, {
     variables: {
-      page: page,
-      limit: 6,
-      searchTerm: searchTerm,
+      input:{
+        page: page,
+        limit: 6,
+        searchTerm: searchTerm,
+      }
     },
+    fetchPolicy: 'network-only'
   })
 
   const rooms = data?.rooms?.rooms || [];

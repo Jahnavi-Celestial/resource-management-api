@@ -18,12 +18,26 @@ const CreateBooking = ({ onSubmitSuccess }) => {
   const [equipQuantity, setEquipQuantity] = useState(0)
 
   const { data: roomData, loading: roomLoading, error: roomError } = useQuery(Rooms, {
-    variables: { page: 1, limit: 10, searchTerm: "" },
+    variables: { 
+      input:{
+        page: 1, 
+        limit: 10, 
+        searchTerm: "" 
+      }
+    },
+    fetchPolicy: 'network-only'
   })
   const rooms = roomData?.rooms?.rooms || []
 
   const { data: equipmentsData, loading: equipmentLoading, error: equipmentError } = useQuery(Equipments, {
-    variables: { page: 1, limit: 10, searchTerm: "" },
+    variables: { 
+      input:{
+        page: 1, 
+        limit: 10, 
+        searchTerm: "" 
+      }
+    },
+    fetchPolicy: 'network-only'
   });
   const equipments = equipmentsData?.equipments?.equipments || []
 
@@ -76,15 +90,17 @@ const CreateBooking = ({ onSubmitSuccess }) => {
     try {
       const bookingData = await createBookingAction({
         variables: {
-          meetingRoomId: Number(formData.roomId),
-          startTime: new Date(formData.startTime).toISOString(),
-          endTime: new Date(formData.endTime).toISOString(),
-          purpose: formData.purpose,
-          numberOfAttendees: parseInt(formData.numberOfAttendees, 10),
-          equipmentRequested: formData.equipments.map((e) => ({
+          input:{
+            meetingRoomId: Number(formData.roomId),
+            startTime: new Date(formData.startTime).toISOString(),
+            endTime: new Date(formData.endTime).toISOString(),
+            purpose: formData.purpose,
+            numberOfAttendees: parseInt(formData.numberOfAttendees, 10),
+            equipmentRequested: formData.equipments.map((e) => ({
             equipId: Number(e.equipmentId),
             quantity: parseInt(e.quantity, 10),
           })),
+          }
         },
       })
       formData.roomId = ""

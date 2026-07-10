@@ -14,9 +14,11 @@ const CreateEquipment = ({ onSubmitSuccess }) => {
     try {
       await createEquipmentAction({
         variables: {
-          name: formData.name,
-          quantityAvailable: parseInt(formData.quantityAvailable),
-          isActive: formData.isActive,
+          input:{
+            name: formData.name,
+            quantityAvailable: parseInt(formData.quantityAvailable),
+            isActive: formData.isActive,
+          }
         }
       })
 

@@ -14,7 +14,7 @@ export class BookingResolver {
     @Arg("input", ()=>CreateBookingInput) input: CreateBookingInput,
     @Ctx() context: AppContext
   ): Promise<Booking> {
-    return this.bookingService.createBooking(input, context.user);
+    return this.bookingService.createBooking(input, context.user, context.io);
   }
 
   @Authorized("EMPLOYEE")
@@ -23,7 +23,7 @@ export class BookingResolver {
     @Arg("bookingId", () => Int) bookingId: number,
     @Ctx() context: AppContext
   ){
-    return this.bookingService.cancelBooking(bookingId, context.user);
+    return this.bookingService.cancelBooking(bookingId, context.user, context.io);
   }
 
   @Authorized("MANAGER")
@@ -32,7 +32,7 @@ export class BookingResolver {
     @Arg("input", ()=>ApproveBookingInput) input: ApproveBookingInput,
     @Ctx() context: AppContext
   ){
-    return await this.bookingService.approveBooking(input, context.user.id);
+    return await this.bookingService.approveBooking(input, context.user.id, context.io);
   }
 
   @Authorized("MANAGER")
@@ -41,7 +41,7 @@ export class BookingResolver {
     @Arg("input", ()=>RejectBookingInput) input: RejectBookingInput,
     @Ctx() context: AppContext
   ){
-    return await this.bookingService.rejectBooking(input, context.user.id);
+    return await this.bookingService.rejectBooking(input, context.user.id, context.io);
   }
 
   @Authorized(["ADMIN", "MANAGER"])

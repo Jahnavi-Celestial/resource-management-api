@@ -18,10 +18,12 @@ const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
     try {
       await updateEquipmentAction({
         variables: {
-          updateEquipmentId: equipment.id,
-          name: formData.name,
-          quantityAvailable: parseInt(formData.quantityAvailable),
-          isActive: formData.isActive,
+          input: {
+            id: equipment.id,
+            name: formData.name,
+            quantityAvailable: parseInt(formData.quantityAvailable),
+            isActive: formData.isActive,
+          }
         }
       })
 

@@ -18,6 +18,7 @@ const BookingDetail = () => {
   const { data, loading, error } = useQuery(Booking, {
     variables: { bookingId: Number(id) },
     skip: !id,
+    fetchPolicy: 'network-only'
   })
 
   const bookingData = data?.booking
@@ -40,7 +41,11 @@ const BookingDetail = () => {
   const handleApproveBtn = async () => {
     try {
       await approveBookingAction({
-        variables: { bookingId: Number(id) },
+        variables: { 
+          input:{
+            bookingId: Number(id)
+          }
+        },
       })
       alert("Booking successfully approved.")
     } catch (err) {
@@ -56,8 +61,10 @@ const BookingDetail = () => {
     try {
       await rejectBookingAction({
         variables: {
-          bookingId: Number(id),
-          rejectionReason: reason.trim(),
+          input:{
+            bookingId: Number(id),
+            rejectionReason: reason.trim(),
+          }
         },
       })
       setIsModalOpen(false)

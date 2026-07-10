@@ -21,12 +21,18 @@ const EquipmentDetail = () => {
 
   const { data, loading } = useQuery(Equipment, {
     variables: { equipmentId: Number(id) },
+    fetchPolicy: 'network-only'
   })
   const equipment = data?.equipment
   const bookings = equipment?.bookings || []
 
   const { data: usageData } = useQuery(EquipmentUsage, {
-    variables: { equipId: Number(id) },
+    variables: {
+      input:{
+        equipId: Number(id) 
+      }
+    },
+    fetchPolicy: 'network-only'
   })
   const equipmentUsage = usageData?.equipmentUsage
 

@@ -24,21 +24,27 @@ const Home = () => {
 
   const { data: employeesData } = useQuery(Employees, {
     variables: { 
-      page: empPage, 
-      limit: 5, 
-      searchTerm: searchTerm 
+      input:{
+        page: empPage, 
+        limit: 5, 
+        searchTerm: searchTerm
+      } 
     },
     skip: role === "EMPLOYEE",
+    fetchPolicy: 'network-only'
   })
   const employees = employeesData?.employees?.employees || []
 
   const { data: bookingData } = useQuery(Bookings, {
     variables: {
-      page: bookingPage,
-      limit: 5,
-      bookingStatus: bookingStatus || null,
+      input:{
+        page: bookingPage,
+        limit: 5,
+        bookingStatus: bookingStatus || null,
+      }
     },
     skip: role === "EMPLOYEE",
+    fetchPolicy: 'network-only'
   })
   const bookings = bookingData?.bookings?.bookings || []
 
@@ -46,8 +52,10 @@ const Home = () => {
 
   const { data: monthlyStatsData } = useQuery(MonthlyBookingStatics, {
     variables: {
-      year: Number(statsYear),
-      month: Number(statsMonth),
+      input:{
+        year: Number(statsYear),
+        month: Number(statsMonth),
+      }
     },
     skip: role === "EMPLOYEE",
     fetchPolicy: "network-only",
@@ -187,6 +195,7 @@ const Home = () => {
                 }}
               >
                 <option value="">All Statuses</option>
+                <option value="COMPLETED">Completed</option>
                 <option value="PENDING">Pending</option>
                 <option value="APPROVED">Approved</option>
                 <option value="REJECTED">Rejected</option>

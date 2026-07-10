@@ -2,8 +2,10 @@ import React from "react";
 import { useMutation } from "@apollo/client/react";
 import { DeleteEquipment as DeleteEquipmentMutation } from "../../graphql/mutations";
 import "./DeleteEquipment.css";
+import { useNavigate } from "react-router-dom";
 
 const DeleteEquipment = ({ onSubmitSuccess, id, refetch }) => {
+  const navigate = useNavigate()
   const [deleteEquipmentAction] = useMutation(DeleteEquipmentMutation)
 
   const handleDeleteBtn = async () => {
@@ -19,6 +21,7 @@ const DeleteEquipment = ({ onSubmitSuccess, id, refetch }) => {
       if (refetch) {
         refetch()
       }
+      navigate("/home")
     } catch (err) {
       alert(err.message)
     }

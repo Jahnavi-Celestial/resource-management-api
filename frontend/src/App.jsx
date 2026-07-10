@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import SignIn from "./pages/SignIn";
@@ -12,6 +12,7 @@ import RoomDetail from "./pages/RoomPages/RoomDetail";
 import Equipment from "./pages/EquipmentPages/Equipment";
 import EquipmentDetail from "./pages/EquipmentPages/EquipmentDetail";
 import EmployeeDetail from "./pages/EmployeePages/EmployeeDetail";
+import { connectSocket, disconnectSocket, socket } from './socket';
 
 const ProtectedRoute = () => {
   const { token } = useContext(AuthContext)
@@ -68,6 +69,19 @@ const router = createBrowserRouter([
 ])
 
 const App = () => {
+
+  useEffect(()=>{
+    const user = JSON.parse(localStorage.getItem("user"))
+    const empId = Number(user?.id)
+    
+    if(empId){
+      connectSocket(empId);
+    }
+
+    return () => disconnectSocket();
+
+  }, [])
+
   return <RouterProvider router={router} />
 }
 
