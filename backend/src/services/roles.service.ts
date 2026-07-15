@@ -21,7 +21,7 @@ export class RoleService{
     const isExist = await this.roleRepo.findRoleByName(name.toLowerCase());
 
     if(isExist){
-      throw new ConflictError("Role already exists, you can only update it.");
+      throw new ConflictError("Role already exists, you can only update it.", "name");
     }
 
     const newRole = await this.roleRepo.createRole({ role_name: name });
@@ -34,7 +34,7 @@ export class RoleService{
     const isExist = await this.roleRepo.findRoleById(id);
 
     if(!isExist){
-      throw new NotFoundError("Role");
+      throw new NotFoundError("Role", "id");
     }
 
     return this.roleRepo.saveRole({
@@ -46,7 +46,7 @@ export class RoleService{
   async deleteRole(id: number){
     const isExist = await this.roleRepo.findRoleById(id);
     if(!isExist){
-      throw new NotFoundError("Role");
+      throw new NotFoundError("Role", "id");
     }
 
     return this.roleRepo.deleteRole(id);
@@ -58,7 +58,7 @@ export class RoleService{
     const role = await this.roleRepo.findRoleById(roleId);
 
     if(!role){
-        throw new NotFoundError("Role");
+        throw new NotFoundError("Role", "roleId");
     }
 
     for(const permissionId of permissionIds){
@@ -66,7 +66,7 @@ export class RoleService{
         const permission = await this.permissionRepo.findPermissionById(permissionId);
 
         if(!permission){
-            throw new NotFoundError("Permission");
+            throw new NotFoundError("Permission", "permissionIds");
         }
 
         const exists = await this.rolePermissionRepo.findByRoleAndPermission(
@@ -85,7 +85,7 @@ export class RoleService{
     }
 
     return this.roleRepo.findRoleById(roleId);
-}
+  }
 
   async removePermissionFromRole(input: RemovePermissionInput){
     const { roleId, permissionIds } = input;
@@ -93,7 +93,7 @@ export class RoleService{
     const role = await this.roleRepo.findRoleById(roleId);
 
     if(!role){
-        throw new NotFoundError("Role");
+        throw new NotFoundError("Role", "roleId");
     }
 
     for(const permissionId of permissionIds){
@@ -109,5 +109,10 @@ export class RoleService{
     }
 
     return this.roleRepo.findRoleById(roleId);
-}
+  }
+
+    async getAllRoles(){
+        const roles = await this.roleRepo.findRole();
+        return roles
+    }
 }

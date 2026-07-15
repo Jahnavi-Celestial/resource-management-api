@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { LoginInput, RegisterInput } from "../dto/auth.input.ts";
 import { EmployeeRepository } from "../repositories/employee.repository.ts";
-import { AppError, ConflictError } from "../errors/AppErrors.ts";
+import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import { UserRoleRepository } from "../repositories/userRole.repository.ts";
 import { RoleRepository } from "../repositories/role.repository.ts";
 
@@ -20,7 +20,7 @@ export class AuthService{
     const isEmpExist = await this.employeeRepo.findByEmail(email);
 
     if (isEmpExist) {
-      throw new ConflictError("Employee already exists.");
+      throw new ConflictError("Employee already exists with this email.", "email");
     }
 
     const password_hash = await bcrypt.hash(password, 10);
@@ -35,7 +35,7 @@ export class AuthService{
 
     const role = await this.roleRepo.findRoleById(roleId);
     if(!role){
-      throw new AppError("Role not found", 404, "NOT_FOUND");
+      throw new NotFoundError("Role", "roleId");
     }
 
     const user = await this.userRoleRepo.create({
@@ -55,12 +55,12 @@ export class AuthService{
     const isEmpExist = await this.employeeRepo.findByEmail(email);
     
     if (!isEmpExist) {
-      throw new AppError("Invalid Credentials", 401, "UNAUTHORIZED");
+      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED", "email");
     }
 
     const isPasswordValid = await bcrypt.compare(password, isEmpExist.password);
     if (!isPasswordValid) {
-      throw new AppError("Invalid Credentials", 401, "UNAUTHORIZED");
+      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED", "password");
     }
 
     console.log(isEmpExist)

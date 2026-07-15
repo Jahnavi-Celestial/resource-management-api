@@ -4,33 +4,33 @@ import { IsNotEmpty, IsInt, Min, Max } from "class-validator";
 @InputType()
 export class BookingsPerEmployeeInput{
   @Field(() => Int)
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
+  @IsNotEmpty({ message: "Employee ID cannot be empty" })
+  @IsInt({ message: "Employee ID must be an integer" })
+  @Min(1, { message: "Employee ID must be at least 1" })
   empId!: number;
 }
 
 @InputType()
 export class EquipmentUsageInput{
   @Field(() => Int)
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
+  @IsNotEmpty({ message: "Equipment ID cannot be empty" })
+  @IsInt({ message: "Equipment ID must be an integer" })
+  @Min(1, { message: "Equipment ID must be at least 1" })
   equipId!: number;
 }
 
 @InputType()
 export class MonthlyBookingStatisticsInput{
   @Field(() => Int)
-  @IsNotEmpty()
-  @IsInt()
+  @IsNotEmpty({ message: "Month cannot be empty" })
+  @IsInt({ message: "Month must be an integer" })
   @Min(1, { message: "Month must be between 1 and 12" })
   @Max(12, { message: "Month must be between 1 and 12" })
   month!: number;
 
   @Field(() => Int)
-  @IsNotEmpty()
-  @IsInt()
+  @IsNotEmpty({ message: "Year cannot be empty" })
+  @IsInt({ message: "Year must be an integer" })
   @Min(2000, { message: "Provide a valid historical or current year" })
   year!: number;
 }

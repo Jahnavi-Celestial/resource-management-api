@@ -16,13 +16,7 @@ dotenv.config();
 const AppDataSource = new DataSource({
     type: "postgres",
     entities: [Employee, Equipment, MeetingRoom, Booking, AuditLog, Notification, Roles, Permission, RolePermission, UserRole],
-    host: "localhost",
-port: 5432,
-username: "postgres",
-password: String(process.env.DB_PASSWORD)!,
-database: "resource_management_db",
-synchronize: true
+    url: process.env.DB_URL || "",
 })
 
-// url: process.env.DB_URL || "",
 export default AppDataSource;

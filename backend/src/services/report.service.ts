@@ -20,7 +20,7 @@ export class ReportService {
   async getBookingsPerEmployee(input: BookingsPerEmployeeInput): Promise<BookingsPerEmployee> {
     const emp = await this.reportRepo.findEmployeeById(input.empId);
     if (!emp) {
-      throw new NotFoundError("Employee");
+      throw new NotFoundError("Employee", "empId");
     }
 
     const bookingCount = await this.reportRepo.countBookingsByEmployeeId(input.empId);
@@ -34,7 +34,7 @@ export class ReportService {
   async getEquipmentUsage(input: EquipmentUsageInput): Promise<EquipmentUsage> {
     const equipment = await this.reportRepo.findEquipmentById(input.equipId);
     if (!equipment) {
-      throw new NotFoundError("Equipment");
+      throw new NotFoundError("Equipment", "equipId");
     }
 
     const result = await this.reportRepo.getEquipmentUsageCountRaw(input.equipId);
@@ -51,7 +51,7 @@ export class ReportService {
 
     const result = await this.reportRepo.getMonthlyStatisticsRaw(month, year);
     if (!result || result.length === 0) {
-      throw new AppError("No metrics recorded for the specified timeframe", 404, "NO_DATA_AVAILABLE");
+      throw new AppError("No metrics recorded for the specified timeframe", 404, "NO_DATA_AVAILABLE", "month");
     }
 
     const months = [

@@ -15,7 +15,7 @@ export class MeetingRoomService {
   async updateRoom(input: UpdateMeetingRoomInput){
     const searchRoom = await this.meetingRoomRepo.findById(input.id);
     if (!searchRoom) {
-      throw new NotFoundError("Meeting Room");
+      throw new NotFoundError("Meeting Room", "id");
     }
 
     return this.meetingRoomRepo.save({
@@ -27,14 +27,14 @@ export class MeetingRoomService {
   async deleteRoom(id: number){
     const searchRoom = await this.meetingRoomRepo.findById(id);
     if (!searchRoom) {
-      throw new NotFoundError("Meeting Room");
+      throw new NotFoundError("Meeting Room", "id");
     }
 
     return this.meetingRoomRepo.delete(id);
   }
 
   async getRooms(input: RoomsFilterInput){
-    const { page, limit, searchTerm } = input;
+    const { page, limit, searchTerm, sortOrder } = input;
     const skip = (page - 1) * limit;
 
     const whereConditions: FindOptionsWhere<MeetingRoom> = {};
@@ -45,11 +45,12 @@ export class MeetingRoomService {
     const [rooms, totalCount] = await this.meetingRoomRepo.findAndCountRooms(
       whereConditions,
       skip,
-      limit
+      limit,
+      String(sortOrder)
     );
 
     return {
-      rooms,
+      data: rooms,
       total: totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit) || 1
@@ -59,7 +60,7 @@ export class MeetingRoomService {
   async getRoomById(id: number){
     const room = await this.meetingRoomRepo.findByIdWithRelations(id);
     if (!room) {
-      throw new NotFoundError("Meeting Room");
+      throw new NotFoundError("Meeting Room", "id");
     }
     return room;
   }

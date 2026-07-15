@@ -33,4 +33,8 @@ export class PermissionRepository{
         const result = await this.repo.delete(id)
         return !!result.affected
     }
+
+    async findPermission(){
+        return this.repo.find()
+    }
 }

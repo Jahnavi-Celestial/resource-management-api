@@ -50,6 +50,9 @@ export class EmployeeRepository {
           employee: true,
           equipments: true
         },
+        userRoles:{
+          role:true
+        },
         auditLogs: true
       }
     });
@@ -58,7 +61,8 @@ export class EmployeeRepository {
   async findAndCountEmployees(
     whereConditions: FindOptionsWhere<Employee>,
     skip: number,
-    take: number
+    take: number,
+    sortOrder: string
   ){
     return this.repo.findAndCount({
       where: whereConditions,
@@ -68,9 +72,12 @@ export class EmployeeRepository {
           employee: true,
           equipments: true
         },
+        userRoles:{
+          role:true
+        },
         auditLogs: true
       },
-      order: { id: "DESC" },
+      order: { id: sortOrder as any },
       skip,
       take
     });

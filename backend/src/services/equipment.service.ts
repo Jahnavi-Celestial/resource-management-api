@@ -14,7 +14,7 @@ export class EquipmentService {
     const isExist = await this.equipmentRepo.findByName(name.toLowerCase())
 
     if(isExist){
-        throw new ConflictError("Equipment already exists, you can only update it.");
+        throw new ConflictError("Equipment already exists, you can only update it.", "name");
     }
 
     const newEquip = this.equipmentRepo.create(input);
@@ -24,7 +24,7 @@ export class EquipmentService {
   async updateEquipment(input: UpdateEquipmentInput){
     const searchEquip = await this.equipmentRepo.findById(input.id);
     if (!searchEquip) {
-      throw new NotFoundError("Equipment");
+      throw new NotFoundError("Equipment", "id");
     }
 
     return this.equipmentRepo.save({
@@ -36,7 +36,7 @@ export class EquipmentService {
   async deleteEquipment(id: number){
     const searchEquip = await this.equipmentRepo.findById(id);
     if (!searchEquip) {
-      throw new NotFoundError("Equipment");
+      throw new NotFoundError("Equipment", "id");
     }
 
     await AppDataSource.query(`
@@ -48,7 +48,7 @@ export class EquipmentService {
   }
 
   async getEquipments(input: EquipmentsFilterInput){
-    const { page, limit, searchTerm } = input;
+    const { page, limit, searchTerm, sortOrder } = input;
     const skip = (page - 1) * limit;
 
     const whereConditions: FindOptionsWhere<Equipment> = {};
@@ -59,11 +59,12 @@ export class EquipmentService {
     const [equipments, totalCount] = await this.equipmentRepo.findAndCountEquipments(
       whereConditions,
       skip,
-      limit
+      limit,
+      String(sortOrder)
     );
 
     return {
-      equipments,
+      data: equipments,
       total: totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit) || 1
@@ -73,7 +74,7 @@ export class EquipmentService {
   async getEquipmentById(id: number){
     const equipment = await this.equipmentRepo.findByIdWithRelations(id);
     if (!equipment) {
-      throw new NotFoundError("Equipment");
+      throw new NotFoundError("Equipment", "id");
     }
     return equipment;
   }

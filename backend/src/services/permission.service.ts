@@ -13,7 +13,7 @@ export class PermissionService{
     );
 
     if(isExist){
-      throw new ConflictError("Permission already exists, you can only update it.")
+      throw new ConflictError("Permission already exists, you can only update it.", "name")
     }
 
     const newPermission = await this.permissionRepo.createPermission({
@@ -28,7 +28,7 @@ export class PermissionService{
     const isExist = await this.permissionRepo.findPermissionById(id);
 
     if(!isExist){
-      throw new NotFoundError("Permission");
+      throw new NotFoundError("Permission", "id");
     }
 
     return this.permissionRepo.savePermission({
@@ -40,9 +40,14 @@ export class PermissionService{
   async deletePermission(id: number){
     const isExist = await this.permissionRepo.findPermissionById(id);
     if(!isExist){
-      throw new NotFoundError("Permission");
+      throw new NotFoundError("Permission", "id");
     }
 
     return this.permissionRepo.deletePermission(id);
+  }
+
+  async getAllPermission(){
+    const permissions = await this.permissionRepo.findPermission();
+    return permissions
   }
 }

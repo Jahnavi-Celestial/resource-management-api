@@ -1,4 +1,4 @@
-import { Arg, Int, Mutation, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { RoleService } from "../services/roles.service.ts";
 import { Roles } from "../entities/Roles.ts";
 import { AssignPermissionInput, CreateRoleInput, RemovePermissionInput, UpdateRoleInput } from "../dto/role.input.ts";
@@ -44,5 +44,11 @@ export class RoleResolver {
     @Arg("input", ()=>RemovePermissionInput) input: RemovePermissionInput
   ){
         return this.roleService.removePermissionFromRole
+  }
+
+  @Query(()=>[Roles])
+  @UseMiddleware(PermissionMiddleware("VIEW_ALL_ROLES"))
+  async getAllRoles(){
+    return this.roleService.getAllRoles()
   }
 }

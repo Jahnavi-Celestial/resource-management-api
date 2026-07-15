@@ -88,7 +88,7 @@ export class BookingRepository{
     whereConditions: FindOptionsWhere<Booking>,
     skip: number,
     take: number,
-    orderOptions: Record<string, "ASC" | "DESC">
+    sortOrder: string
   ){
     return this.manager.findAndCount(Booking, {
       where: whereConditions,
@@ -97,9 +97,9 @@ export class BookingRepository{
         meetingRoom: true,
         equipments: true
       },
-      order: orderOptions,
+      order: {createdAt: sortOrder as any},
       skip,
-      take
+      take,
     });
   }
 }

@@ -20,6 +20,7 @@ import { registerNotificationHandlers } from "./sockets/notification.socket.ts";
 import { RoleResolver } from "./resolvers/role.resolver.ts";
 import { PermissionResolver } from "./resolvers/permission.resolver.ts";
 import { authCheck } from "./middleware/auth.middleware.ts";
+import { formatError } from './utils/errorFormatter.ts';
 
 dotenv.config();
 
@@ -81,7 +82,10 @@ async function main() {
 
         app.set("io", io);
 
-        const server = new ApolloServer({ schema });
+        const server = new ApolloServer({
+            schema,
+            formatError, 
+        });
         await server.start();
 
         app.use(express.json());

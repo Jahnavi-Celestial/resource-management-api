@@ -9,17 +9,22 @@ export class CreateEmployeeInput{
   firstName!: string;
 
   @Field(() => String)
+  @IsNotEmpty({ message: "Last name cannot be empty" })
   lastName!: string;
 
   @Field(() => String)
+  @IsNotEmpty({ message: "Email cannot be empty" })
   @IsEmail({ require_tld: true }, { message: "Invalid email format" })
   email!: string;
 
   @Field(() => String)
+  @IsNotEmpty({ message: "Password cannot be empty" })
   @MinLength(6, { message: "Password should contain at least 6 characters" })
   password!: string;
 
   @Field(() => Int)
+  @IsNotEmpty({ message: "Role ID cannot be empty" })
+  @IsInt({ message: "Role ID must be a number" })
   roleId!: number;
 }
 
@@ -27,6 +32,7 @@ export class CreateEmployeeInput{
 export class UpdateEmployeeInput{
   @Field(() => Int)
   @IsNotEmpty({ message: "Employee ID cannot be empty" })
+  @IsInt({ message: "Employee ID must be a number" })
   id!: number;
 
   @Field(() => String)
@@ -34,21 +40,28 @@ export class UpdateEmployeeInput{
   firstName!: string;
 
   @Field(() => String)
+  @IsNotEmpty({ message: "Last name cannot be empty" })
   lastName!: string;
 
   @Field(() => String)
+  @IsNotEmpty({ message: "Email cannot be empty" })
   @IsEmail({ require_tld: true }, { message: "Invalid email format" })
   email!: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @MinLength(6, { message: "Password should contain at least 6 characters" })
-  password!: string;
+  password?: string;
 
-  @Field(()=>Int)
-  roleIdFrom!: number
+  @Field(() => Int)
+  @IsNotEmpty({ message: "Source Role ID cannot be empty" })
+  @IsInt({ message: "Source Role ID must be a number" })
+  roleIdFrom!: number;
 
-  @Field(()=>Int)
-  roleIdTo!: number
+  @Field(() => Int)
+  @IsNotEmpty({ message: "Target Role ID cannot be empty" })
+  @IsInt({ message: "Target Role ID must be a number" })
+  roleIdTo!: number;
 }
 
 @InputType()
@@ -69,12 +82,15 @@ export class EmployeesFilterInput{
   @IsOptional()
   @IsString()
   searchTerm?: string;
+
+  @Field(() => String, { nullable: true, defaultValue: "DESC" })
+  sortOrder?: "ASC" | "DESC";
 }
 
 @ObjectType()
 export class PaginatedEmployees{
   @Field(() => [Employee])
-  employees!: Employee[];
+  data!: Employee[];
 
   @Field(() => Int)
   total!: number;
@@ -88,9 +104,13 @@ export class PaginatedEmployees{
 
 @InputType()
 export class AssignRemoveRoleInput{
-  @Field(()=>Int)
-  roleId!: number
+  @Field(() => Int)
+  @IsNotEmpty({ message: "Role ID cannot be empty" })
+  @IsInt({ message: "Role ID must be a number" })
+  roleId!: number;
 
-  @Field(()=>Int)
-  userId!: number
+  @Field(() => Int)
+  @IsNotEmpty({ message: "User ID cannot be empty" })
+  @IsInt({ message: "User ID must be a number" })
+  userId!: number;
 }

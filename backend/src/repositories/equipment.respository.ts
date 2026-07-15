@@ -43,7 +43,8 @@ export class EquipmentRepository {
   async findAndCountEquipments(
     whereConditions: FindOptionsWhere<Equipment>,
     skip: number,
-    take: number
+    take: number,
+    sortOrder: string
   ){
     return this.repo.findAndCount({
       where: whereConditions,
@@ -54,7 +55,7 @@ export class EquipmentRepository {
           meetingRoom: true
         }
       },
-      order: { id: "DESC" },
+      order: { id: sortOrder as any },
       skip,
       take
     });

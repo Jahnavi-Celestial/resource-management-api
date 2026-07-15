@@ -33,4 +33,8 @@ export class RoleRepository{
         const result = await this.roleRepo.delete(id);
         return !!result.affected;
     }
+
+    async findRole(){
+        return this.roleRepo.find()
+    }
 }

@@ -1,4 +1,4 @@
-import { Arg, Int, Mutation, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { PermissionService } from "../services/permission.service.ts";
 import { Permission } from "../entities/Permission.ts";
 import { CreatePermissionInput, UpdatePermissionInput } from "../dto/permission.input.ts";
@@ -28,5 +28,11 @@ export class PermissionResolver {
   @UseMiddleware(PermissionMiddleware("DELETE_PERMISSION"))
   async deletePermission(@Arg("id", () => Int) id: number){
     return this.permissionService.deletePermission(id);
+  }
+
+  @Query(()=>[Permission])
+  @UseMiddleware(PermissionMiddleware("VIEW_ALL_PERMISSION"))
+  async getAllPermission(){
+    return this.permissionService.getAllPermission()
   }
 }
