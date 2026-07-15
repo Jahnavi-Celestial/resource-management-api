@@ -3,7 +3,6 @@ import AppDataSource from "./config/db.ts";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "@apollo/server"; 
 import { expressMiddleware } from '@as-integrations/express5';
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Employee } from "./entities/Employee.ts";
 import { AuthResolver } from "./resolvers/auth.resolver.ts";
@@ -18,11 +17,14 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { registerNotificationHandlers } from "./sockets/notification.socket.ts";
+import { RoleResolver } from "./resolvers/role.resolver.ts";
+import { PermissionResolver } from "./resolvers/permission.resolver.ts";
+import { authCheck } from "./middleware/auth.middleware.ts";
 
 dotenv.config();
 
 export interface AppContext {
-  user: Employee; 
+  user: Employee | null; 
   io: Server;
 }
 
@@ -32,13 +34,8 @@ async function main() {
         console.log("Database connected successfully");
 
         const schema = await buildSchema({
-            resolvers: [AuthResolver, EmployeeResolver, MeetingRoomResolver, EquipmentResolver, BookingResolver, ReportResolver],
-            validate: true, 
-            authChecker: ({ context }, roles) => {
-                if (!context.user) return false;
-                if (roles.length === 0) return true;
-                return roles.includes(context.user.role);
-            }
+            resolvers: [AuthResolver, EmployeeResolver, MeetingRoomResolver, EquipmentResolver, BookingResolver, ReportResolver, RoleResolver, PermissionResolver],
+            validate: true,
         }); 
 
         const app = express();
@@ -93,22 +90,7 @@ async function main() {
             "/graphql",
             cors({ origin: process.env.FRONTEND_URL, credentials: true }),
             expressMiddleware(server, {
-                context: async ({ req }) => {
-                    const ioInstance = req.app.get("io");
-                    try {
-                        const token = req.headers.authorization?.split(" ")[1];
-                        if (!token) return { user: null, io: ioInstance };
-
-                        const payload: any = jwt.verify(token, String(process.env.JWT_SECRET));
-
-                        const empRepo = AppDataSource.getRepository(Employee);
-                        const user = await empRepo.findOne({ where: { id: payload.id } });
-
-                        return { user, io: ioInstance }; 
-                    } catch (err) {
-                        return { user: null, io: ioInstance };
-                    }
-                }
+                context: authCheck()
             })
         );
 

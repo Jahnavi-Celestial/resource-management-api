@@ -1,6 +1,5 @@
-import { Field, InputType } from "type-graphql";
-import { IsNotEmpty, IsEmail, MinLength, IsEnum, IsOptional } from "class-validator";
-import { Role } from "../entities/Employee.ts";
+import { Field, InputType, Int } from "type-graphql";
+import { IsNotEmpty, IsEmail, MinLength, IsOptional } from "class-validator";
 
 @InputType()
 export class RegisterInput{
@@ -10,7 +9,7 @@ export class RegisterInput{
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  lastName?: string;
+  lastName?: string | undefined;
 
   @Field(() => String)
   @IsNotEmpty({ message: "email can't be empty" })
@@ -22,10 +21,9 @@ export class RegisterInput{
   @MinLength(6, { message: "Password should contain atleast 6 characters" })
   password!: string;
 
-  @Field(() => String)
-  @IsNotEmpty({ message: "role can't be empty" })
-  @IsEnum(Role, { message: "Invalid employee role provided" })
-  role!: Role;
+  @Field(() => Int)
+  @IsNotEmpty({ message: "role id can't be empty" })
+  roleId!: number;
 }
 
 @InputType()

@@ -5,7 +5,7 @@ import {
   RejectBookingInput,
   BookingsFilterInput,
 } from "../dto/booking.input.ts";
-import { Employee, Role } from "../entities/Employee.ts";
+import { Employee } from "../entities/Employee.ts";
 import { Booking, BookingStatus } from "../entities/Booking.ts";
 import { Equipment } from "../entities/Equipment.ts";
 import { AuditLog, AuditAction } from "../entities/AuditLog.ts";
@@ -121,7 +121,11 @@ export class BookingService {
         const managers = await transactionalManager
           .getRepository(Employee)
           .find({
-            where: { role: Role.MANAGER },
+            where: { userRoles: {
+              role: {
+                role_name: "manager"} 
+              },
+            }
           });
 
         return { savedBooking, room, managers };
@@ -197,7 +201,11 @@ export class BookingService {
         const managers = await transactionalManager
           .getRepository(Employee)
           .find({
-            where: { role: Role.MANAGER },
+            where: { userRoles: {
+              role: {
+                role_name: "manager"} 
+              },
+            }
           });
 
         return { updatedBooking, managers };

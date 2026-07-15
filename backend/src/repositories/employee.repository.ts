@@ -8,13 +8,23 @@ export class EmployeeRepository {
 
   async findById(id: number){
     return this.repo.findOne({ 
-        where: { id } 
+        where: { id },
+        relations:{
+          userRoles:{
+            role: true
+          }
+        }
     });
   }
 
   async findByEmail(email: string){
     return this.repo.findOne({ 
-        where: { email } 
+        where: { email },
+        relations:{
+          userRoles:{
+            role: true
+          }
+        }
     });
   }
 

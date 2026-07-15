@@ -1,15 +1,10 @@
-import { Field, Int, ObjectType, registerEnumType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Booking } from "./Booking.ts";
 import { AuditLog } from "./AuditLog.ts";
-import { IsDateString, IsEmail, IsEnum, IsNotEmpty, Length, Matches } from "class-validator";
+import { IsDateString, IsEmail, IsNotEmpty, Length } from "class-validator";
+import { UserRole } from "./UserRole.ts";
 
-export enum Role {
-    ADMIN = 'ADMIN',
-    MANAGER = 'MANAGER',
-    EMPLOYEE = 'EMPLOYEE',
-}
-registerEnumType(Role, { name: 'Role' });
 
 @ObjectType()
 @Entity({ name: "employees" })
@@ -25,7 +20,7 @@ export class Employee {
 
     @Field(() => String)
     @Column({ type: 'text', nullable: true })
-    lastName!: string;
+    lastName!: string | undefined;
 
     @Field(() => String)
     @Column({ type: 'varchar', length: 255, unique: true })
@@ -37,12 +32,6 @@ export class Employee {
     @IsNotEmpty({ message: "Password cannot be empty" })
     @Length(6, 100, { message: "Password must be at least 6 characters long" })
     password!: string;
-
-    @Field(() => Role, { nullable: false })
-    @Column({ type: 'enum', enum: Role, default: Role.EMPLOYEE })
-    @IsNotEmpty({ message: "Role cannot be empty" })
-    @IsEnum(Role)
-    role!: Role;
 
     @Field(() => Date)
     @CreateDateColumn({ type: 'timestamptz' })
@@ -61,4 +50,8 @@ export class Employee {
     @Field(() => [AuditLog])
     @OneToMany(() => AuditLog, (auditLog) => auditLog.employee)
     auditLogs!: AuditLog[];
+
+    @Field(() => [UserRole])
+    @OneToMany(() => UserRole, userRole => userRole.employee)
+    userRoles!: UserRole[];
 }

@@ -1,6 +1,6 @@
 import { Field, InputType, Int, ObjectType } from "type-graphql";
-import { IsEmail, IsNotEmpty, MinLength, IsEnum, IsOptional, IsInt, Min, IsString } from "class-validator";
-import { Employee, Role } from "../entities/Employee.ts";
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsInt, Min, IsString } from "class-validator";
+import { Employee } from "../entities/Employee.ts";
 
 @InputType()
 export class CreateEmployeeInput{
@@ -19,16 +19,36 @@ export class CreateEmployeeInput{
   @MinLength(6, { message: "Password should contain at least 6 characters" })
   password!: string;
 
-  @Field(() => Role)
-  @IsEnum(Role, { message: "Invalid role assigned" })
-  role!: Role;
+  @Field(() => Int)
+  roleId!: number;
 }
 
 @InputType()
-export class UpdateEmployeeInput extends CreateEmployeeInput{
+export class UpdateEmployeeInput{
   @Field(() => Int)
   @IsNotEmpty({ message: "Employee ID cannot be empty" })
   id!: number;
+
+  @Field(() => String)
+  @IsNotEmpty({ message: "First name cannot be empty" })
+  firstName!: string;
+
+  @Field(() => String)
+  lastName!: string;
+
+  @Field(() => String)
+  @IsEmail({ require_tld: true }, { message: "Invalid email format" })
+  email!: string;
+
+  @Field(() => String)
+  @MinLength(6, { message: "Password should contain at least 6 characters" })
+  password!: string;
+
+  @Field(()=>Int)
+  roleIdFrom!: number
+
+  @Field(()=>Int)
+  roleIdTo!: number
 }
 
 @InputType()
@@ -64,4 +84,13 @@ export class PaginatedEmployees{
 
   @Field(() => Int)
   totalPages!: number;
+}
+
+@InputType()
+export class AssignRemoveRoleInput{
+  @Field(()=>Int)
+  roleId!: number
+
+  @Field(()=>Int)
+  userId!: number
 }

@@ -1,35 +1,36 @@
-import { Arg, Authorized, Query, Resolver } from "type-graphql";
+import { Arg, Query, Resolver, UseMiddleware } from "type-graphql";
 import { MostBookedRoom, BookingsPerEmployee, EquipmentUsage, MonthlyBookingStatics, BookingsPerEmployeeInput, EquipmentUsageInput, MonthlyBookingStatisticsInput } from "../dto/report.input.ts";
 import { ReportService } from "../services/report.service.ts";
+import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
 
 @Resolver()
 export class ReportResolver {
   private reportService = new ReportService();
 
-  @Authorized()
   @Query(() => MostBookedRoom)
+  @UseMiddleware(PermissionMiddleware("VIEW_MOST_BOOKED_ROOM"))
   async mostBookedRoom(){
     return await this.reportService.getMostBookedRoom();
   }
 
-  @Authorized(["ADMIN", "MANAGER"])
   @Query(() => BookingsPerEmployee)
+  @UseMiddleware(PermissionMiddleware("VIEW_BOOKING_PER_EMPLOYEE"))
   async bookingsPerEmployee(
     @Arg("input", ()=>BookingsPerEmployeeInput) input: BookingsPerEmployeeInput
   ){
     return await this.reportService.getBookingsPerEmployee(input);
   }
 
-  @Authorized(["ADMIN", "MANAGER"])
   @Query(() => EquipmentUsage)
+  @UseMiddleware(PermissionMiddleware("VIEW_EQUIPMENT_USAGE"))
   async equipmentUsage(
     @Arg("input", ()=>EquipmentUsageInput) input: EquipmentUsageInput
   ){
     return await this.reportService.getEquipmentUsage(input);
   }
 
-  @Authorized(["MANAGER"])
   @Query(() => MonthlyBookingStatics)
+  @UseMiddleware(PermissionMiddleware("VIEW_MONTHLY_STATICS"))
   async monthlyBookingStatics(
     @Arg("input", ()=>MonthlyBookingStatisticsInput) input: MonthlyBookingStatisticsInput
   ){
