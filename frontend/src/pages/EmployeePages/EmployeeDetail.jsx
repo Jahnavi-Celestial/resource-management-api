@@ -8,6 +8,7 @@ import DeleteEmployee from "../../components/Employee/DeleteEmployee";
 import "./EmployeeDetail.css";
 import RoleActionForm from "../../components/Forms/RoleActionForm";
 import PermissionActionForm from "../../components/Forms/PermissionActionForm";
+import EmployeeDetailShimmer from "../ShimmerPages/EmployeeDetailShimmer";
 
 const EmployeeDetail = () => {
   const { id } = useParams()
@@ -34,7 +35,7 @@ const EmployeeDetail = () => {
   })
 
   if (loading) {
-    return <div className="loading-state">Loading employee profile...</div>
+    return <EmployeeDetailShimmer />
   }
 
   return (
@@ -151,12 +152,6 @@ const EmployeeDetail = () => {
                 id={employee?.id}
                 refetch={null}
               />
-            )}
-            {activeModal === "updateEmployee" && (
-              <UpdateEmployee onSubmitSuccess={closeModal} employee={employee} />
-            )}
-            {activeModal === "deleteEmployee" && (
-              <DeleteEmployee onSubmitSuccess={closeModal} id={employee?.id} refetch={null} />
             )}
             {activeModal === "assignRole" && (
               <RoleActionForm actionType="assign" userId={Number(id)} onSubmitSuccess={closeModal} />

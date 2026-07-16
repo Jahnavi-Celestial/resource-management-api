@@ -1,0 +1,68 @@
+import React from "react";
+import "./HomeShimmer.css";
+
+const HomeShimmer = () => {
+  return (
+    <div className="shimmer-container">
+      <header className="shimmer-header">
+        <div>
+          <div className="block title"></div>
+          <div className="block subtitle"></div>
+        </div>
+        <div className="block shimmer-badge"></div>
+      </header>
+
+      <section className="shimmer-stats-section">
+        <div className="shimmer-card">
+          <div className="block card-title"></div>
+          <div className="block card-badge"></div>
+          <div className="block card-text"></div>
+        </div>
+        <div className="shimmer-card">
+          <div className="block card-title"></div>
+          <div className="block card-text-long"></div>
+          <div className="block card-text"></div>
+        </div>
+        <div className="shimmer-card full-row-shimmer">
+          <div className="shimmer-card-header-inline">
+            <div className="block card-title"></div>
+            <div className="block input-picker"></div>
+          </div>
+          <div className="stats-row">
+            <div className="stat-item"></div>
+            <div className="stat-item"></div>
+            <div className="stat-item"></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="shimmer-grid">
+        <section className="shimmer-section">
+          <div className="shimmer-section-header">
+            <div className="block section-title"></div>
+            <div className="block filter"></div>
+          </div>
+          <div className="shimmer-list">
+            <div className="item-card"></div>
+            <div className="item-card"></div>
+            <div className="item-card"></div>
+          </div>
+        </section>
+
+        <section className="shimmer-section">
+          <div className="shimmer-section-header">
+            <div className="block section-title"></div>
+            <div className="block filter"></div>
+          </div>
+          <div className="list">
+            <div className="item-card"></div>
+            <div className="item-card"></div>
+            <div className="item-card"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default HomeShimmer;

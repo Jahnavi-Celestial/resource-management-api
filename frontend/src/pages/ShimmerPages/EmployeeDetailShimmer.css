@@ -1,0 +1,138 @@
+.shimmer-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shimmer-profile-title {
+  width: 280px;
+  height: 36px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-profile-subtext {
+  width: 200px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-detail-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.shimmer-profile-card,
+.shimmer-metrics-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shimmer-profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-profile-name {
+  width: 180px;
+  height: 24px;
+  margin: 0 auto;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-profile-badge {
+  width: 80px;
+  height: 20px;
+  margin: 0 auto;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.shimmer-field-item {
+  height: 40px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-metrics-title {
+  width: 150px;
+  height: 20px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-metrics-box {
+  height: 120px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+.shimmer-action-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.shimmer-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.shimmer-btn {
+  width: 120px;
+  height: 38px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: detail-wave 1.5s infinite linear;
+}
+
+@keyframes detail-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

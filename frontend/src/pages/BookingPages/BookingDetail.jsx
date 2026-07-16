@@ -5,6 +5,7 @@ import { Booking } from "../../graphql/queries";
 import { AuthContext } from "../../context/AuthContext";
 import { ApproveBooking, CancelBooking, RejectBooking } from "../../graphql/mutations";
 import "./BookingDetail.css";
+import BookingDetailShimmer from "../ShimmerPages/BookingDetailShimmer";
 
 const BookingDetail = () => {
   const { id } = useParams()
@@ -76,12 +77,7 @@ const BookingDetail = () => {
   }
 
   if (loading) {
-    return (
-      <div className="bd-container bd-animate-pulse">
-        <div className="bd-skeleton-header"></div>
-        <div className="bd-skeleton-card"></div>
-      </div>
-    )
+    return <BookingDetailShimmer />
   }
 
   if (error) {

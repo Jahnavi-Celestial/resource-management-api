@@ -6,6 +6,7 @@ import DeleteEquipment from "../../components/Equipment/DeleteEquipment";
 import { Equipment, EquipmentUsage } from "../../graphql/queries";
 import { useQuery } from "@apollo/client/react";
 import "./EquipmentDetail.css";
+import EquipmentDetailShimmer from "../ShimmerPages/EquipmentDetailShimmer";
 
 const EquipmentDetail = () => {
   const { id } = useParams()
@@ -37,9 +38,7 @@ const EquipmentDetail = () => {
   const equipmentUsage = usageData?.equipmentUsage
 
   if (loading) {
-    return (
-      <div className="detail-loading">Loading asset inventory profile...</div>
-    )
+    return <EquipmentDetailShimmer />
   }
 
   return (

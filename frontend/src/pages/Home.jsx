@@ -6,6 +6,7 @@ import EmployeeCard from "../components/Employee/EmployeeCard";
 import BookingCard from "../components/Booking/BookingCard";
 import ViewOwnBookings from "./BookingPages/ViewOwnBookings";
 import "./Home.css";
+import HomeShimmer from "./ShimmerPages/HomeShimmer";
 
 const Home = () => {
   const { user } = useContext(AuthContext)
@@ -22,7 +23,7 @@ const Home = () => {
   const [statsYear, setStatsYear] = useState(currentYear)
   const [statsMonth, setStatsMonth] = useState(currentMonth)
 
-  const { data: employeesData } = useQuery(Employees, {
+  const { data: employeesData, loading: loadingEmp } = useQuery(Employees, {
     variables: { 
       input:{
         page: empPage, 
@@ -35,7 +36,7 @@ const Home = () => {
   })
   const employees = employeesData?.employees?.data || []
 
-  const { data: bookingData } = useQuery(Bookings, {
+  const { data: bookingData, loading: loadingBookings } = useQuery(Bookings, {
     variables: {
       input:{
         page: bookingPage,
@@ -48,9 +49,9 @@ const Home = () => {
   })
   const bookings = bookingData?.bookings?.data || []
 
-  const { data: mostBookedRoomData } = useQuery(MostBookedRoom)
+  const { data: mostBookedRoomData, loading: loadingMostBookedRoom } = useQuery(MostBookedRoom)
 
-  const { data: monthlyStatsData } = useQuery(MonthlyBookingStatics, {
+  const { data: monthlyStatsData, loading: loadingMonthlyStatics } = useQuery(MonthlyBookingStatics, {
     variables: {
       input:{
         year: Number(statsYear),
@@ -62,6 +63,9 @@ const Home = () => {
   })
   const monthlyStats = monthlyStatsData?.monthlyBookingStatics
 
+  if(loadingBookings || loadingEmp || loadingMonthlyStatics || loadingMostBookedRoom){
+    return <HomeShimmer />
+  }
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -102,7 +106,7 @@ const Home = () => {
           </strong>
           <p>Roles: 
             {user?.roles.map( (role, index) => {
-              return <span key={index}>{role} || </span>
+              return <span key={index}> {role}</span>
             })}
           </p>
         </div>

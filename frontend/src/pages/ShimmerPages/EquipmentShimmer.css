@@ -1,0 +1,70 @@
+.shimmer-equipment-container {
+  width: 100%;
+}
+
+.shimmer-equipment-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.shimmer-equipment-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shimmer-elem {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: asset-wave-animation 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes asset-wave-animation {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer-asset-box {
+  width: 100%;
+  height: 140px;
+  border-radius: 8px;
+}
+
+.shimmer-title-line {
+  width: 70%;
+  height: 18px;
+  margin-top: 4px;
+}
+
+.shimmer-status-badge {
+  width: 80px;
+  height: 22px;
+  border-radius: 12px;
+}
+
+.shimmer-meta-line {
+  width: 50%;
+  height: 14px;
+}
+
+@media (min-width: 576px) {
+  .shimmer-equipment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .shimmer-equipment-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

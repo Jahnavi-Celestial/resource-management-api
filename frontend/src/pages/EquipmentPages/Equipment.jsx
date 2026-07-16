@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import { Equipments } from "../../graphql/queries";
 import EquipmentCard from "../../components/Equipment/EquipmentCard";
 import "./Equipment.css";
+import EquipmentShimmer from "../ShimmerPages/EquipmentShimmer";
 
 const Equipment = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -46,7 +47,7 @@ const Equipment = () => {
       </header>
 
       {loading ? (
-        <div className="equipment-loading">Loading inventory listings...</div>
+        <EquipmentShimmer />
       ) : equipments.length > 0 ? (
         <div className="equipment-grid">
           {equipments.map((equipment) => (

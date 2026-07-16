@@ -1,0 +1,217 @@
+.bd-shimmer-bg {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bd-shimmer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bd-shimmer-block {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: bd-wave 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes bd-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.bd-shimmer-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bd-shimmer-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bd-shimmer-back {
+  width: 120px;
+  height: 16px;
+}
+
+.bd-shimmer-title {
+  width: 260px;
+  height: 36px;
+}
+
+.bd-shimmer-actions {
+  width: 180px;
+  height: 40px;
+}
+
+.bd-shimmer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.bd-shimmer-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bd-shimmer-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bd-shimmer-badge {
+  width: 90px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.bd-shimmer-meta {
+  width: 70px;
+  height: 14px;
+}
+
+.bd-shimmer-purpose {
+  width: 80%;
+  height: 28px;
+}
+
+.bd-shimmer-split {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 20px 0;
+}
+
+.bd-shimmer-info-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.bd-shimmer-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.bd-shimmer-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bd-shimmer-label {
+  width: 100px;
+  height: 14px;
+}
+
+.bd-shimmer-value-1 {
+  width: 160px;
+  height: 16px;
+}
+
+.bd-shimmer-value-2 {
+  width: 120px;
+  height: 14px;
+}
+
+.bd-shimmer-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.bd-shimmer-chip {
+  width: 80px;
+  height: 28px;
+  border-radius: 16px;
+}
+
+.bd-shimmer-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bd-shimmer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.bd-shimmer-profile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bd-shimmer-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.bd-shimmer-num {
+  width: 40px;
+  height: 32px;
+}
+
+.bd-shimmer-logs {
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bd-shimmer-log-line {
+  width: 60%;
+  height: 12px;
+}
+
+@media (min-width: 768px) {
+  .bd-shimmer-bg {
+    padding: 32px;
+  }
+
+  .bd-shimmer-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .bd-shimmer-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .bd-shimmer-split {
+    flex-direction: row;
+  }
+
+  .bd-shimmer-info-item {
+    flex: 1;
+  }
+}

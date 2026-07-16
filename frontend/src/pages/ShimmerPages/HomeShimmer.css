@@ -1,0 +1,164 @@
+.shimmer-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.block {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer-animation 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes shimmer-animation {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  width: 250px;
+  height: 32px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  width: 180px;
+  height: 16px;
+}
+
+.shimmer-badge {
+  width: 120px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.shimmer-stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.shimmer-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.full-row-shimmer {
+  grid-column: 1 / -1;
+}
+
+.shimmer-card-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.input-picker {
+  width: 140px;
+  height: 32px;
+}
+
+.card-title {
+  width: 140px;
+  height: 18px;
+}
+
+.card-badge {
+  width: 100px;
+  height: 28px;
+}
+
+.card-text {
+  width: 120px;
+  height: 14px;
+}
+
+.card-text-long {
+  width: 200px;
+  height: 16px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-item {
+  flex: 1;
+  height: 48px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer-animation 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+.shimmer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .shimmer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shimmer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shimmer-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  width: 160px;
+  height: 24px;
+}
+
+.filter {
+  width: 150px;
+  height: 32px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  height: 80px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer-animation 1.5s infinite linear;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}

@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import { Rooms } from "../../graphql/queries";
 import RoomCard from "../../components/Room/RoomCard";
 import "./MeetingRoom.css";
+import RoomShimmer from "../ShimmerPages/RoomShimmer";
 
 const MeetingRoom = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -46,13 +47,13 @@ const MeetingRoom = () => {
       </header>
 
       {loading ? (
-        <div className="rooms-loading">Loading workspace catalog...</div>
+        <RoomShimmer />
       ) : rooms.length > 0 ? (
-        <div className="rooms-grid">
+      <div className="rooms-grid">
           {rooms.map((room) => (
             <RoomCard key={room.id} room={room} refetch={refetch} />
           ))}
-        </div>
+      </div>
       ) : (
         <div className="rooms-empty">
           <p>No meeting rooms found matching your search criteria.</p>

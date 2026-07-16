@@ -1,0 +1,164 @@
+.shimmer-eq-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shimmer-eq-wave {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: eq-shimmer-wave 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes eq-shimmer-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer-eq-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shimmer-eq-title {
+  width: 240px;
+  height: 32px;
+  margin-bottom: 8px;
+}
+
+.shimmer-eq-subtitle {
+  width: 340px;
+  height: 16px;
+}
+
+.shimmer-eq-header-actions {
+  width: 240px;
+  height: 40px;
+}
+
+.shimmer-eq-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.shimmer-eq-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.shimmer-eq-name {
+  width: 200px;
+  height: 28px;
+}
+
+.shimmer-eq-badge {
+  width: 90px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.shimmer-eq-spec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+}
+
+.shimmer-eq-spec-row {
+  width: 100%;
+  height: 20px;
+}
+
+.shimmer-eq-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shimmer-eq-section-title {
+  width: 180px;
+  height: 22px;
+}
+
+.shimmer-eq-counter {
+  width: 80px;
+  height: 20px;
+  border-radius: 12px;
+}
+
+.shimmer-eq-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shimmer-eq-timeline-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shimmer-eq-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shimmer-eq-card-title {
+  width: 160px;
+  height: 18px;
+}
+
+.shimmer-eq-status {
+  width: 70px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.shimmer-eq-text-line {
+  width: 50%;
+  height: 14px;
+}
+
+.shimmer-eq-toggle-btn {
+  width: 180px;
+  height: 36px;
+  margin-top: 8px;
+}
+
+@media (min-width: 768px) {
+  .shimmer-eq-container {
+    padding: 32px;
+  }
+
+  .shimmer-eq-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .shimmer-eq-layout {
+    grid-template-columns: 1fr 2fr;
+  }
+}
