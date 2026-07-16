@@ -19,7 +19,7 @@ const MeetingRoom = () => {
     fetchPolicy: 'network-only'
   })
 
-  const rooms = data?.rooms?.rooms || [];
+  const rooms = data?.rooms?.data || [];
 
   return (
     <div className="rooms-container">

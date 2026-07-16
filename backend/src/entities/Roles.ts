@@ -13,7 +13,7 @@ export class Roles {
 
     @Field(() => String)
     @Column({ type: 'text', nullable: false, unique: true })
-    @IsNotEmpty({ message: "First name cannot be empty" })
+    @IsNotEmpty({ message: "Role name cannot be empty" })
     role_name!: string; 
     
     @Field(() => [RolePermission])

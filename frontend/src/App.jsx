@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import Layout from "./components/Layout";
 import SignIn from "./pages/SignIn";
 import { RouterProvider } from "react-router-dom";
@@ -12,21 +12,27 @@ import RoomDetail from "./pages/RoomPages/RoomDetail";
 import Equipment from "./pages/EquipmentPages/Equipment";
 import EquipmentDetail from "./pages/EquipmentPages/EquipmentDetail";
 import EmployeeDetail from "./pages/EmployeePages/EmployeeDetail";
-import { connectSocket, disconnectSocket, socket } from './socket';
+import { connectSocket, disconnectSocket } from './socket';
+import UnAuthorized from "./components/UnAuthorized";
 
-const ProtectedRoute = () => {
+const AuthGuard = () => {
   const { token } = useContext(AuthContext)
+  return token ? <Layout /> : <SignIn />
+};
 
-  if (token) {
-    return <Layout />
+const PermissionGuard = ({ requiredPermission }) => {
+  const { hasPermission } = useContext(AuthContext)
+
+  if(!hasPermission(requiredPermission)){
+    return <Navigate to="/unauthorized" replace />
   }
-  return <SignIn />
+  return <Outlet />
 }
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <ProtectedRoute />,
+    element: <AuthGuard />,
     children: [
       {
         index: true,
@@ -37,33 +43,50 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/employeeDetails/:id",
-        element: <EmployeeDetail />,
+        element: <PermissionGuard requiredPermission="VIEW_EMPLOYEE" />,
+        children: [
+          { path: "/employeeDetails/:id", element: <EmployeeDetail /> }
+        ]
       },
       {
-        path: "/room",
-        element: <MeetingRoom />,
+        element: <PermissionGuard requiredPermission="VIEW_ALL_ROOM" />,
+        children: [
+          { path: "/room", element: <MeetingRoom /> }
+        ]
       },
       {
-        path: "/roomDetails/:id",
-        element: <RoomDetail />,
+        element: <PermissionGuard requiredPermission="VIEW_ROOM" />,
+        children: [
+          { path: "/roomDetails/:id", element: <RoomDetail /> }
+        ]
       },
       {
-        path: "/equipment",
-        element: <Equipment />,
+        element: <PermissionGuard requiredPermission="VIEW_ALL_EQUIPMENT" />,
+        children: [
+          { path: "/equipment", element: <Equipment /> },
+          { path: "/equipmentDetails/:id", element: <EquipmentDetail /> }
+        ]
       },
       {
-        path: "/equipmentDetails/:id",
-        element: <EquipmentDetail />,
+        element: <PermissionGuard requiredPermission="VIEW_EQUIPMENT" />,
+        children: [
+          { path: "/equipmentDetails/:id", element: <EquipmentDetail /> }
+        ]
       },
       {
-        path: "/viewOwnBookings",
-        element: <ViewOwnBookings />,
+        element: <PermissionGuard requiredPermission="VIEW_OWN_BOOKINGS" />,
+        children: [
+          { path: "/viewOwnBookings", element: <ViewOwnBookings /> }
+        ]
       },
       {
-        path: "/bookingDetails/:id",
-        element: <BookingDetail />,
-      },
+        element: <PermissionGuard requiredPermission="VIEW_BOOKING" />,
+        children: [
+          { path: "/bookingDetails/:id", element: <BookingDetail /> }
+        ]
+      },{
+        path: "/unauthorized", element: <UnAuthorized />
+      }
     ],
   },
 ])

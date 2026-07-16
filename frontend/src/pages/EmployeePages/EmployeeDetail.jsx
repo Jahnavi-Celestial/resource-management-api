@@ -6,12 +6,14 @@ import { AuthContext } from "../../context/AuthContext";
 import UpdateEmployee from "../../components/Employee/UpdateEmployee";
 import DeleteEmployee from "../../components/Employee/DeleteEmployee";
 import "./EmployeeDetail.css";
+import RoleActionForm from "../../components/Forms/RoleActionForm";
+import PermissionActionForm from "../../components/Forms/PermissionActionForm";
 
 const EmployeeDetail = () => {
   const { id } = useParams()
   const { user } = useContext(AuthContext)
 
-  const role = user?.role
+  const roles = user?.roles
   const [activeModal, setActiveModal] = useState(null)
 
   const openModal = (modalName) => setActiveModal(modalName)
@@ -42,23 +44,6 @@ const EmployeeDetail = () => {
           <h1>Employee Profile</h1>
           <p className="detail-subtext">Manage team records and assignments</p>
         </div>
-
-        {role === "ADMIN" && (
-          <div className="action-header-buttons">
-            <button
-              className="btn-edit"
-              onClick={() => openModal("updateEmployee")}
-            >
-              Update Profile
-            </button>
-            <button
-              className="btn-delete"
-              onClick={() => openModal("deleteEmployee")}
-            >
-              Delete Account
-            </button>
-          </div>
-        )}
       </header>
 
       <div className="detail-layout">
@@ -99,6 +84,54 @@ const EmployeeDetail = () => {
         </section>
       </div>
 
+      { roles.includes('admin') && (
+        <div className="action-header-buttons">
+          <div>
+            <button
+              className="btn-edit"
+              onClick={() => openModal("updateEmployee")}
+            >
+              Update Profile
+            </button>
+            <button
+              className="btn-delete"
+              onClick={() => openModal("deleteEmployee")}
+            >
+              Delete Account
+            </button>
+            
+          </div>
+          <div>
+            <button
+              className="btn-edit"
+              onClick={() => openModal("assignRole")}
+            >
+              Assign Role
+            </button>
+            <button
+              className="btn-delete"
+              onClick={() => openModal("removeRole")}
+            >
+              Remove Role
+            </button>
+          </div>
+          <div>
+            <button
+              className="btn-edit"
+              onClick={() => openModal("assignPermission")}
+            >
+              Assign Permission
+            </button>
+            <button
+              className="btn-delete"
+              onClick={() => openModal("removePermission")}
+            >
+              Remove Permission
+            </button>
+          </div>
+        </div>
+      )}
+
       {activeModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-window" onClick={(e) => e.stopPropagation()}>
@@ -118,6 +151,24 @@ const EmployeeDetail = () => {
                 id={employee?.id}
                 refetch={null}
               />
+            )}
+            {activeModal === "updateEmployee" && (
+              <UpdateEmployee onSubmitSuccess={closeModal} employee={employee} />
+            )}
+            {activeModal === "deleteEmployee" && (
+              <DeleteEmployee onSubmitSuccess={closeModal} id={employee?.id} refetch={null} />
+            )}
+            {activeModal === "assignRole" && (
+              <RoleActionForm actionType="assign" userId={Number(id)} onSubmitSuccess={closeModal} />
+            )}
+            {activeModal === "removeRole" && (
+              <RoleActionForm actionType="remove" userId={Number(id)} onSubmitSuccess={closeModal} />
+            )}
+            {activeModal === "assignPermission" && (
+              <PermissionActionForm actionType="assign" onSubmitSuccess={closeModal} />
+            )}
+            {activeModal === "removePermission" && (
+              <PermissionActionForm actionType="remove" onSubmitSuccess={closeModal} />
             )}
           </div>
         </div>

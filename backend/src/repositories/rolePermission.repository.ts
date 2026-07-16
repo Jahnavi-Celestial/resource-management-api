@@ -32,4 +32,18 @@ export class RolePermissionRepository{
     async remove(data: RolePermission){
         return this.repo.remove(data);
     }
+
+    async findByRoleId(roleId: number){
+        return await this.repo.find({
+            where: {
+                role:{
+                    id: roleId
+                }
+            },
+            relations:{
+                role: true,
+                permission: true
+            }
+        })
+    }
 }

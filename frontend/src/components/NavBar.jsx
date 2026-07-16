@@ -13,7 +13,7 @@ import { socket } from "../socket";
 const NavBar = () => {
   const navigate = useNavigate()
   const { user } = useContext(AuthContext)
-  const role = user?.role
+  const roles = user?.roles
 
   const [activeModal, setActiveModal] = useState(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -155,7 +155,7 @@ const NavBar = () => {
           Equipment
         </NavLink>
 
-        {role === "ADMIN" && (
+        {roles?.includes('admin') && (
           <div className="role-actions-group">
             <button className="nav-action-btn" onClick={() => openModal("employee")}>+ Employee</button>
             <button className="nav-action-btn" onClick={() => openModal("equipment")}>+ Equipment</button>
@@ -163,7 +163,7 @@ const NavBar = () => {
           </div>
         )}
 
-        {role === "EMPLOYEE" && (
+        {roles?.includes('employee') && (
           <div className="role-actions-group">
             <button className="nav-action-btn primary-action" onClick={() => openModal("booking")}>Book a Room</button>
           </div>

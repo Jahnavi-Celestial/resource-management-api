@@ -3,7 +3,7 @@ import { gql } from '@apollo/client'
 export const Rooms = gql`
 query Rooms($input: RoomsFilterInput!) {
   rooms(input: $input) {
-    rooms {
+    data {
       id
     name
     location
@@ -47,7 +47,7 @@ query Rooms($input: RoomsFilterInput!) {
 export const Equipments = gql`
 query Equipments($input: EquipmentsFilterInput!) {
   equipments(input: $input) {
-    equipments {
+    data {
       id
     name
     quantityAvailable
@@ -90,7 +90,7 @@ query Equipments($input: EquipmentsFilterInput!) {
 export const ViewOwnBookings = gql`
 query ViewOwnBooking($input: BookingsFilterInput!) {
   viewOwnBooking(input: $input) {
-    bookings {
+    data {
       id
     startTime
     endTime
@@ -232,12 +232,18 @@ query Equipment($equipmentId: Int!) {
 export const Employees = gql`
 query Employees($input: EmployeesFilterInput!) {
   employees(input: $input) {
-    employees {
+    data {
       id
     firstName
     lastName
     email
-    role
+    userRoles {
+      id
+      role {
+        id
+        role_name
+      }
+    }
     created_at
     updated_at
     bookings {
@@ -283,7 +289,13 @@ query Employee($employeeId: Int!) {
     firstName
     lastName
     email
-    role
+    userRoles {
+      id
+      role {
+        id
+        role_name
+      }
+    }
     created_at
     updated_at
     bookings {
@@ -318,7 +330,7 @@ query Employee($employeeId: Int!) {
 export const Bookings = gql`
 query Bookings($input: BookingsFilterInput!) {
   bookings(input: $input) {
-    bookings {
+    data {
       id
     startTime
     endTime
@@ -387,4 +399,22 @@ query MonthlyBookingStatics($input: MonthlyBookingStatisticsInput!) {
   }
 }
 
+`
+
+export const GetAllRoles = gql`
+query GetAllRoles {
+  getAllRoles {
+    role_name
+    id
+  }
+}
+`
+
+export const GetAllPermission = gql`
+query GetAllPermission {
+  getAllPermission {
+    id
+    permission_name
+  }
+}
 `

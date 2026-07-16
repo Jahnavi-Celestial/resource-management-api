@@ -34,7 +34,16 @@
 
 .action-header-buttons {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px;
+}
+
+.action-header-buttons div{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .action-header-buttons button {
@@ -44,6 +53,7 @@
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
+  margin-right: 10px;
 }
 
 .btn-edit {

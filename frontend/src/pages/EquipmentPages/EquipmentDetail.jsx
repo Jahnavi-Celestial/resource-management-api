@@ -17,7 +17,7 @@ const EquipmentDetail = () => {
   const openModal = (modalName) => setActiveModal(modalName)
   const closeModal = () => setActiveModal(null)
 
-  const role = user?.role
+  const roles = user?.roles
 
   const { data, loading } = useQuery(Equipment, {
     variables: { equipmentId: Number(id) },
@@ -52,7 +52,7 @@ const EquipmentDetail = () => {
           </p>
         </div>
 
-        {role === "ADMIN" && (
+        {roles.includes('admin') && (
           <div className="equipment-action-buttons">
             <button
               className="btn-asset-update"
@@ -139,7 +139,7 @@ const EquipmentDetail = () => {
             )}
           </div>
 
-          {(role === "ADMIN" || role === "MANAGER") && (
+          {(roles.includes('admin') || roles.includes('manager')) && (
             <div className="collapsible-section">
               <button
                 className={`btn-toggle ${showUsage ? "active" : ""}`}

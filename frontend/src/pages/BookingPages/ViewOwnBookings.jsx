@@ -22,7 +22,7 @@ const ViewOwnBookings = () => {
     fetchPolicy: 'network-only'
   })
 
-  const bookings = data?.viewOwnBooking?.bookings || []
+  const bookings = data?.viewOwnBooking?.data || []
 
   return (
     <section className="own-bookings-section">

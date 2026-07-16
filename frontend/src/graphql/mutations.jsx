@@ -7,7 +7,6 @@ mutation Register($input: RegisterInput!) {
     firstName
     lastName
     email
-    role 
     created_at
     updated_at
   }
@@ -47,7 +46,6 @@ mutation CreateEmployee($input: CreateEmployeeInput!) {
     firstName
     lastName
     email
-    role 
     created_at
     updated_at
   }
@@ -191,7 +189,6 @@ mutation UpdateEmployee($input: UpdateEmployeeInput!) {
     firstName
     lastName
     email
-    role 
     created_at
     updated_at
   }
@@ -201,5 +198,35 @@ mutation UpdateEmployee($input: UpdateEmployeeInput!) {
 export const DeleteEmployee = gql`
 mutation DeleteEmployee($deleteEmployeeId: Int!) {
   deleteEmployee(id: $deleteEmployeeId)
+}
+`
+
+export const AssignRole = gql`
+mutation AssignRole($input: AssignRemoveRoleInput!) {
+  assignRole(input: $input) {
+    email
+    firstName
+    lastName
+    id
+    updated_at
+  }
+}
+`
+
+export const RemoveRole = gql`
+mutation RemoveRole($input: AssignRemoveRoleInput!) {
+  removeRole(input: $input)
+}
+`
+
+export const AssignPermission = gql`
+mutation AssignPermission($input: AssignPermissionInput!) {
+  assignPermission(input: $input)
+}
+`
+
+export const RemovePermission = gql`
+mutation RemovePermission($input: RemovePermissionInput!) {
+  removePermission(input: $input)
 }
 `

@@ -84,7 +84,7 @@ async function main() {
 
         const server = new ApolloServer({
             schema,
-            formatError, 
+            formatError,
         });
         await server.start();
 

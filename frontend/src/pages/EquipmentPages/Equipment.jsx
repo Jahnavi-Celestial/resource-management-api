@@ -19,7 +19,7 @@ const Equipment = () => {
     fetchPolicy: 'network-only'
   })
 
-  const equipments = data?.equipments?.equipments || [];
+  const equipments = data?.equipments?.data || [];
 
   return (
     <div className="equipment-container">

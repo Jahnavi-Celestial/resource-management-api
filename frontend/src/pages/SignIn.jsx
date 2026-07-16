@@ -38,7 +38,7 @@ const SignIn = () => {
                   lastName: formData.lastName, 
                   email: formData.email, 
                   password: formData.password, 
-                  role: formData.role 
+                  roleId: 3
                 }
             } 
         })

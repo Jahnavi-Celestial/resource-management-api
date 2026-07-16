@@ -6,6 +6,8 @@ import { EmployeeRepository } from "../repositories/employee.repository.ts";
 import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import { UserRoleRepository } from "../repositories/userRole.repository.ts";
 import { RoleRepository } from "../repositories/role.repository.ts";
+import { RolePermissionRepository } from "../repositories/rolePermission.repository.ts";
+import { PermissionRepository } from "../repositories/permission.repository.ts";
 
 dotenv.config();
 
@@ -13,6 +15,8 @@ export class AuthService{
   private employeeRepo = new EmployeeRepository();
   private userRoleRepo = new UserRoleRepository();
   private roleRepo = new RoleRepository();
+  private rolePermissionRepo = new RolePermissionRepository();
+  private permissionRepo = new PermissionRepository()
 
   async register(input: RegisterInput){
     const { firstName, lastName, email, password, roleId } = input;
@@ -63,14 +67,30 @@ export class AuthService{
       throw new AppError("Invalid email or password", 401, "UNAUTHORIZED", "password");
     }
 
-    console.log(isEmpExist)
     const roles = isEmpExist.userRoles.map(userRole => userRole.role.role_name);
+
+    const roleIds = isEmpExist.userRoles.map(userRole => userRole.role.id);
+
+    const result = roleIds.map(async (id) => {
+      const rolePermission = await this.rolePermissionRepo.findByRoleId(id)
+      const perm = rolePermission.map(rp => {
+        return rp.permission.permission_name
+      })
+      return perm
+    })
+    let permissions = []
+    
+    for(let i = 0; i < result.length; i++){
+      let ele = await result[i]
+      permissions.push(ele)
+    }
 
     const token = jwt.sign(
       {
         id: isEmpExist.id,
         email: isEmpExist.email,
-        roles
+        roles,
+        permissions: permissions.flat()
       },
       String(process.env.JWT_SECRET),
       {

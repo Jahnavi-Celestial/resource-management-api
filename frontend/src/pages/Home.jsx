@@ -9,7 +9,7 @@ import "./Home.css";
 
 const Home = () => {
   const { user } = useContext(AuthContext)
-  const role = user?.role
+  const roles = user?.roles
 
   const [searchTerm, setSearchTerm] = useState("")
   const [empPage, setEmpPage] = useState(1)
@@ -30,10 +30,10 @@ const Home = () => {
         searchTerm: searchTerm
       } 
     },
-    skip: role === "EMPLOYEE",
+    skip: roles.includes('employee'),
     fetchPolicy: 'network-only'
   })
-  const employees = employeesData?.employees?.employees || []
+  const employees = employeesData?.employees?.data || []
 
   const { data: bookingData } = useQuery(Bookings, {
     variables: {
@@ -43,10 +43,10 @@ const Home = () => {
         bookingStatus: bookingStatus || null,
       }
     },
-    skip: role === "EMPLOYEE",
+    skip: roles.includes('employee'),
     fetchPolicy: 'network-only'
   })
-  const bookings = bookingData?.bookings?.bookings || []
+  const bookings = bookingData?.bookings?.data || []
 
   const { data: mostBookedRoomData } = useQuery(MostBookedRoom)
 
@@ -57,7 +57,7 @@ const Home = () => {
         month: Number(statsMonth),
       }
     },
-    skip: role === "EMPLOYEE",
+    skip: roles.includes('employee'),
     fetchPolicy: "network-only",
   })
   const monthlyStats = monthlyStatsData?.monthlyBookingStatics
@@ -69,7 +69,11 @@ const Home = () => {
           <h1>Welcome back, {user?.name || "User"}</h1>
           <p className="welcome-subtext">Here is what is happening today.</p>
         </div>
-        <span className="role-badge">{role} Panel</span>
+        <span className="role-badge">
+            {user?.roles.map( (role, index) => {
+              return <span key={index}> {role}</span>
+            })}
+        </span>
       </header>
 
       <section className="global-stats-section">
@@ -96,10 +100,14 @@ const Home = () => {
           >
             {user?.email || "N/A"}
           </strong>
-          <p>Role: {user?.role}</p>
+          <p>Roles: 
+            {user?.roles.map( (role, index) => {
+              return <span key={index}>{role} || </span>
+            })}
+          </p>
         </div>
 
-        {(role === "MANAGER") && (
+        {(roles.includes('manager')) && (
           <div className="room-stats-card stats-analytics-card full-row-card">
             <div className="card-header-inline">
               <h3>Monthly Statistics</h3>
@@ -135,13 +143,13 @@ const Home = () => {
         )}
       </section>
 
-      {role === "EMPLOYEE" && (
+      {roles.includes('employee') && (
         <div className="single-column-layout">
           <ViewOwnBookings />
         </div>
       )}
 
-      {(role === "ADMIN" || role === "MANAGER") && (
+      {(roles.includes('admin') || roles.includes('manager')) && (
         <div className="dashboard-grid">
           <section className="dashboard-section">
             <div className="section-header">

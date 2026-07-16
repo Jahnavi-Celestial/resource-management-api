@@ -10,7 +10,7 @@ const BookingDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useContext(AuthContext)
-  const role = user?.role
+  const roles = user?.roles
 
   const [reason, setReason] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -141,7 +141,7 @@ const BookingDetail = () => {
             <h1 className="bd-main-title">Booking Details</h1>
           </div>
 
-          {role === "EMPLOYEE" && (
+          {roles.includes('employee') && (
             <div className="bd-action-buttons">
               <button
                 className="bd-btn bd-btn-secondary"
@@ -152,7 +152,7 @@ const BookingDetail = () => {
             </div>
           )}
 
-          {role === "MANAGER" && (
+          {roles.includes('manager') && (
             <div className="bd-action-buttons">
               <button
                 className="bd-btn bd-btn-primary"
