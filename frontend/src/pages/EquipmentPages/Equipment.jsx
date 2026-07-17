@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { Equipments } from "../../graphql/queries";
 import EquipmentCard from "../../components/Equipment/EquipmentCard";
@@ -6,7 +6,8 @@ import "./Equipment.css";
 import EquipmentShimmer from "../ShimmerPages/EquipmentShimmer";
 
 const Equipment = () => {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
   const [page, setPage] = useState(1)
 
   const { data, loading, refetch } = useQuery(Equipments, {
@@ -14,13 +15,22 @@ const Equipment = () => {
       input:{
         page: page,
         limit: 6,
-        searchTerm: searchTerm,
+        searchTerm: debouncedSearch,
       }
     },
     fetchPolicy: 'network-only'
   })
 
   const equipments = data?.equipments?.data || [];
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(1);
+    }, 400)
+  
+    return () => clearTimeout(handler)
+  }, [searchInput]);
 
   return (
     <div className="equipment-container">
@@ -37,9 +47,9 @@ const Equipment = () => {
             type="text"
             placeholder="Search items by name..."
             className="equipment-search-input"
-            value={searchTerm}
+            value={searchInput} 
             onChange={(e) => {
-              setSearchTerm(e.target.value);
+              setSearchInput(e.target.value);
               setPage(1);
             }}
           />

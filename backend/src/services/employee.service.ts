@@ -69,7 +69,7 @@ export class EmployeeService {
     const changeUserRole = await this.userRoleRepo.findByEmployeeIdAndRoleId(employee.id, input.roleIdFrom)
 
     if(!changeUserRole){
-      throw new NotFoundError('User Role not found', "roleIdFrom")
+      throw new NotFoundError('User Role From not found', "roleIdFrom")
     }
 
     const roleToChange = await this.roleRepo.findRoleById(input.roleIdTo)

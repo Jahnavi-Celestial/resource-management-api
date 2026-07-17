@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GetAllRoles, GetAllPermission } from "../../graphql/queries";
 import { AssignPermission, RemovePermission } from "../../graphql/mutations";
-import "./PermissionActionForm.css"
+import "./PermissionActionModal.css"
 
-const PermissionActionForm = ({ actionType, onSubmitSuccess }) => {
+const PermissionActionModal = ({ actionType, onSubmitSuccess }) => {
   const [selectedRoleId, setSelectedRoleId] = useState("")
   const [selectedPermissionIds, setSelectedPermissionIds] = useState([])
 
@@ -90,4 +90,4 @@ const PermissionActionForm = ({ actionType, onSubmitSuccess }) => {
   )
 }
 
-export default PermissionActionForm
+export default PermissionActionModal

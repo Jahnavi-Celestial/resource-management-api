@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { Rooms } from "../../graphql/queries";
 import RoomCard from "../../components/Room/RoomCard";
@@ -6,7 +6,8 @@ import "./MeetingRoom.css";
 import RoomShimmer from "../ShimmerPages/RoomShimmer";
 
 const MeetingRoom = () => {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
   const [page, setPage] = useState(1)
 
   const { data, loading, refetch } = useQuery(Rooms, {
@@ -14,13 +15,22 @@ const MeetingRoom = () => {
       input:{
         page: page,
         limit: 6,
-        searchTerm: searchTerm,
+        searchTerm: debouncedSearch,
       }
     },
     fetchPolicy: 'network-only'
   })
 
   const rooms = data?.rooms?.data || [];
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(1);
+    }, 400)
+    
+    return () => clearTimeout(handler)
+  }, [searchInput]);
 
   return (
     <div className="rooms-container">
@@ -37,9 +47,9 @@ const MeetingRoom = () => {
             type="text"
             placeholder="Search rooms by name..."
             className="room-search-input"
-            value={searchTerm}
+            value={searchInput}
             onChange={(e) => {
-              setSearchTerm(e.target.value);
+              setSearchInput(e.target.value);
               setPage(1);
             }}
           />

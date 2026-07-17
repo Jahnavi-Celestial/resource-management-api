@@ -6,8 +6,8 @@ import { AuthContext } from "../../context/AuthContext";
 import UpdateEmployee from "../../components/Employee/UpdateEmployee";
 import DeleteEmployee from "../../components/Employee/DeleteEmployee";
 import "./EmployeeDetail.css";
-import RoleActionForm from "../../components/Forms/RoleActionForm";
-import PermissionActionForm from "../../components/Forms/PermissionActionForm";
+import RoleActionModal from "../../components/modals/RoleActionModal";
+import PermissionActionModal from "../../components/modals/PermissionActionModal";
 import EmployeeDetailShimmer from "../ShimmerPages/EmployeeDetailShimmer";
 
 const EmployeeDetail = () => {
@@ -50,8 +50,8 @@ const EmployeeDetail = () => {
       <div className="detail-layout">
         <section className="profile-card">
           <div className="profile-avatar-large">
-            {employee?.firstName?.[0]}
-            {employee?.lastName?.[0]}
+            {employee?.firstName?.[0].toUpperCase()}
+            {employee?.lastName?.[0].toUpperCase()}
           </div>
           <h2 className="profile-name">
             {employee?.firstName} {employee?.lastName}

@@ -6,11 +6,12 @@ import { AuthContext } from "../../context/AuthContext";
 import UpdateRoom from "../../components/Room/UpdateRoom";
 import DeleteRoom from "../../components/Room/DeleteRoom";
 import "./RoomDetail.css";
+import RoomDetailShimmer from "../ShimmerPages/RoomDetailShimmer";
 
 const RoomDetail = () => {
   const { id } = useParams()
   const { user } = useContext(AuthContext)
-  const role = user?.role
+  const roles = user?.roles
 
   const [activeModal, setActiveModal] = useState(null)
 
@@ -27,7 +28,7 @@ const RoomDetail = () => {
 
   if (loading) {
     return (
-      <div className="detail-loading">Loading meeting workspace specs...</div>
+      <RoomDetailShimmer/>
     )
   }
 
@@ -41,7 +42,7 @@ const RoomDetail = () => {
           </p>
         </div>
 
-        {role === "ADMIN" && (
+        {roles.includes('admin') && (
           <div className="room-action-buttons">
             <button
               className="btn-room-update"

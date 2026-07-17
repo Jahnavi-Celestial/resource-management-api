@@ -105,7 +105,7 @@
   gap: 16px;
 }
 
-.stat-item {
+.shimmer-stat-item {
   flex: 1;
   height: 48px;
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
@@ -161,4 +161,29 @@
   animation: shimmer-animation 1.5s infinite linear;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
+}
+
+.management-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.shimmer-section.shimmer-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.datagrid-mock-row {
+  height: 38px;
+  width: 100%;
+}
+
+.datagrid-mock-row.header {
+  height: 42px;
+  opacity: 0.85;
 }

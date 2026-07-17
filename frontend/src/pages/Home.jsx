@@ -1,53 +1,72 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useQuery } from "@apollo/client/react";
 import { Bookings, Employees, MostBookedRoom, MonthlyBookingStatics } from "../graphql/queries";
-import EmployeeCard from "../components/Employee/EmployeeCard";
-import BookingCard from "../components/Booking/BookingCard";
+import DataGrid from "../components/DataGrid";
 import ViewOwnBookings from "./BookingPages/ViewOwnBookings";
 import "./Home.css";
 import HomeShimmer from "./ShimmerPages/HomeShimmer";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { user } = useContext(AuthContext)
   const roles = user?.roles
+  const navigate = useNavigate()
 
-  const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
   const [empPage, setEmpPage] = useState(1)
+  const [empLimit, setEmpLimit] = useState(5)
+  const [empSort, setEmpSort] = useState("DESC")
 
   const [bookingStatus, setBookingStatus] = useState("")
   const [bookingPage, setBookingPage] = useState(1)
+  const [bookingLimit, setBookingLimit] = useState(5)
+  const [bookingSort, setBookingSort] = useState("DESC")
 
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1
   const [statsYear, setStatsYear] = useState(currentYear)
   const [statsMonth, setStatsMonth] = useState(currentMonth)
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setEmpPage(1);
+    }, 400)
+
+    return () => clearTimeout(handler)
+  }, [searchInput]);
+
   const { data: employeesData, loading: loadingEmp } = useQuery(Employees, {
     variables: { 
       input:{
         page: empPage, 
-        limit: 5, 
-        searchTerm: searchTerm
-      } 
+        limit: empLimit,
+        searchTerm: debouncedSearch,
+        sortOrder: empSort
+      }
     },
     skip: roles.includes('employee'),
     fetchPolicy: 'network-only'
   })
   const employees = employeesData?.employees?.data || []
+  const totalEmployeesCount = employeesData?.employees?.total || 0
 
   const { data: bookingData, loading: loadingBookings } = useQuery(Bookings, {
     variables: {
       input:{
         page: bookingPage,
-        limit: 5,
+        limit: bookingLimit,
         bookingStatus: bookingStatus || null,
+        sortOrder: bookingSort
       }
     },
     skip: roles.includes('employee'),
     fetchPolicy: 'network-only'
   })
   const bookings = bookingData?.bookings?.data || []
+  const totalBookingsCount = bookingData?.bookings?.total || 0
 
   const { data: mostBookedRoomData, loading: loadingMostBookedRoom } = useQuery(MostBookedRoom)
 
@@ -62,6 +81,65 @@ const Home = () => {
     fetchPolicy: "network-only",
   })
   const monthlyStats = monthlyStatsData?.monthlyBookingStatics
+
+  const employeeColumns = [
+    { key: "id", label: "ID" },
+    {
+      key: "name",
+      label: "Name",
+      render: (_, row) => <span>{`${row?.firstName || ""} ${row?.lastName || ""}`.trim()}</span>
+    },
+    { key: "email", label: "Email" },
+    {
+      key: "userRoles",
+      label: "Roles",
+      render: (userRoles) => (
+        <div>
+          {userRoles?.map((ur) => (
+            <span key={ur?.id} className="role-badge" style={{ marginRight: "4px" }}>
+              {ur?.role?.role_name}
+            </span>
+          ))}
+        </div>
+      )
+    }
+  ]
+
+  const bookingColumns = [
+    { key: "id", label: "Booking ID" },
+    {
+      key: "meetingRoom",
+      label: "Room Name",
+      render: (meetingRoom,row) => <span>{meetingRoom?.name || "N/A"}</span>
+    },
+    {
+      key: "employee",
+      label: "Booked By",
+      render: (employee,row) => <span>{employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}</span>
+    },
+    { key: "purpose", label: "Purpose" },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => (
+        <span className={`status-text ${value?.toLowerCase()}`}>
+          {value}
+        </span>
+      )
+    }
+  ]
+
+  const handleEmployeeRowClick = (row) => {
+    if (row?.id) {
+      navigate(`/employeeDetails/${row.id}`);
+    }
+  }
+
+  const handleBookingRowClick = (row) => {
+    if (row?.id) {
+      navigate(`/bookingDetails/${row.id}`);
+    }
+  }
 
   if(loadingBookings || loadingEmp || loadingMonthlyStatics || loadingMostBookedRoom){
     return <HomeShimmer />
@@ -154,56 +232,45 @@ const Home = () => {
       )}
 
       {(roles.includes('admin') || roles.includes('manager')) && (
-        <div className="dashboard-grid">
-          <section className="dashboard-section">
-            <div className="section-header">
-              <h2>Team Members</h2>
+        <section className="management-section">
+          <div className="management-card">
+            <div className="management-card-header">
+              <h2>Employee Management</h2>
               <input
+                className="filter-input management-input"
                 type="text"
-                placeholder="Search by name..."
-                className="filter-input"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setEmpPage(1);
-                }}
+                placeholder="Search employees..."
+                value={searchInput} 
+                onChange={(e) => setSearchInput(e.target.value)}
               />
-            </div>
-            <div className="cards-list">
-              {employees.length > 0 ? (
-                employees.map((employee) => (
-                  <EmployeeCard key={employee.id} employee={employee} />
-                ))
-              ) : (
-                <p className="empty-message">No employees found.</p>
-              )}
-            </div>
-            <div className="pagination-controls">
-              <button
-                disabled={empPage === 1}
-                onClick={() => setEmpPage((prev) => prev - 1)}
-              >
-                Previous
-              </button>
-              <span>Page {empPage}</span>
-              <button
-                disabled={employees.length < 5}
-                onClick={() => setEmpPage((prev) => prev + 1)}
-              >
-                Next
-              </button>
-            </div>
-          </section>
-
-          <section className="dashboard-section">
-            <div className="section-header">
-              <h2>Recent Bookings</h2>
+              </div>
+              <DataGrid
+                columns={employeeColumns}
+                data={employees}
+                loading={loadingEmp}
+                page={empPage}
+                limit={empLimit}
+                totalCount={totalEmployeesCount}
+                sortDirection={empSort}
+                onSortToggle={() => setEmpSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))}
+                onPageChange={(newPage) => setEmpPage(newPage)}
+                onLimitChange={(newLimit) => {
+                setEmpLimit(newLimit);
+                setEmpPage(1);
+              }}
+              onRowClick={handleEmployeeRowClick}
+            />
+          </div>
+    
+          <div className="management-card">
+            <div className="management-card-header">
+              <h2>Booking Logs</h2>
               <select
-                className="filter-select"
+                className="filter-select management-select-input"
                 value={bookingStatus}
                 onChange={(e) => {
-                  setBookingStatus(e.target.value);
-                  setBookingPage(1);
+                setBookingStatus(e.target.value);
+                setBookingPage(1);
                 }}
               >
                 <option value="">All Statuses</option>
@@ -214,33 +281,25 @@ const Home = () => {
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
-            <div className="cards-list">
-              {bookings.length > 0 ? (
-                bookings.map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
-                ))
-              ) : (
-                <p className="empty-message">No bookings found.</p>
-              )}
-            </div>
-            <div className="pagination-controls">
-              <button
-                disabled={bookingPage === 1}
-                onClick={() => setBookingPage((prev) => prev - 1)}
-              >
-                Previous
-              </button>
-              <span>Page {bookingPage}</span>
-              <button
-                disabled={bookings.length < 5}
-                onClick={() => setBookingPage((prev) => prev + 1)}
-              >
-                Next
-              </button>
-            </div>
-          </section>
+            <DataGrid
+              columns={bookingColumns}
+              data={bookings}
+              loading={loadingBookings}
+              page={bookingPage}
+              limit={bookingLimit}
+              totalCount={totalBookingsCount}
+              sortDirection={bookingSort}
+              onSortToggle={() => setBookingSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))}
+              onPageChange={(newPage) => setBookingPage(newPage)}
+              onLimitChange={(newLimit) => {
+              setBookingLimit(newLimit);
+              setBookingPage(1);
+            }}
+            onRowClick={handleBookingRowClick}
+          />
         </div>
-      )}
+      </section>
+    )}
     </div>
   )
 }

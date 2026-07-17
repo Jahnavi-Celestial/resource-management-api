@@ -1,21 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useQuery } from "@apollo/client/react";
 import { ViewOwnBookings as ViewOwnBookingsQuery } from "../../graphql/queries";
-import BookingCard from "../../components/Booking/BookingCard";
+import DataGrid from "../../components/DataGrid"; 
 import "./ViewOwnBookings.css";
 
 const ViewOwnBookings = () => {
   const { user } = useContext(AuthContext)
+  const navigate = useNavigate()
+  
   const [status, setStatus] = useState("")
   const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(5)
+  const [sortOrder, setSortOrder] = useState("DESC")
 
   const { data, loading, refetch } = useQuery(ViewOwnBookingsQuery, {
     variables: {
       input:{
         page: page,
-        limit: 5,
+        limit: limit,
         bookingStatus: status || null,
+        sortOrder: sortOrder
       }
     },
     skip: !user?.id,
@@ -23,6 +29,46 @@ const ViewOwnBookings = () => {
   })
 
   const bookings = data?.viewOwnBooking?.data || []
+  
+  const totalCount = data?.viewOwnBooking?.total || 0
+
+  const columns = [
+    { key: "id", label: "Id" },
+    { 
+      key: "purpose", 
+      label: "Purpose" 
+    },
+    { 
+      key: "meetingRoom", 
+      label: "Meeting Room",
+      render: (value, row) => row.meetingRoom?.name || "N/A"
+    },
+    { 
+      key: "startTime", 
+      label: "Scheduled Date",
+      render: (value) => value ? new Date(value).toLocaleDateString() : "N/A"
+    },
+    { 
+      key: "status", 
+      label: "Status",
+      render: (value) => (
+        <span className={`status-badge ${value?.toLowerCase() || "pending"}`}>
+          {value || "PENDING"}
+        </span>
+      )
+    },
+  ];
+
+  const handleSortToggle = () => {
+    setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+    setPage(1);
+  };
+
+  const handleRowClick = (row) => {
+    if (row?.id) {
+      navigate(`/bookingDetails/${row.id}`);
+    }
+  };
 
   return (
     <section className="own-bookings-section">
@@ -45,37 +91,22 @@ const ViewOwnBookings = () => {
         </select>
       </div>
 
-      <div className="cards-list">
-        {loading ? (
-          <p className="empty-message">Loading schedule registry...</p>
-        ) : bookings.length > 0 ? (
-          bookings.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} />
-          ))
-        ) : (
-          <p className="empty-message">
-            No reservations recorded under your ID matching this filter.
-          </p>
-        )}
-      </div>
-
-      {!loading && (
-        <div className="pagination-controls">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => prev - 1)}
-          >
-            Previous
-          </button>
-          <span>Page {page}</span>
-          <button
-            disabled={bookings.length < 5}
-            onClick={() => setPage((prev) => prev + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <DataGrid
+        columns={columns}
+        data={bookings}
+        loading={loading}
+        page={page}
+        limit={limit}
+        totalCount={totalCount}
+        sortDirection={sortOrder}
+        onSortToggle={handleSortToggle}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => { 
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onRowClick={handleRowClick}
+      />
     </section>
   )
 }

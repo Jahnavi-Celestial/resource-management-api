@@ -47,7 +47,6 @@ export class RoleResolver {
   }
 
   @Query(()=>[Roles])
-  @UseMiddleware(PermissionMiddleware("VIEW_ALL_ROLES"))
   async getAllRoles(){
     return this.roleService.getAllRoles()
   }

@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { CreateEmployee as CreateEmployeeMutation } from "../../graphql/mutations";
+import { GetAllRoles } from "../../graphql/queries";
 
 const CreateEmployee = ({ onSubmitSuccess }) => {
+  const [selectedRoleId, setSelectedRoleId] = useState("")
+  const { data, loading, error } = useQuery(GetAllRoles)
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
-    role: "",
+    roleId: null,
   })
 
   const [createEmployeeAction, { loading: isSubmitting }] = useMutation(CreateEmployeeMutation)
@@ -24,7 +28,7 @@ const CreateEmployee = ({ onSubmitSuccess }) => {
             lastName: formData.lastName,
             email: formData.email,
             password: formData.password,
-            role: formData.role,
+            roleId: Number(selectedRoleId),
           }
         },
       })
@@ -157,18 +161,18 @@ const CreateEmployee = ({ onSubmitSuccess }) => {
             <div>
               <label style={labelStyle}>Role</label>
               <select
-                name="password"
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
+                name="role"
+                value={selectedRoleId}
+                onChange={(e) => setSelectedRoleId(e.target.value)}
                 style={inputStyle}
                 required
               >
-                <option value="">Select Role</option>
-                <option value="ADMIN">Admin</option>
-                <option value="MANAGER">Manager</option>
-                <option value="EMPLOYEE">Employee</option>
+              <option value="">Select Role</option>
+                {data?.getAllRoles?.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.role_name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

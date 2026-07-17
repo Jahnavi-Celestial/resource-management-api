@@ -29,35 +29,35 @@ const HomeShimmer = () => {
             <div className="block input-picker"></div>
           </div>
           <div className="stats-row">
-            <div className="stat-item"></div>
-            <div className="stat-item"></div>
-            <div className="stat-item"></div>
+            <div className="shimmer-stat-item"></div>
+            <div className="shimmer-stat-item"></div>
+            <div className="shimmer-stat-item"></div>
           </div>
         </div>
       </section>
 
-      <div className="shimmer-grid">
-        <section className="shimmer-section">
-          <div className="shimmer-section-header">
-            <div className="block section-title"></div>
-            <div className="block filter"></div>
-          </div>
-          <div className="shimmer-list">
-            <div className="item-card"></div>
-            <div className="item-card"></div>
-            <div className="item-card"></div>
-          </div>
-        </section>
-
-        <section className="shimmer-section">
+      <div className="management-section">
+        <section className="shimmer-section shimmer-card">
           <div className="shimmer-section-header">
             <div className="block section-title"></div>
             <div className="block filter"></div>
           </div>
           <div className="list">
-            <div className="item-card"></div>
-            <div className="item-card"></div>
-            <div className="item-card"></div>
+            <div className="block datagrid-mock-row header"></div>
+            <div className="block datagrid-mock-row"></div>
+            <div className="block datagrid-mock-row"></div>
+          </div>
+        </section>
+
+        <section className="shimmer-section shimmer-card">
+          <div className="shimmer-section-header">
+            <div className="block section-title"></div>
+            <div className="block filter"></div>
+          </div>
+          <div className="list">
+            <div className="block datagrid-mock-row header"></div>
+            <div className="block datagrid-mock-row"></div>
+            <div className="block datagrid-mock-row"></div>
           </div>
         </section>
       </div>

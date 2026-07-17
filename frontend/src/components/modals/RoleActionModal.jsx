@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GetAllRoles, Employee } from "../../graphql/queries"; 
 import { AssignRole, RemoveRole } from "../../graphql/mutations"; 
-import "./RoleActionForm.css"
+import "./RoleActionModal.css"
 
-const RoleActionForm = ({ actionType, userId, onSubmitSuccess }) => {
+const RoleActionModal = ({ actionType, userId, onSubmitSuccess }) => {
   const [selectedRoleId, setSelectedRoleId] = useState("")
   const { data, loading, error } = useQuery(GetAllRoles)
 
@@ -63,4 +63,4 @@ const RoleActionForm = ({ actionType, userId, onSubmitSuccess }) => {
   );
 };
 
-export default RoleActionForm;
+export default RoleActionModal;

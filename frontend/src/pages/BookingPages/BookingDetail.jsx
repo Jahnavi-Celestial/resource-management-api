@@ -153,12 +153,14 @@ const BookingDetail = () => {
               <button
                 className="bd-btn bd-btn-primary"
                 onClick={handleApproveBtn}
+                disabled={bookingData.status != 'PENDING'}
               >
                 Approve Booking
               </button>
               <button
                 className="bd-btn bd-btn-secondary"
                 onClick={() => setIsModalOpen(true)}
+                disabled={bookingData.status != 'PENDING'}
               >
                 Reject Booking
               </button>

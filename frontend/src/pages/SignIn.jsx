@@ -1,16 +1,20 @@
 import React, { useContext, useState } from 'react'
-import { useMutation } from '@apollo/client/react'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { Login, Register } from '../graphql/mutations'
 import { AuthContext } from '../context/AuthContext'
 import './SignIn.css'
+import { GetAllRoles } from '../graphql/queries'
 
 const SignIn = () => {
   const [isLogin, setIsLogin] = useState(true)
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', role: '' })
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', roleId: null })
   
   const { setToken, setUser } = useContext(AuthContext);
   const [loginAction] = useMutation(Login)
   const [registerAction] = useMutation(Register)
+
+  const [selectedRoleId, setSelectedRoleId] = useState("")
+  const { data, loading, error } = useQuery(GetAllRoles)
 
   async function handleSubmit(e){
     e.preventDefault();
@@ -38,7 +42,7 @@ const SignIn = () => {
                   lastName: formData.lastName, 
                   email: formData.email, 
                   password: formData.password, 
-                  roleId: 3
+                  roleId: Number(selectedRoleId)
                 }
             } 
         })
@@ -47,13 +51,30 @@ const SignIn = () => {
         localStorage.setItem('user', JSON.stringify(user))
 
         setUser(user)
-        setFormData({ firstName: '', lastName: '', email: '', password: '', role: '' })
+        setFormData({ firstName: '', lastName: '', email: '', password: '', roleId: null })
         setIsLogin(true);
       }
     } catch (error) {
       console.error("Authentication failed:", error.message);
       alert(`Authentication failed: ${error.message}`)
     }
+  }
+
+  const labelStyle = {
+    display: "block",
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#4a5568",
+    marginBottom: "6px",
+  }
+  const inputStyle = {
+    width: "100%",
+    padding: "10px 12px",
+    border: "1px solid #e2e8f0",
+    borderRadius: "6px",
+    fontSize: "14px",
+    boxSizing: "border-box",
+    backgroundColor: "#f8fafc",
   }
 
   return (
@@ -94,10 +115,23 @@ const SignIn = () => {
             value={formData.password} 
             onChange={(e)=>setFormData({...formData, password: e.target.value})}
             />
-            <input type="text" placeholder='Role' 
-            value={formData.role} 
-            onChange={(e)=>setFormData({...formData, role: e.target.value})}
-            />
+            <div>
+              <label style={labelStyle}>Role</label>
+              <select
+                name="role"
+                value={selectedRoleId}
+                onChange={(e) => setSelectedRoleId(e.target.value)}
+                style={inputStyle}
+                required
+              >
+              <option value="">Select Role</option>
+                {data?.getAllRoles?.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.role_name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <h3 className="toggleText" onClick={()=>setIsLogin(true)}>Already have an account? Login</h3>
             <button className="submitBtn" type="submit">Sign Up</button>
           </form>

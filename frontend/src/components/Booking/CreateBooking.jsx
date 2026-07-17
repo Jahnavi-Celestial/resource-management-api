@@ -27,7 +27,7 @@ const CreateBooking = ({ onSubmitSuccess }) => {
     },
     fetchPolicy: 'network-only'
   })
-  const rooms = roomData?.rooms?.rooms || []
+  const rooms = roomData?.rooms?.data || []
 
   const { data: equipmentsData, loading: equipmentLoading, error: equipmentError } = useQuery(Equipments, {
     variables: { 
@@ -39,7 +39,7 @@ const CreateBooking = ({ onSubmitSuccess }) => {
     },
     fetchPolicy: 'network-only'
   });
-  const equipments = equipmentsData?.equipments?.equipments || []
+  const equipments = equipmentsData?.equipments?.data || []
 
   const [createBookingAction, { loading: isSubmitting }] = useMutation(CreateBookingMutation, {
     onCompleted: async()=>{

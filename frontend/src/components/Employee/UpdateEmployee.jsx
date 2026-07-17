@@ -1,14 +1,20 @@
 import React, { useState } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { UpdateEmployee as UpdateEmployeeMutation } from "../../graphql/mutations";
+import { GetAllRoles } from "../../graphql/queries";
 
 const UpdateEmployee = ({ onSubmitSuccess, employee}) => {
+  const [selectedRoleIdFrom, setSelectedRoleIdFrom] = useState("")
+  const [selectedRoleIdTo, setSelectedRoleIdTo] = useState("")
+  const { data, loading, error } = useQuery(GetAllRoles)
+
   const [formData, setFormData] = useState({
     firstName: employee.firstName,
     lastName: employee.lastName,
     email: employee.email,
     password: "",
-    role: employee.role,
+    roleIdFrom: null,
+    roleIdTo: null,
   })
 
   const [updateEmployeeAction, { loading: isSubmitting }] = useMutation(UpdateEmployeeMutation)
@@ -25,7 +31,8 @@ const UpdateEmployee = ({ onSubmitSuccess, employee}) => {
             lastName: formData.lastName,
             email: formData.email,
             password: formData.password,
-            role: formData.role,
+            roleIdFrom: Number(selectedRoleIdFrom),
+            roleIdTo: Number(selectedRoleIdTo),
           }
         }
       })
@@ -158,20 +165,37 @@ const UpdateEmployee = ({ onSubmitSuccess, employee}) => {
               />
             </div>
             <div>
-              <label style={labelStyle}>Role</label>
+              <label style={labelStyle}>Role From</label>
               <select
-                name="password"
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
+                name="role"
+                value={selectedRoleIdFrom}
+                onChange={(e) => setSelectedRoleIdFrom(e.target.value)}
                 style={inputStyle}
                 required
               >
-                <option value="">Select Role</option>
-                <option value="ADMIN">Admin</option>
-                <option value="MANAGER">Manager</option>
-                <option value="EMPLOYEE">Employee</option>
+              <option value="">Select Role</option>
+                {data?.getAllRoles?.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.role_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Role To</label>
+              <select
+                name="roleTo"
+                value={selectedRoleIdTo}
+                onChange={(e) => setSelectedRoleIdTo(e.target.value)}
+                style={inputStyle}
+                required
+              >
+              <option value="">Select Role</option>
+                {data?.getAllRoles?.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.role_name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
