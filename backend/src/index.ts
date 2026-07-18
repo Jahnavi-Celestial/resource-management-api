@@ -21,12 +21,14 @@ import { RoleResolver } from "./resolvers/role.resolver.ts";
 import { PermissionResolver } from "./resolvers/permission.resolver.ts";
 import { authCheck } from "./middleware/auth.middleware.ts";
 import { formatError } from './utils/errorFormatter.ts';
+import { createLoaders, RecordLoaders } from "./utils/createLoaders.ts";
 
 dotenv.config();
 
 export interface AppContext {
   user: Employee | null; 
   io: Server;
+  loaders: RecordLoaders;
 }
 
 async function main() {
@@ -94,7 +96,14 @@ async function main() {
             "/graphql",
             cors({ origin: process.env.FRONTEND_URL, credentials: true }),
             expressMiddleware(server, {
-                context: authCheck()
+                context: async ({ req, res }) => {
+                    const baseContext = await authCheck()({ req });
+                    
+                    return {
+                        ...baseContext,
+                        loaders: createLoaders(),
+                    }
+                }
             })
         );
 

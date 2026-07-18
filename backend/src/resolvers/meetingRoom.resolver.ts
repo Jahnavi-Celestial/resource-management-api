@@ -1,12 +1,22 @@
-import { Arg, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { MeetingRoomService } from "../services/meetingRoom.service.ts";
 import { MeetingRoom } from "../entities/MeetingRoom.ts";
 import { CreateMeetingRoomInput, RoomsFilterInput, UpdateMeetingRoomInput, PaginatedRooms } from "../dto/meetingRoom.input.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
+import { Booking } from "../entities/Booking.ts";
+import { type AppContext } from "../index.ts";
 
-@Resolver()
+@Resolver(() => MeetingRoom)
 export class MeetingRoomResolver {
   constructor(private meetingRoomService = new MeetingRoomService()) {}
+
+  @FieldResolver(() => [Booking])
+  async bookings(
+    @Root() meetingRoom: MeetingRoom,
+    @Ctx() context: AppContext
+  ){
+    return context.loaders.bookingsByMeetingRoomLoader.load(meetingRoom.id)
+  }
 
   @Mutation(() => MeetingRoom)
   @UseMiddleware(PermissionMiddleware("CREATE_ROOM"))

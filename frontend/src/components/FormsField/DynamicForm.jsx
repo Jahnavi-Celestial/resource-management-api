@@ -125,7 +125,7 @@ const DynamicForm = ({ config, onSubmit, backendErrors, isSubmitting }) => {
                 }
             })}
             <div className="footer-actions">
-                <Button type="submit" value={isSubmitting ? 'Saving...' : 'Confirm & Create Booking'} />
+                <Button type="submit" value={isSubmitting ? 'Saving...' : 'Submit'} />
             </div>
         </form>
     )

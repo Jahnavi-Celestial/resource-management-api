@@ -1,12 +1,40 @@
-import { Arg, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { EmployeeService } from "../services/employee.service.ts";
 import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, PaginatedEmployees, AssignRemoveRoleInput } from "../dto/employee.input.ts";
 import { Employee } from "../entities/Employee.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
+import { Booking } from "../entities/Booking.ts";
+import { type AppContext } from "../index.ts";
+import { AuditLog } from "../entities/AuditLog.ts";
+import { UserRole } from "../entities/UserRole.ts";
 
-@Resolver()
+@Resolver(() => Employee)
 export class EmployeeResolver {
   constructor(private employeeService = new EmployeeService()) {}
+
+  @FieldResolver(() => [Booking])
+  async bookings(
+    @Root() employee: Employee, 
+    @Ctx() ctx: AppContext
+  ){
+    return ctx.loaders.bookingsByEmployeeLoader.load(employee.id)
+  }
+
+  @FieldResolver(() => [AuditLog])
+  async auditLogs(
+    @Root() employee: Employee, 
+    @Ctx() ctx: AppContext
+  ){
+    return ctx.loaders.auditLogsByEmployeeLoader.load(employee.id)
+  }
+
+  @FieldResolver(() => [UserRole])
+  async userRoles(
+    @Root() employee: Employee, 
+    @Ctx() ctx: AppContext
+  ){
+    return ctx.loaders.userRolesByEmployeeLoader.load(employee.id)
+  }
 
   @Mutation(() => Employee)
   @UseMiddleware(PermissionMiddleware("CREATE_EMPLOYEE"))

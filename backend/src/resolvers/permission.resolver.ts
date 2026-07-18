@@ -1,12 +1,22 @@
-import { Arg, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { PermissionService } from "../services/permission.service.ts";
 import { Permission } from "../entities/Permission.ts";
 import { CreatePermissionInput, UpdatePermissionInput } from "../dto/permission.input.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
+import { RolePermission } from "../entities/RolePermission.ts";
+import { type AppContext } from "../index.ts";
 
-@Resolver()
+@Resolver(() => Permission)
 export class PermissionResolver {
   private permissionService = new PermissionService();
+
+  @FieldResolver(() => [RolePermission])
+  async rolePermissions(
+    @Root() permission: Permission, 
+    @Ctx() context: AppContext
+  ){
+    return context.loaders.rolePermissionsByPermissionLoader.load(permission.id)
+  }
 
   @Mutation(() => Permission)
   @UseMiddleware(PermissionMiddleware("CREATE_PERMISSION"))

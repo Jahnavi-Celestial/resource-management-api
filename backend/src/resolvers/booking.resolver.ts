@@ -1,13 +1,40 @@
-import { Arg, Ctx, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { BookingService } from "../services/booking.service.ts";
 import { Booking } from "../entities/Booking.ts";
 import { ApproveBookingInput, BookingsFilterInput, CreateBookingInput, RejectBookingInput, PaginatedBookings } from "../dto/booking.input.ts";
 import { type AppContext } from "../index.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
+import { Equipment } from "../entities/Equipment.ts";
+import { MeetingRoom } from "../entities/MeetingRoom.ts";
+import { Employee } from "../entities/Employee.ts";
 
-@Resolver()
+@Resolver(()=>Booking)
 export class BookingResolver {
   constructor(private bookingService = new BookingService()) {}
+
+  @FieldResolver(() => Employee)
+  async employee(
+    @Root() booking: Booking, 
+    @Ctx() context: AppContext
+  ){
+    return context.loaders.employeeLoader.load(booking.employeeId)
+  }
+
+  @FieldResolver(() => MeetingRoom)
+  async meetingRoom(
+    @Root() booking: Booking, 
+    @Ctx() context: AppContext
+  ){
+    return context.loaders.meetingRoomLoader.load(booking.meetingRoomId)
+  }
+
+  @FieldResolver(() => [Equipment])
+  async equipments(
+    @Root() booking: Booking, 
+    @Ctx() context: AppContext
+  ){
+    return context.loaders.equipmentLoader.load(booking.id)
+  }
 
   @Mutation(() => Booking)
   @UseMiddleware(PermissionMiddleware("CREATE_BOOKING"))
