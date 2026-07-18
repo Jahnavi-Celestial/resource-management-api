@@ -230,3 +230,51 @@ mutation RemovePermission($input: RemovePermissionInput!) {
   removePermission(input: $input)
 }
 `
+
+export const CreateRole = gql`
+mutation CreateRole($input: CreateRoleInput!) {
+  createRole(input: $input) {
+    id
+    role_name
+  }
+}
+`
+
+export const UpdateRole = gql`
+mutation UpdateRole($input: UpdateRoleInput!) {
+  updateRole(input: $input) {
+    id
+    role_name
+  }
+}
+`
+
+export const DeleteRole = gql`
+mutation DeleteRole($deleteRoleId: Int!) {
+  deleteRole(id: $deleteRoleId)
+}
+`
+
+export const CreatePermission = gql`
+mutation CreatePermission($input: CreatePermissionInput!) {
+  createPermission(input: $input) {
+    id
+    permission_name
+  }
+}
+`
+
+export const UpdatePermission = gql`
+mutation UpdatePermission($input: UpdatePermissionInput!) {
+  updatePermission(input: $input) {
+    id
+    permission_name
+  }
+}
+`
+
+export const DeletePermission = gql`
+mutation DeletePermission($deletePermissionId: Int!) {
+  deletePermission(id: $deletePermissionId)
+}
+`

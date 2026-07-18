@@ -157,6 +157,13 @@ const NavBar = () => {
 
         {roles?.includes('admin') && (
           <div className="role-actions-group">
+            <NavLink to="/admin/actions" 
+              className={({ isActive }) => `nav-item-link ${isActive ? "active" : ""}`} 
+              onClick={() => setIsMenuOpen(false)}
+              style={{paddingTop: "5px"}}
+            >
+              Manage Role/Permission
+            </NavLink>
             <button className="nav-action-btn" onClick={() => openModal("employee")}>+ Employee</button>
             <button className="nav-action-btn" onClick={() => openModal("equipment")}>+ Equipment</button>
             <button className="nav-action-btn" onClick={() => openModal("room")}>+ Room</button>

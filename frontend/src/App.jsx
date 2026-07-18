@@ -14,6 +14,7 @@ import EquipmentDetail from "./pages/EquipmentPages/EquipmentDetail";
 import EmployeeDetail from "./pages/EmployeePages/EmployeeDetail";
 import { connectSocket, disconnectSocket } from './socket';
 import UnAuthorized from "./components/UnAuthorized";
+import AdminAction from "./components/AdminAction";
 
 const AuthGuard = () => {
   const { token } = useContext(AuthContext)
@@ -84,8 +85,12 @@ const router = createBrowserRouter([
         children: [
           { path: "/bookingDetails/:id", element: <BookingDetail /> }
         ]
-      },{
+      },
+      {
         path: "/unauthorized", element: <UnAuthorized />
+      },
+      {
+        path: "/admin/actions", element: <AdminAction />
       }
     ],
   },
