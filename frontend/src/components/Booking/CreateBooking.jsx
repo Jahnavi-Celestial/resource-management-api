@@ -1,455 +1,191 @@
-import { useMutation, useQuery } from "@apollo/client/react";
-import { Equipments, Rooms } from "../../graphql/queries";
-import { useState } from "react";
-import { CreateBooking as CreateBookingMutation } from "../../graphql/mutations";
-import { client } from "../../apolloClient";
+import React, { useState } from "react"
+import { useMutation, useQuery } from "@apollo/client/react"
+import { Equipments, Rooms } from "../../graphql/queries"
+import { CreateBooking as CreateBookingMutation } from "../../graphql/mutations"
+import { client } from "../../apolloClient"
+import DynamicForm from "../FormsField/DynamicForm"
+import "../FormsField/Form.css"
 
 const CreateBooking = ({ onSubmitSuccess }) => {
-  const [formData, setFormData] = useState({
-    roomId: "",
-    startTime: "",
-    endTime: "",
-    purpose: "",
-    numberOfAttendees: 1,
-    equipments: [],
-  })
-
   const [selectedEquipId, setSelectedEquipId] = useState("")
-  const [equipQuantity, setEquipQuantity] = useState(0)
+  const [equipQuantity, setEquipQuantity] = useState(1)
+  const [backendErrors, setBackendErrors] = useState({})
 
   const { data: roomData, loading: roomLoading, error: roomError } = useQuery(Rooms, {
-    variables: { 
-      input:{
-        page: 1, 
-        limit: 10, 
-        searchTerm: "" 
-      }
-    },
+    variables: { input: { page: 1, limit: 10, searchTerm: "" } },
     fetchPolicy: 'network-only'
   })
   const rooms = roomData?.rooms?.data || []
 
   const { data: equipmentsData, loading: equipmentLoading, error: equipmentError } = useQuery(Equipments, {
-    variables: { 
-      input:{
-        page: 1, 
-        limit: 10, 
-        searchTerm: "" 
-      }
-    },
+    variables: { input: { page: 1, limit: 10, searchTerm: "" } },
     fetchPolicy: 'network-only'
-  });
+  })
   const equipments = equipmentsData?.equipments?.data || []
 
   const [createBookingAction, { loading: isSubmitting }] = useMutation(CreateBookingMutation, {
-    onCompleted: async()=>{
-      await client.refetchQueries({
-        include: "active",
-      });
+    onCompleted: async () => {
+      await client.refetchQueries({ include: "active" })
     }
-  }
-  )
+  })
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleAddEquipment = () => {
-    if (!selectedEquipId) return
-    const existingIndex = formData.equipments.findIndex(
-      (e) => e.equipmentId === selectedEquipId,
-    )
-
-    if (existingIndex > -1) {
-      const updatedEquip = [...formData.equipments]
-      updatedEquip[existingIndex].quantity = equipQuantity
-      setFormData((prev) => ({ ...prev, equipments: updatedEquip }))
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        equipments: [
-          ...prev.equipments,
-          { equipmentId: selectedEquipId, quantity: equipQuantity },
-        ],
-      }))
-    }
-    setSelectedEquipId("")
-    setEquipQuantity(1)
-  }
-
-  const handleRemoveEquipment = (id) => {
-    setFormData((prev) => ({
-      ...prev,
-      equipments: prev.equipments.filter((e) => e.equipmentId !== id),
-    }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleFormSubmit = async (formData, resetForm) => {
+    setBackendErrors({})
     try {
-      const bookingData = await createBookingAction({
+      await createBookingAction({
         variables: {
-          input:{
+          input: {
             meetingRoomId: Number(formData.roomId),
             startTime: new Date(formData.startTime).toISOString(),
             endTime: new Date(formData.endTime).toISOString(),
             purpose: formData.purpose,
             numberOfAttendees: parseInt(formData.numberOfAttendees, 10),
-            equipmentRequested: formData.equipments.map((e) => ({
-            equipId: Number(e.equipmentId),
-            quantity: parseInt(e.quantity, 10),
-          })),
+            equipmentRequested: (formData.equipments || []).map((e) => ({
+              equipId: Number(e.equipmentId),
+              quantity: parseInt(e.quantity, 10),
+            })),
           }
         },
       })
-      formData.roomId = ""
-      formData.startTime = ""
-      formData.endTime = ""
-      formData.purpose = ""
-      formData.numberOfAttendees = 1
-      formData.equipments = []
+
       setSelectedEquipId("")
       setEquipQuantity(1)
+      resetForm()
 
       if (onSubmitSuccess) {
         onSubmitSuccess()
       }
     } catch (err) {
-      console.error("Error creating booking:", err)
-      alert(`${err.message}`)
+      if (err.graphQLErrors && err.graphQLErrors[0]?.extensions?.validation) {
+        setBackendErrors(err.graphQLErrors[0].extensions.validation)
+      } else {
+        setBackendErrors({ global: err.message })
+      }
     }
-  }
-
-  const labelStyle = {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4a5568",
-    marginBottom: "6px",
-  }
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    fontSize: "14px",
-    boxSizing: "border-box",
-    backgroundColor: "#f8fafc",
   }
 
   if (roomError || equipmentError) {
     return (
-      <div
-        style={{
-          maxWidth: "450px",
-          margin: "40px auto",
-          padding: "24px",
-          backgroundColor: "#fef2f2",
-          border: "1px solid #fee2e2",
-          color: "#b91c1c",
-          borderRadius: "12px",
-          textAlign: "center",
-          fontFamily: "sans-serif",
-        }}
-      >
-        <h3 style={{ margin: "0 0 4px 0", fontSize: "18px" }}>
-          Failed to load configurations
-        </h3>
-        <p style={{ margin: 0, fontSize: "14px" }}>Please refresh the page.</p>
+      <div className="error-state">
+        <h3>Failed to load configurations</h3>
+        <p>Please refresh the page.</p>
       </div>
     )
   }
 
   if (roomLoading || equipmentLoading) {
     return (
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "40px auto",
-          padding: "32px",
-          textAlign: "center",
-          color: "#64748b",
-          fontFamily: "sans-serif",
-        }}
-      >
+      <div className="state-container">
         <p>Gathering system resources...</p>
       </div>
     )
   }
 
-  return (
-    <div
-      style={{
-        minHeight: "50vh",
-        backgroundColor: "#f1f5f9",
-        padding: "48px 16px",
-        fontFamily: "sans-serif",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          padding: "32px",
-        }}
-      >
-        <div
-          style={{
-            borderBottom: "1px solid #edf2f7",
-            paddingBottom: "20px",
-            marginBottom: "24px",
-          }}
-        >
-          <h1
-            style={{ margin: "0 0 6px 0", fontSize: "24px", color: "#1a202c" }}
-          >
-            Reserve a Meeting Room
-          </h1>
-          <p style={{ margin: 0, fontSize: "14px", color: "#718096" }}>
-            Fill out the form below to book a meeting room.
-          </p>
-        </div>
+  const formSchema = [
+    {
+      name: "roomId",
+      type: "select",
+      label: "Select Meeting Room",
+      placeholder: "Choose a Room",
+      validators: [{ type: "required", message: "Meeting Room choice is mandatory" }],
+      options: rooms.map(room => ({ value: room.id, label: room.name }))
+    },
+    {
+      name: "startTime",
+      type: "datetime-local",
+      label: "Start Time",
+      validators: [{ type: "required", message: "Start timeline context window is required" }]
+    },
+    {
+      name: "endTime",
+      type: "datetime-local",
+      label: "End Time",
+      validators: [{ type: "required", message: "Conclusion benchmark timeline is mandatory" }]
+    },
+    {
+      name: "purpose",
+      type: "text",
+      label: "Meeting Purpose",
+      placeholder: "e.g., Project Sync",
+      validators: [{ type: "required", message: "Agenda explanation is required" }]
+    },
+    {
+      name: "numberOfAttendees",
+      type: "number",
+      label: "Attendees",
+      defaultValue: 1,
+      validators: [{ type: "required", message: "Count metric is required" }]
+    },
+    {
+      name: "equipments",
+      label: "Add Equipment",
+      defaultValue: [],
+      renderCustom: ({ name, value: equipmentList, onChange, externalError }) => {
+        const handleAddEquipmentClick = () => {
+          if (!selectedEquipId) return
+          const existingIndex = equipmentList.findIndex(e => e.equipmentId === selectedEquipId)
+          let updatedList = [...equipmentList]
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-        >
-          <div>
-            <label style={labelStyle}>Select Meeting Room</label>
-            <select
-              name="roomId"
-              value={formData.roomId}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            >
-              <option value="">Choose a Room</option>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          if (existingIndex > -1) {
+            updatedList[existingIndex].quantity = equipQuantity
+          } else {
+            updatedList.push({ equipmentId: selectedEquipId, quantity: equipQuantity })
+          }
+          onChange(name, updatedList)
+          setSelectedEquipId("")
+          setEquipQuantity(1)
+        }
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <label style={labelStyle}>Start Time</label>
-              <input
-                type="datetime-local"
-                min={new Date().toISOString().slice(0, 16)}
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>End Time</label>
-              <input
-                type="datetime-local"
-                min={new Date().toISOString().slice(0, 16)}
-                name="endTime"
-                value={formData.endTime}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-            </div>
-          </div>
+        const handleRemoveEquipmentClick = (id) => {
+          const filteredList = equipmentList.filter(e => e.equipmentId !== id)
+          onChange(name, filteredList)
+        }
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <label style={labelStyle}>Meeting Purpose</label>
-              <input
-                type="text"
-                name="purpose"
-                placeholder="e.g., Project Sync"
-                value={formData.purpose}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Attendees</label>
-              <input
-                type="number"
-                name="numberOfAttendees"
-                min="1"
-                value={formData.numberOfAttendees}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              padding: "20px",
-              borderRadius: "8px",
-              border: "1px solid #f1f5f9",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "12px",
-                fontWeight: "700",
-                color: "#4a5568",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Add Equipment
-            </h3>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                flexWrap: "wrap",
-                marginBottom: "12px",
-              }}
-            >
+        return (
+          <div key={name} className="custom-box">
+            <h3 className="custom-title">Add Equipment</h3>
+            <div className="flex-row">
               <select
                 value={selectedEquipId}
                 onChange={(e) => setSelectedEquipId(e.target.value)}
-                style={{ ...inputStyle, flex: "1", backgroundColor: "#ffffff" }}
+                className="form-control"
+                style={{ flex: "1", backgroundColor: "#ffffff" }}
               >
                 <option value="">Choose Equipment</option>
-                {equipments.map((equipment) => (
-                  <option key={equipment.id} value={equipment.id}>
-                    {equipment.name}
-                  </option>
-                ))}
+                {equipments.map((eq) => <option key={eq.id} value={eq.id}>{eq.name}</option>)}
               </select>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: "#64748b",
-                  }}
-                >
-                  Qty:
-                </span>
+              <div className="flex-center">
+                <span className="qty-label">Qty:</span>
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   value={equipQuantity}
-                  onChange={(e) =>
-                    setEquipQuantity(
-                      Math.max(1, parseInt(e.target.value, 10) || 1),
-                    )
-                  }
-                  style={{
-                    ...inputStyle,
-                    width: "70px",
-                    backgroundColor: "#ffffff",
-                    textAlign: "center",
-                  }}
+                  onChange={(e) => setEquipQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                  className="form-control qty-input"
                 />
                 <button
                   type="button"
-                  onClick={handleAddEquipment}
+                  onClick={handleAddEquipmentClick}
                   disabled={!selectedEquipId}
-                  style={{
-                    padding: "10px 16px",
-                    backgroundColor: "#1e293b",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    opacity: selectedEquipId ? 1 : 0.5,
-                  }}
+                  className="btn-add"
+                  style={{ opacity: selectedEquipId ? 1 : 0.5 }}
                 >
                   Add
                 </button>
               </div>
             </div>
 
-            {formData.equipments.length > 0 && (
-              <div
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "6px",
-                }}
-              >
-                {formData.equipments.map((item) => {
-                  const details = equipments.find(
-                    (e) => e.id === item.equipmentId,
-                  )
+            {equipmentList.length > 0 && (
+              <div className="list-container">
+                {equipmentList.map((item) => {
+                  const details = equipments.find((e) => e.id === item.equipmentId)
                   return (
-                    <div
-                      key={item.equipmentId}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyInverted: "space-between",
-                        justifyContent: "space-between",
-                        padding: "12px",
-                        borderBottom: "1px solid #f1f5f9",
-                        fontSize: "14px",
-                      }}
-                    >
+                    <div key={item.equipmentId} className="list-item">
                       <div>
-                        <span
-                          style={{
-                            fontWeight: "500",
-                            color: "#334155",
-                            marginRight: "8px",
-                          }}
-                        >
-                          {details?.name || "Asset"}
-                        </span>
-                        <span
-                          style={{
-                            padding: "2px 6px",
-                            backgroundColor: "#f1f5f9",
-                            borderRadius: "4px",
-                            fontSize: "11px",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Qty: {item.quantity}
-                        </span>
+                        <span className="item-name">{details?.name || "Asset"}</span>
+                        <span className="item-badge">Qty: {item.quantity}</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEquipment(item.equipmentId)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#ef4444",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                          fontWeight: "500",
-                        }}
-                      >
+                      <button type="button" onClick={() => handleRemoveEquipmentClick(item.equipmentId)} className="btn-remove">
                         Remove
                       </button>
                     </div>
@@ -457,35 +193,33 @@ const CreateBooking = ({ onSubmitSuccess }) => {
                 })}
               </div>
             )}
+            {externalError && <span className="error-feedback">{externalError}</span>}
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              paddingTop: "16px",
-              borderTop: "1px solid #edf2f7",
-            }}
-          >
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                opacity: isSubmitting ? 0.6 : 1,
-              }}
-            >
-              {isSubmitting ? "Saving..." : "Confirm & Create Booking"}
-            </button>
+        )
+      }
+    }
+  ]
+
+  return (
+    <div className="form-container">
+      <div className="form-card">
+        <div className="form-header">
+          <h1 className="form-title">Reserve a Meeting Room</h1>
+          <p className="form-subtitle">Fill out the form below to book a meeting room.</p>
+        </div>
+
+        {backendErrors.global && (
+          <div className="global-error">
+            {backendErrors.global}
           </div>
-        </form>
+        )}
+
+        <DynamicForm 
+          config={formSchema} 
+          onSubmit={handleFormSubmit} 
+          backendErrors={backendErrors}
+          isSubmitting={isSubmitting} 
+        />
       </div>
     </div>
   )

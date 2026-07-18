@@ -1,178 +1,88 @@
-import React, { useState } from "react";
-import { useMutation } from "@apollo/client/react";
-import { UpdateEquipment as UpdateEquipmentMutation } from "../../graphql/mutations";
+import React, { useState } from "react"
+import { useMutation } from "@apollo/client/react"
+import { UpdateEquipment as UpdateEquipmentMutation } from "../../graphql/mutations"
+import DynamicForm from "../FormsField/DynamicForm"
 
 const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
-  const initialFormState = {
-    name: equipment.name,
-    quantityAvailable: equipment.quantityAvailable,
-    isActive: equipment.isActive,
-  }
-  const [formData, setFormData] = useState(initialFormState)
-
+  const [backendErrors, setBackendErrors] = useState({})
   const [updateEquipmentAction, { loading: isSubmitting }] = useMutation(UpdateEquipmentMutation)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
+  const handleFormSubmit = async (formData, resetForm) => {
+    setBackendErrors({})
     try {
       await updateEquipmentAction({
         variables: {
           input: {
             id: equipment.id,
             name: formData.name,
-            quantityAvailable: parseInt(formData.quantityAvailable),
-            isActive: formData.isActive,
+            quantityAvailable: parseInt(formData.quantityAvailable, 10) || 0,
+            isActive: formData.isActive === "true" || formData.isActive === true
           }
         }
       })
 
       alert("Equipment updated successfully!")
-      setFormData(initialFormState)
+      resetForm()
       if (onSubmitSuccess) {
         onSubmitSuccess()
       }
-    } catch (error) {
-      console.error("Error updating equipment:", error)
-      alert("Failed to update equipment. Please try again.")
+    } catch (err) {
+      if (err.graphQLErrors && err.graphQLErrors?.extensions?.validation) {
+        setBackendErrors(err.graphQLErrors.extensions.validation)
+      } else {
+        setBackendErrors({ global: err.message })
+      }
     }
-  };
+  }
 
-  const labelStyle = {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4a5568",
-    marginBottom: "6px",
-  }
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    fontSize: "14px",
-    boxSizing: "border-box",
-    backgroundColor: "#f8fafc",
-  }
+  const formSchema = [
+    {
+      name: "name",
+      type: "text",
+      label: "Name",
+      defaultValue: equipment?.name || "",
+      validators: [{ type: "required", message: "Equipment label name configuration matches are required" }]
+    },
+    {
+      name: "quantityAvailable",
+      type: "number",
+      label: "Quantity Available",
+      defaultValue: equipment?.quantityAvailable !== undefined ? equipment.quantityAvailable : 0,
+      validators: [{ type: "required", message: "Stock allocation availability metrics required" }]
+    },
+    {
+      name: "isActive",
+      type: "select",
+      label: "Is Active",
+      defaultValue: equipment?.isActive !== undefined ? equipment.isActive.toString() : "true",
+      validators: [{ type: "required", message: "System activity state flag status choice is mandatory" }],
+      options: [
+        { value: "true", label: "True" },
+        { value: "false", label: "False" }
+      ]
+    }
+  ]
 
   return (
-    <div
-      style={{
-        minHeight: "50vh",
-        backgroundColor: "#f1f5f9",
-        padding: "48px 16px",
-        fontFamily: "sans-serif",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          padding: "32px",
-        }}
-      >
-        <div
-          style={{
-            borderBottom: "1px solid #edf2f7",
-            paddingBottom: "20px",
-            marginBottom: "24px",
-          }}
-        >
-          <h1
-            style={{ margin: "0 0 6px 0", fontSize: "24px", color: "#1a202c" }}
-          >
-            Update Equipment
-          </h1>
-          <p style={{ margin: 0, fontSize: "14px", color: "#718096" }}>
-            Edit the form below to update an equipment.
-          </p>
+    <div className="form-container">
+      <div className="form-card">
+        <div className="form-header">
+          <h1 className="form-title">Update Equipment</h1>
+          <p className="form-subtitle">Edit the form below to update an equipment.</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <label style={labelStyle}>Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Quantity Available</label>
-              <input
-                type="number"
-                min="0"
-                name="quantityAvailable"
-                value={formData.quantityAvailable}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    quantityAvailable: e.target.value,
-                  })
-                }
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Is Active</label>
-              <select
-                name="isActive"
-                value={formData.isActive.toString()}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    isActive: e.target.value === "true",
-                  })
-                }
-                style={inputStyle}
-                required
-              >
-                <option value="true">True</option>
-                <option value="false">False</option>
-              </select>
-            </div>
+        {backendErrors.global && (
+          <div className="global-error">
+            {backendErrors.global}
           </div>
+        )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                opacity: isSubmitting ? 0.6 : 1,
-              }}
-            >
-              {isSubmitting ? "Saving..." : "Confirm & Update Equipment"}
-            </button>
-          </div>
-        </form>
+        <DynamicForm 
+          config={formSchema} 
+          onSubmit={handleFormSubmit} 
+          backendErrors={backendErrors}
+          isSubmitting={isSubmitting} 
+        />
       </div>
     </div>
   )

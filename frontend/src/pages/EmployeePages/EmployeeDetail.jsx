@@ -154,16 +154,16 @@ const EmployeeDetail = () => {
               />
             )}
             {activeModal === "assignRole" && (
-              <RoleActionForm actionType="assign" userId={Number(id)} onSubmitSuccess={closeModal} />
+              <RoleActionModal actionType="assign" userId={Number(id)} onSubmitSuccess={closeModal} />
             )}
             {activeModal === "removeRole" && (
-              <RoleActionForm actionType="remove" userId={Number(id)} onSubmitSuccess={closeModal} />
+              <RoleActionModal actionType="remove" userId={Number(id)} onSubmitSuccess={closeModal} />
             )}
             {activeModal === "assignPermission" && (
-              <PermissionActionForm actionType="assign" onSubmitSuccess={closeModal} />
+              <PermissionActionModal actionType="assign" onSubmitSuccess={closeModal} />
             )}
             {activeModal === "removePermission" && (
-              <PermissionActionForm actionType="remove" onSubmitSuccess={closeModal} />
+              <PermissionActionModal actionType="remove" onSubmitSuccess={closeModal} />
             )}
           </div>
         </div>

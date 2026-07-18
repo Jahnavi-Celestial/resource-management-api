@@ -1,203 +1,115 @@
-import React, { useState } from "react";
-import { useMutation, useQuery } from "@apollo/client/react";
-import { CreateEmployee as CreateEmployeeMutation } from "../../graphql/mutations";
-import { GetAllRoles } from "../../graphql/queries";
+import React, { useState } from "react"
+import { useMutation, useQuery } from "@apollo/client/react"
+import { CreateEmployee as CreateEmployeeMutation } from "../../graphql/mutations"
+import { GetAllRoles } from "../../graphql/queries"
+import DynamicForm from "../FormsField/DynamicForm"
 
 const CreateEmployee = ({ onSubmitSuccess }) => {
-  const [selectedRoleId, setSelectedRoleId] = useState("")
+  const [backendErrors, setBackendErrors] = useState({})
   const { data, loading, error } = useQuery(GetAllRoles)
-
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    roleId: null,
-  })
 
   const [createEmployeeAction, { loading: isSubmitting }] = useMutation(CreateEmployeeMutation)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
+  const handleFormSubmit = async (formData, resetForm) => {
+    setBackendErrors({})
     try {
       await createEmployeeAction({
         variables: {
-          input:{
+          input: {
             firstName: formData.firstName,
             lastName: formData.lastName,
             email: formData.email,
             password: formData.password,
-            roleId: Number(selectedRoleId),
+            roleId: Number(formData.roleId),
           }
         },
       })
 
       alert("Employee created successfully!")
-      e.target.reset()
+      resetForm()
       if (onSubmitSuccess) {
         onSubmitSuccess()
       }
-    } catch (error) {
-      console.error("Error creating employee:", error)
-      alert("Failed to create employee. Please try again.")
+    } catch (err) {
+      if (err.graphQLErrors && err.graphQLErrors[0]?.extensions?.validation) {
+        setBackendErrors(err.graphQLErrors[0].extensions.validation)
+      } else {
+        setBackendErrors({ global: err.message })
+      }
     }
   }
 
-  const labelStyle = {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4a5568",
-    marginBottom: "6px",
+  if (error) {
+    return (
+      <div className="error-state">
+        <h3>Failed to load configurations</h3>
+        <p>Please refresh the page.</p>
+      </div>
+    )
   }
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    fontSize: "14px",
-    boxSizing: "border-box",
-    backgroundColor: "#f8fafc",
+
+  if (loading) {
+    return (
+      <div className="state-container">
+        <p>Gathering system resources...</p>
+      </div>
+    )
   }
+
+  const formSchema = [
+    {
+      name: "firstName",
+      type: "text",
+      label: "First Name",
+      validators: [{ type: "required", message: "First name is required" }]
+    },
+    {
+      name: "lastName",
+      type: "text",
+      label: "Last Name"
+    },
+    {
+      name: "email",
+      type: "email",
+      label: "Email",
+      validators: [{ type: "required", message: "Email is required" }]
+    },
+    {
+      name: "password",
+      type: "password",
+      label: "Password",
+      validators: [{ type: "required", message: "Password is required" }]
+    },
+    {
+      name: "roleId",
+      type: "select",
+      label: "Role",
+      placeholder: "Select Role",
+      validators: [{ type: "required", message: "Selecting a role is mandatory" }],
+      options: (data?.getAllRoles || []).map(role => ({ value: role.id, label: role.role_name }))
+    }
+  ]
 
   return (
-    <div
-      style={{
-        minHeight: "50vh",
-        backgroundColor: "#f1f5f9",
-        padding: "48px 16px",
-        fontFamily: "sans-serif",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          padding: "32px",
-        }}
-      >
-        <div
-          style={{
-            borderBottom: "1px solid #edf2f7",
-            paddingBottom: "20px",
-            marginBottom: "24px",
-          }}
-        >
-          <h1 style={{ margin: "0 0 6px 0", fontSize: "24px", color: "#1a202c" }}>
-            Add New Employee
-          </h1>
-          <p style={{ margin: 0, fontSize: "14px", color: "#718096" }}>
-            Fill out the form below to add a new employee.
-          </p>
+    <div className="form-container">
+      <div className="form-card">
+        <div className="form-header">
+          <h1 className="form-title">Add New Employee</h1>
+          <p className="form-subtitle">Fill out the form below to add a new employee.</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <label style={labelStyle}>First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
-                }
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Role</label>
-              <select
-                name="role"
-                value={selectedRoleId}
-                onChange={(e) => setSelectedRoleId(e.target.value)}
-                style={inputStyle}
-                required
-              >
-              <option value="">Select Role</option>
-                {data?.getAllRoles?.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.role_name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {backendErrors.global && (
+          <div className="global-error">
+            {backendErrors.global}
           </div>
+        )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                opacity: isSubmitting ? 0.6 : 1,
-              }}
-            >
-              {isSubmitting ? "Saving..." : "Confirm & Create Employee"}
-            </button>
-          </div>
-        </form>
+        <DynamicForm 
+          config={formSchema} 
+          onSubmit={handleFormSubmit} 
+          backendErrors={backendErrors}
+          isSubmitting={isSubmitting} 
+        />
       </div>
     </div>
   )

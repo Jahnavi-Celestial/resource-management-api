@@ -2,141 +2,153 @@ import React, { useContext, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { Login, Register } from '../graphql/mutations'
 import { AuthContext } from '../context/AuthContext'
-import './SignIn.css'
 import { GetAllRoles } from '../graphql/queries'
+import DynamicForm from '../components/FormsField/DynamicForm'
+import './SignIn.css'
 
 const SignIn = () => {
   const [isLogin, setIsLogin] = useState(true)
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', roleId: null })
+  const [backendErrors, setBackendErrors] = useState({})
   
-  const { setToken, setUser } = useContext(AuthContext);
-  const [loginAction] = useMutation(Login)
-  const [registerAction] = useMutation(Register)
+  const { setToken, setUser } = useContext(AuthContext)
+  const [loginAction, { loading: isLoggingIn }] = useMutation(Login)
+  const [registerAction, { loading: isRegistering }] = useMutation(Register)
 
-  const [selectedRoleId, setSelectedRoleId] = useState("")
-  const { data, loading, error } = useQuery(GetAllRoles)
+  const { data, loading: rolesLoading } = useQuery(GetAllRoles, {
+    skip: isLogin
+  })
 
-  async function handleSubmit(e){
-    e.preventDefault();
+  const handleFormSubmit = async (formData, resetForm) => {
+    setBackendErrors({})
     try {
-      if(isLogin){
+      if (isLogin) {
         const loginData = await loginAction({ 
-            variables: { 
-                input:{
-                  email: formData.email, 
-                  password: formData.password
-                } 
+          variables: { 
+            input: {
+              email: formData.email, 
+              password: formData.password
             } 
+          } 
         })
 
         const token = loginData.data.login
         localStorage.setItem('token', token)
-
         setToken(token)
-        setFormData({...formData, email: '', password: ''})
+        resetForm()
       } else {
         const registerData = await registerAction({ 
-            variables: { 
-                input:{
-                  firstName: formData.firstName, 
-                  lastName: formData.lastName, 
-                  email: formData.email, 
-                  password: formData.password, 
-                  roleId: Number(selectedRoleId)
-                }
-            } 
+          variables:{ 
+            input:{
+              firstName: formData.firstName, 
+              lastName: formData.lastName, 
+              email: formData.email, 
+              password: formData.password, 
+              roleId: Number(formData.roleId)
+            }
+          } 
         })
 
         const user = registerData.data.register
         localStorage.setItem('user', JSON.stringify(user))
-
         setUser(user)
-        setFormData({ firstName: '', lastName: '', email: '', password: '', roleId: null })
-        setIsLogin(true);
+        resetForm()
+        setIsLogin(true)
       }
-    } catch (error) {
-      console.error("Authentication failed:", error.message);
-      alert(`Authentication failed: ${error.message}`)
+    }catch(err){
+      if (err.graphQLErrors && err.graphQLErrors?.extensions?.validation) {
+        setBackendErrors(err.graphQLErrors.extensions.validation)
+      } else {
+        setBackendErrors({ global: err.message })
+      }
     }
   }
 
-  const labelStyle = {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4a5568",
-    marginBottom: "6px",
+  const toggleAuthMode = () => {
+    setBackendErrors({})
+    setIsLogin(!isLogin)
   }
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    fontSize: "14px",
-    boxSizing: "border-box",
-    backgroundColor: "#f8fafc",
+
+  const loginSchema = [
+    {
+      name: "email",
+      type: "email",
+      placeholder: "Email",
+      validators: [{ type: "required", message: "Email is required" }]
+    },
+    {
+      name: "password",
+      type: "password",
+      placeholder: "Password",
+      validators: [{ type: "required", message: "Password is required" }]
+    }
+  ]
+
+  const registerSchema = [
+    {
+      name: "firstName",
+      type: "text",
+      placeholder: "First Name",
+      validators: [{ type: "required", message: "First name is required" }]
+    },
+    {
+      name: "lastName",
+      type: "text",
+      placeholder: "Last Name"
+    },
+    {
+      name: "email",
+      type: "email",
+      placeholder: "Email",
+      validators: [{ type: "required", message: "Email is required" }]
+    },
+    {
+      name: "password",
+      type: "password",
+      placeholder: "Password",
+      validators: [{ type: "required", message: "Password is required" }]
+    },
+    {
+      name: "roleId",
+      type: "select",
+      label: "Role",
+      placeholder: "Select Role",
+      validators: [{ type: "required", message: "Role is required" }],
+      options: (data?.getAllRoles || []).map(role => ({ value: role.id, label: role.role_name }))
+    }
+  ]
+
+  if(!isLogin && rolesLoading){
+    return(
+      <div className="authContainer">
+        <div className="authCard">
+          <p>Loading available roles...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="authContainer"> 
-      { isLogin ? (
-        <div className="authCard">
-          <h1>Sign In</h1>
-          <form className="authForm" onSubmit={(e) => handleSubmit(e)}>
-            <input type="email" placeholder='Email' 
-            value={formData.email} 
-            onChange={(e)=>setFormData({...formData, email: e.target.value})}
-            />
-            <input type="password" placeholder='Password' 
-            value={formData.password} 
-            onChange={(e)=>setFormData({...formData, password: e.target.value})}
-            />
-            <h3 className="toggleText" onClick={()=>setIsLogin(false)}>Create Account?</h3>
-            <button className="submitBtn" type="submit">Sign In</button>
-          </form>
-        </div>
-      ) : (
-        <div className="authCard">
-          <h2>Sign Up</h2>
-          <form className="authForm" onSubmit={(e) => handleSubmit(e)}>
-            <input type="text" placeholder='First Name' 
-            value={formData.firstName} 
-            onChange={(e)=>setFormData({...formData, firstName: e.target.value})}
-            />
-            <input type="text" placeholder='Last Name' 
-            value={formData.lastName} 
-            onChange={(e)=>setFormData({...formData, lastName: e.target.value})}
-            />
-            <input type="email" placeholder='Email' 
-            value={formData.email} 
-            onChange={(e)=>setFormData({...formData, email: e.target.value})}
-            />
-            <input type="password" placeholder='Password' 
-            value={formData.password} 
-            onChange={(e)=>setFormData({...formData, password: e.target.value})}
-            />
-            <div>
-              <label style={labelStyle}>Role</label>
-              <select
-                name="role"
-                value={selectedRoleId}
-                onChange={(e) => setSelectedRoleId(e.target.value)}
-                style={inputStyle}
-                required
-              >
-              <option value="">Select Role</option>
-                {data?.getAllRoles?.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.role_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <h3 className="toggleText" onClick={()=>setIsLogin(true)}>Already have an account? Login</h3>
-            <button className="submitBtn" type="submit">Sign Up</button>
-          </form>
-        </div>
-      ) }
+    <div className="authContainer">
+      <div className="authCard">
+        <h1>{isLogin ? "Sign In" : "Sign Up"}</h1>
+
+        {backendErrors.global && (
+          <div className="global-error" style={{ color: "#ef4444", marginBottom: "15px", fontSize: "14px" }}>
+            {backendErrors.global}
+          </div>
+        )}
+
+        <DynamicForm 
+          config={isLogin ? loginSchema : registerSchema} 
+          onSubmit={handleFormSubmit} 
+          backendErrors={backendErrors}
+          isSubmitting={isLogin ? isLoggingIn : isRegistering} 
+        />
+
+        <h3 className="toggleText" onClick={toggleAuthMode}>
+          {isLogin ? "Create Account?" : "Already have an account? Login"}
+        </h3>
+      </div>
     </div>
   )
 }
