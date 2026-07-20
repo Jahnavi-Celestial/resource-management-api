@@ -1,23 +1,30 @@
-import React, { useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
 import { useQuery } from "@apollo/client/react";
 import { ViewOwnBookings as ViewOwnBookingsQuery } from "../../graphql/queries";
 import DataGrid from "../../components/DataGrid"; 
 import "./ViewOwnBookings.css";
+import { useAuth } from "../../hooks/useAuth";
+import { usePagination } from "../../hooks/usePagination";
 
 const ViewOwnBookings = () => {
-  const { user } = useContext(AuthContext)
+  const { user } = useAuth()
   const navigate = useNavigate()
   
   const [status, setStatus] = useState("")
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(5)
   const [sortOrder, setSortOrder] = useState("DESC")
 
-  const { data, loading, refetch } = useQuery(ViewOwnBookingsQuery, {
+  const {
+    currentPage: page,
+    pageSize: limit,
+    goToPage,
+    setPageSize,
+    setTotalRecords
+  } = usePagination({ initialPageSize: 5, initialPage: 1 })
+
+  const { data, loading } = useQuery(ViewOwnBookingsQuery, {
     variables: {
-      input:{
+      input: {
         page: page,
         limit: limit,
         bookingStatus: status || null,
@@ -31,6 +38,16 @@ const ViewOwnBookings = () => {
   const bookings = data?.viewOwnBooking?.data || []
   
   const totalCount = data?.viewOwnBooking?.total || 0
+
+  useEffect(() => {
+    if (!loading && data?.viewOwnBooking) {
+      setTotalRecords(totalCount);
+    }
+  }, [totalCount, loading, data, setTotalRecords]);
+
+  useEffect(() => {
+    goToPage(1)
+  }, [status, sortOrder])
 
   const columns = [
     { key: "id", label: "Id" },
@@ -61,7 +78,6 @@ const ViewOwnBookings = () => {
 
   const handleSortToggle = () => {
     setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
-    setPage(1);
   };
 
   const handleRowClick = (row) => {
@@ -79,7 +95,6 @@ const ViewOwnBookings = () => {
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
-            setPage(1);
           }}
         >
           <option value="">All Statuses</option>
@@ -100,11 +115,8 @@ const ViewOwnBookings = () => {
         totalCount={totalCount}
         sortDirection={sortOrder}
         onSortToggle={handleSortToggle}
-        onPageChange={(newPage) => setPage(newPage)}
-        onLimitChange={(newLimit) => { 
-          setLimit(newLimit);
-          setPage(1);
-        }}
+        onPageChange={(newPage) => goToPage(newPage)}
+        onLimitChange={(newLimit) => setPageSize(newLimit)}
         onRowClick={handleRowClick}
       />
     </section>

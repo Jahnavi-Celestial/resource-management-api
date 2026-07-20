@@ -1,22 +1,24 @@
 import { useQuery } from "@apollo/client/react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Room } from "../../graphql/queries";
-import { AuthContext } from "../../context/AuthContext";
 import UpdateRoom from "../../components/Room/UpdateRoom";
 import DeleteRoom from "../../components/Room/DeleteRoom";
 import "./RoomDetail.css";
 import RoomDetailShimmer from "../ShimmerPages/RoomDetailShimmer";
+import { useAuth } from "../../hooks/useAuth";
+import { useDialog } from "../../hooks/useDialog";
+import { usePermission } from "../../hooks/usePermission";
+import { Can } from "../../components/Can";
 
 const RoomDetail = () => {
   const { id } = useParams()
-  const { user } = useContext(AuthContext)
+  const { user } = useAuth()
   const roles = user?.roles
 
-  const [activeModal, setActiveModal] = useState(null)
+  const { hasPermission } = usePermission()
 
-  const openModal = (modalName) => setActiveModal(modalName)
-  const closeModal = () => setActiveModal(null)
+  const { isOpen, dialogData: activeModal, openDialog, closeDialog } = useDialog()
 
   const { data, loading } = useQuery(Room, {
     variables: { roomId: Number(id) },
@@ -42,22 +44,24 @@ const RoomDetail = () => {
           </p>
         </div>
 
-        {roles.includes('admin') && (
           <div className="room-action-buttons">
+          <Can permission={"UPDATE_ROOM"}>
             <button
               className="btn-room-update"
-              onClick={() => openModal("updateRoom")}
+              onClick={() => openDialog("updateRoom")}
             >
               Update Room
             </button>
+          </Can>
+          <Can permission={"DELETE_ROOM"} >
             <button
               className="btn-room-delete"
-              onClick={() => openModal("deleteRoom")}
+              onClick={() => openDialog("deleteRoom")}
             >
               Delete Room
             </button>
+          </Can>
           </div>
-        )}
       </header>
 
       <div className="room-detail-layout">
@@ -147,18 +151,18 @@ const RoomDetail = () => {
       </section>
 
       {activeModal && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeDialog}>
           <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={closeModal}>
+            <button className="modal-close-btn" onClick={closeDialog}>
               &times;
             </button>
 
             {activeModal === "updateRoom" && (
-              <UpdateRoom onSubmitSuccess={closeModal} room={room} />
+              <UpdateRoom onSubmitSuccess={closeDialog} room={room} />
             )}
             {activeModal === "deleteRoom" && (
               <DeleteRoom
-                onSubmitSuccess={closeModal}
+                onSubmitSuccess={closeDialog}
                 id={room?.id}
                 refetch={null}
               />

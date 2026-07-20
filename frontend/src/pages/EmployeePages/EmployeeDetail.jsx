@@ -1,24 +1,27 @@
 import { useQuery } from "@apollo/client/react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { BookingPerEmployee, Employee } from "../../graphql/queries";
-import { AuthContext } from "../../context/AuthContext";
 import UpdateEmployee from "../../components/Employee/UpdateEmployee";
 import DeleteEmployee from "../../components/Employee/DeleteEmployee";
 import "./EmployeeDetail.css";
 import RoleActionModal from "../../components/modals/RoleActionModal";
 import PermissionActionModal from "../../components/modals/PermissionActionModal";
 import EmployeeDetailShimmer from "../ShimmerPages/EmployeeDetailShimmer";
+import { useAuth } from "../../hooks/useAuth";
+import { useDialog } from "../../hooks/useDialog";
+import { usePermission } from "../../hooks/usePermission";
+import { Can } from "../../components/Can";
 
 const EmployeeDetail = () => {
   const { id } = useParams()
-  const { user } = useContext(AuthContext)
+  const { user } = useAuth()
 
   const roles = user?.roles
-  const [activeModal, setActiveModal] = useState(null)
 
-  const openModal = (modalName) => setActiveModal(modalName)
-  const closeModal = () => setActiveModal(null)
+  const { hasPermission } = usePermission()
+
+  const { isOpen, dialogData: activeModal, openDialog, closeDialog } = useDialog()
 
   const { data, loading } = useQuery(Employee, {
     variables: { employeeId: Number(id) }
@@ -85,85 +88,96 @@ const EmployeeDetail = () => {
         </section>
       </div>
 
-      { roles.includes('admin') && (
-        <div className="action-header-buttons">
-          <div>
+      <div className="action-header-buttons">
+        <div>
+          <Can permission={'UPDATE_EMPLOYEE'}>
             <button
               className="btn-edit"
-              onClick={() => openModal("updateEmployee")}
+              onClick={() => openDialog("updateEmployee")}
             >
               Update Profile
             </button>
+          </Can>
+          <Can permission={'DELETE_EMPLOYEE'}>
             <button
               className="btn-delete"
-              onClick={() => openModal("deleteEmployee")}
+              onClick={() => openDialog("deleteEmployee")}
             >
               Delete Account
             </button>
-            
-          </div>
-          <div>
+          </Can>  
+        </div>
+          
+        <div>
+          <Can permission={'ASSIGN_ROLE'}>
             <button
               className="btn-edit"
-              onClick={() => openModal("assignRole")}
+              onClick={() => openDialog("assignRole")}
             >
               Assign Role
             </button>
+          </Can>
+          <Can permission={'REMOVE_ROLE'}>
             <button
               className="btn-delete"
-              onClick={() => openModal("removeRole")}
+              onClick={() => openDialog("removeRole")}
             >
               Remove Role
             </button>
-          </div>
-          <div>
+          </Can>
+        </div>
+
+        <div>
+          <Can permission={'ASSIGN_PERMISSION'}>
             <button
               className="btn-edit"
-              onClick={() => openModal("assignPermission")}
+              onClick={() => openDialog("assignPermission")}
             >
               Assign Permission
             </button>
+          </Can>
+          <Can permission={'REMOVE_PERMISSION'}>
             <button
               className="btn-delete"
-              onClick={() => openModal("removePermission")}
+              onClick={() => openDialog("removePermission")}
             >
               Remove Permission
             </button>
-          </div>
+          </Can>
         </div>
-      )}
+      </div>
 
       {activeModal && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeDialog}>
           <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={closeModal}>
+            <button className="modal-close-btn" onClick={closeDialog}>
               &times;
             </button>
 
             {activeModal === "updateEmployee" && (
               <UpdateEmployee
-                onSubmitSuccess={closeModal}
+                onSubmitSuccess={closeDialog}
                 employee={employee}
               />
             )}
             {activeModal === "deleteEmployee" && (
               <DeleteEmployee
-                onSubmitSuccess={closeModal}
+                onSubmitSuccess={closeDialog}
                 id={employee?.id}
                 refetch={null}
               />
             )}
             {activeModal === "assignRole" && (
-              <RoleActionModal actionType="assign" userId={Number(id)} onSubmitSuccess={closeModal} />
+              <RoleActionModal actionType="assign" userId={Number(id)} onSubmitSuccess={closeDialog} />
             )}
             {activeModal === "removeRole" && (
-              <RoleActionModal actionType="remove" userId={Number(id)} onSubmitSuccess={closeModal} />
+              <RoleActionModal actionType="remove" userId={Number(id)} onSubmitSuccess={closeDialog} />
             )}
             {activeModal === "assignPermission" && (
-              <PermissionActionModal actionType="assign" onSubmitSuccess={closeModal} />
+              <PermissionActionModal actionType="assign" onSubmitSuccess={closeDialog} />
             )}
             {activeModal === "removePermission" && (
-              <PermissionActionModal actionType="remove" onSubmitSuccess={closeModal} />
+              <PermissionActionModal actionType="remove" onSubmitSuccess={closeDialog} />
             )}
           </div>
         </div>

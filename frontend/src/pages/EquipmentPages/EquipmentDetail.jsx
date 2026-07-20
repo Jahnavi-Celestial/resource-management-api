@@ -1,5 +1,4 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateEquipment from "../../components/Equipment/UpdateEquipment";
 import DeleteEquipment from "../../components/Equipment/DeleteEquipment";
@@ -7,18 +6,23 @@ import { Equipment, EquipmentUsage } from "../../graphql/queries";
 import { useQuery } from "@apollo/client/react";
 import "./EquipmentDetail.css";
 import EquipmentDetailShimmer from "../ShimmerPages/EquipmentDetailShimmer";
+import { useAuth } from "../../hooks/useAuth";
+import { useDialog } from "../../hooks/useDialog";
+import { usePermission } from "../../hooks/usePermission";
+import { Can } from "../../components/Can";
 
 const EquipmentDetail = () => {
   const { id } = useParams()
 
   const [showUsage, setShowUsage] = useState(false)
-  const { user } = useContext(AuthContext)
-  const [activeModal, setActiveModal] = useState(null)
-
-  const openModal = (modalName) => setActiveModal(modalName)
-  const closeModal = () => setActiveModal(null)
+  const { user } = useAuth()
 
   const roles = user?.roles
+
+  const { isOpen, dialogData: activeModal, openDialog, closeDialog } = useDialog()
+
+  const { hasPermission } = usePermission()
+  const viewEquipmentUsage = hasPermission('VIEW_EQUIPMENT_USAGE')
 
   const { data, loading } = useQuery(Equipment, {
     variables: { equipmentId: Number(id) },
@@ -51,22 +55,24 @@ const EquipmentDetail = () => {
           </p>
         </div>
 
-        {roles.includes('admin') && (
-          <div className="equipment-action-buttons">
+        <div className="equipment-action-buttons">
+          <Can permission={'UPDATE_EQUIPMENT'}>
             <button
               className="btn-asset-update"
-              onClick={() => openModal("updateEquipment")}
+              onClick={() => openDialog("updateEquipment")}
             >
               Update Equipment
             </button>
+          </Can>
+          <Can permission={'DELETE_EQUIPMENT'}>
             <button
               className="btn-asset-delete"
-              onClick={() => openModal("deleteEquipment")}
+              onClick={() => openDialog("deleteEquipment")}
             >
               Delete Equipment
             </button>
-          </div>
-        )}
+          </Can>
+        </div>
       </header>
 
       <div className="equipment-detail-layout">
@@ -138,7 +144,7 @@ const EquipmentDetail = () => {
             )}
           </div>
 
-          {(roles.includes('admin') || roles.includes('manager')) && (
+          {(viewEquipmentUsage) && (
             <div className="collapsible-section">
               <button
                 className={`btn-toggle ${showUsage ? "active" : ""}`}
@@ -169,21 +175,21 @@ const EquipmentDetail = () => {
       </div>
 
       {activeModal && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeDialog}>
           <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={closeModal}>
+            <button className="modal-close-btn" onClick={closeDialog}>
               &times;
             </button>
 
             {activeModal === "updateEquipment" && (
               <UpdateEquipment
-                onSubmitSuccess={closeModal}
+                onSubmitSuccess={closeDialog}
                 equipment={equipment}
               />
             )}
             {activeModal === "deleteEquipment" && (
               <DeleteEquipment
-                onSubmitSuccess={closeModal}
+                onSubmitSuccess={closeDialog}
                 id={equipment?.id}
                 refetch={null}
               />

@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 import CreateEmployee from "./Employee/CreateEmployee";
 import CreateEquipment from "./Equipment/CreateEquipment";
 import CreateRoom from "./Room/CreateRoom";
@@ -8,66 +7,40 @@ import CreateBooking from "./Booking/CreateBooking";
 import "./NavBar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
-import { socket } from "../socket";
+import { useAuth } from "../hooks/useAuth";
+import { useDialog } from "../hooks/useDialog";
+import { useNotification } from "../hooks/useNotification";
+import { usePermission } from "../hooks/usePermission";
+import { Can } from "./Can";
 
 const NavBar = () => {
   const navigate = useNavigate()
-  const { user } = useContext(AuthContext)
+  const { user } = useAuth()
   const roles = user?.roles
 
-  const [activeModal, setActiveModal] = useState(null)
+  const { hasPermission } = usePermission()
+
+  const { isOpen, dialogData: activeModal, openDialog, closeDialog } = useDialog()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isNotifOpen, setIsNotifOpen] = useState(false)
 
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [notifications, setNotifications] = useState([])
+  const {
+    isNotifOpen,
+    unreadCount,
+    notifications,
+    toggleNotifPanel,
+    closeNotifPanel,
+    handleNotifClick,
+    handleMarkAllAsRead
+  } = useNotification()
 
-  useEffect(() => {
-    socket.emit("get_unread_count")
-
-    socket.emit("get_my_notifications", { unreadOnly: false })
-
-    socket.on("unread_count_res", (data) => {
-      setUnreadCount(data.count)
-    })
-
-    socket.on("notifications_list", (list) => {
-      setNotifications(list)
-    })
-
-    socket.on("new_notification", (newNotif) => {
-      setNotifications((prev) => [newNotif, ...prev])
-    })
-
-    socket.on("mark_as_read_success", ({ notificationId }) => {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
-      )
-    })
-
-    socket.on("mark_all_as_read_success", () => {
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-      setUnreadCount(0)
-    })
-
-    return () => {
-      socket.off("unread_count_res")
-      socket.off("notifications_list")
-      socket.off("new_notification")
-      socket.off("mark_as_read_success")
-      socket.off("mark_all_as_read_success")
-    }
-  }, [])
-
-  const openModal = (modalName) => {
-    setActiveModal(modalName)
-    setIsMenuOpen(false)
+  const toggleMobileMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
     setIsNotifOpen(false)
   }
 
-  const closeModal = () => setActiveModal(null)
-  const toggleMobileMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
+  const handleOpenModal = (modalName) => {
+    openDialog(modalName)
+    setIsMenuOpen(false)
     setIsNotifOpen(false)
   }
 
@@ -75,24 +48,6 @@ const NavBar = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     window.location.href = "/";
-  }
-
-  const handleNotifClick = (notif) => {
-    console.log(notif)
-    if (!notif.isRead) {
-      socket.emit("mark_as_read", { notificationId: notif.id })
-    }
-    setIsNotifOpen(false)
-    
-    if (notif.message?.includes("booking") || notif.title?.toLowerCase().includes("booking")) {
-      let id = notif.bookingId
-      navigate(`/bookingDetails/${id}`)
-    }
-  }
-
-  const handleMarkAllAllRead = () => {
-    socket.emit("mark_all_as_read")
-    setIsNotifOpen(false)
   }
 
   return (
@@ -103,7 +58,7 @@ const NavBar = () => {
 
       <div className="navbar-right-section">
         <div className="notification-bell-container">
-          <button className="bell-btn" onClick={() => setIsNotifOpen(!isNotifOpen)}>
+          <button className="bell-btn" onClick={toggleNotifPanel}>
             <FontAwesomeIcon icon={faBell} />
             {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
           </button>
@@ -112,7 +67,7 @@ const NavBar = () => {
             <div className="notification-panel">
               <div className="panel-header">
                 <h3>Notifications</h3>
-                <button onClick={handleMarkAllAllRead}>Mark all as read</button>
+                <button onClick={handleMarkAllAsRead}>Mark all as read</button>
               </div>
               <div className="panel-body">
                 {notifications.length === 0 ? (
@@ -164,32 +119,32 @@ const NavBar = () => {
             >
               Manage Role/Permission
             </NavLink>
-            <button className="nav-action-btn" onClick={() => openModal("employee")}>+ Employee</button>
-            <button className="nav-action-btn" onClick={() => openModal("equipment")}>+ Equipment</button>
-            <button className="nav-action-btn" onClick={() => openModal("room")}>+ Room</button>
+            <button className="nav-action-btn" onClick={() => handleOpenModal("employee")}>+ Employee</button>
+            <button className="nav-action-btn" onClick={() => handleOpenModal("equipment")}>+ Equipment</button>
+            <button className="nav-action-btn" onClick={() => handleOpenModal("room")}>+ Room</button>
           </div>
         )}
 
-        {roles?.includes('employee') && (
+        <Can permission={'CREATE_BOOKING'}>
           <div className="role-actions-group">
-            <button className="nav-action-btn primary-action" onClick={() => openModal("booking")}>Book a Room</button>
+            <button className="nav-action-btn primary-action" onClick={() => handleOpenModal("booking")}>Book a Room</button>
           </div>
-        )}
+        </Can>
 
         <button className="nav-logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
-      {activeModal && (
-        <div className="modal-overlay" onClick={closeModal}>
+      {isOpen && (
+        <div className="modal-overlay" onClick={closeDialog}>
           <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={closeModal}>✕</button>
+            <button className="modal-close-btn" onClick={closeDialog}>✕</button>
 
-            {activeModal === "employee" && <CreateEmployee onSubmitSuccess={closeModal} />}
-            {activeModal === "equipment" && <CreateEquipment onSubmitSuccess={closeModal} />}
-            {activeModal === "room" && <CreateRoom onSubmitSuccess={closeModal} />}
-            {activeModal === "booking" && <CreateBooking onSubmitSuccess={closeModal} />}
+            {activeModal === "employee" && <CreateEmployee onSubmitSuccess={closeDialog} />}
+            {activeModal === "equipment" && <CreateEquipment onSubmitSuccess={closeDialog} />}
+            {activeModal === "room" && <CreateRoom onSubmitSuccess={closeDialog} />}
+            {activeModal === "booking" && <CreateBooking onSubmitSuccess={closeDialog} />}
           </div>
         </div>
       )}

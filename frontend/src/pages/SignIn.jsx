@@ -1,16 +1,16 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { Login, Register } from '../graphql/mutations'
-import { AuthContext } from '../context/AuthContext'
 import { GetAllRoles } from '../graphql/queries'
 import DynamicForm from '../components/FormsField/DynamicForm'
 import './SignIn.css'
+import { useAuth } from '../hooks/useAuth'
 
 const SignIn = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [backendErrors, setBackendErrors] = useState({})
   
-  const { setToken, setUser } = useContext(AuthContext)
+  const { setToken, setUser } = useAuth()
   const [loginAction, { loading: isLoggingIn }] = useMutation(Login)
   const [registerAction, { loading: isRegistering }] = useMutation(Register)
 

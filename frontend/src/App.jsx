@@ -1,10 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import Layout from "./components/Layout";
 import SignIn from "./pages/SignIn";
 import { RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
-import { AuthContext } from "./context/AuthContext";
 import ViewOwnBookings from "./pages/BookingPages/ViewOwnBookings";
 import BookingDetail from "./pages/BookingPages/BookingDetail";
 import MeetingRoom from "./pages/RoomPages/MeetingRoom";
@@ -15,14 +14,16 @@ import EmployeeDetail from "./pages/EmployeePages/EmployeeDetail";
 import { connectSocket, disconnectSocket } from './socket';
 import UnAuthorized from "./components/UnAuthorized";
 import AdminAction from "./components/AdminAction";
+import { useAuth } from "./hooks/useAuth";
+import { usePermission } from "./hooks/usePermission";
 
 const AuthGuard = () => {
-  const { token } = useContext(AuthContext)
+  const { token } = useAuth()
   return token ? <Layout /> : <SignIn />
 };
 
 const PermissionGuard = ({ requiredPermission }) => {
-  const { hasPermission } = useContext(AuthContext)
+  const { hasPermission } = usePermission()
 
   if(!hasPermission(requiredPermission)){
     return <Navigate to="/unauthorized" replace />

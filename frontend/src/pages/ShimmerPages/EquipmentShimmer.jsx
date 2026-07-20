@@ -9,7 +9,7 @@ const EquipmentShimmer = () => {
         {
             array.map((e, i) => {
                 return (
-                    <div className="shimmer-equipment-card">
+                    <div className="shimmer-equipment-card" key={i}>
                         <div className="shimmer-elem shimmer-asset-box"></div>
                         <div className="shimmer-elem shimmer-title-line"></div>
                         <div className="shimmer-elem shimmer-status-badge"></div>

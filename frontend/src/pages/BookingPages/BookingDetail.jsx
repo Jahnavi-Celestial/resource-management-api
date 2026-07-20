@@ -1,20 +1,25 @@
 import { useMutation, useQuery } from "@apollo/client/react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Booking } from "../../graphql/queries";
-import { AuthContext } from "../../context/AuthContext";
 import { ApproveBooking, CancelBooking, RejectBooking } from "../../graphql/mutations";
 import "./BookingDetail.css";
 import BookingDetailShimmer from "../ShimmerPages/BookingDetailShimmer";
+import { useAuth } from "../../hooks/useAuth";
+import { useDialog } from "../../hooks/useDialog";
+import { usePermission } from "../../hooks/usePermission";
+import { Can } from "../../components/Can";
 
 const BookingDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useContext(AuthContext)
+  const { user } = useAuth()
   const roles = user?.roles
 
+  const { hasPermission } = usePermission()
+
   const [reason, setReason] = useState("")
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { isOpen, dialogData: activeModal, openDialog, closeDialog } = useDialog()
 
   const { data, loading, error } = useQuery(Booking, {
     variables: { bookingId: Number(id) },
@@ -68,7 +73,7 @@ const BookingDetail = () => {
           }
         },
       })
-      setIsModalOpen(false)
+      closeDialog()
       setReason("")
       alert("Booking successfully rejected.")
     } catch (err) {
@@ -137,7 +142,7 @@ const BookingDetail = () => {
             <h1 className="bd-main-title">Booking Details</h1>
           </div>
 
-          {roles.includes('employee') && (
+          <Can permission={'CANCEL_BOOKING'}>
             <div className="bd-action-buttons">
               <button
                 className="bd-btn bd-btn-secondary"
@@ -146,10 +151,10 @@ const BookingDetail = () => {
                 Cancel Booking
               </button>
             </div>
-          )}
+          </Can>
 
-          {roles.includes('manager') && (
-            <div className="bd-action-buttons">
+          <div className="bd-action-buttons">
+            <Can permission={'APPROVE_BOOKING'}>
               <button
                 className="bd-btn bd-btn-primary"
                 onClick={handleApproveBtn}
@@ -157,15 +162,17 @@ const BookingDetail = () => {
               >
                 Approve Booking
               </button>
+            </Can>
+            <Can permission={'REJECT_BOOKING'}>
               <button
                 className="bd-btn bd-btn-secondary"
-                onClick={() => setIsModalOpen(true)}
+                onClick={openDialog}
                 disabled={bookingData.status != 'PENDING'}
               >
                 Reject Booking
               </button>
-            </div>
-          )}
+            </Can>
+          </div>
         </header>
 
         <div className="bd-grid">
@@ -268,8 +275,8 @@ const BookingDetail = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className="bd-modal-overlay" onClick={() => setIsModalOpen(false)}>
+      {isOpen && (
+        <div className="bd-modal-overlay" onClick={closeDialog}>
           <div className="bd-modal-window" onClick={(e) => e.stopPropagation()}>
             <h2 className="bd-modal-title">Reason for Booking Rejection</h2>
             <p className="bd-modal-description">
@@ -287,7 +294,7 @@ const BookingDetail = () => {
             <div className="bd-modal-actions">
               <button
                 className="bd-modal-btn btn-close"
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeDialog}
               >
                 Cancel
               </button>

@@ -4,11 +4,23 @@ import { Equipments } from "../../graphql/queries";
 import EquipmentCard from "../../components/Equipment/EquipmentCard";
 import "./Equipment.css";
 import EquipmentShimmer from "../ShimmerPages/EquipmentShimmer";
+import { useDebounce } from "../../hooks/useDebounce";
+import { usePagination } from "../../hooks/usePagination";
 
 const Equipment = () => {
-  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
-  const [page, setPage] = useState(1)
+
+  const debouncedSearch = useDebounce(searchInput, 500)
+
+  const {
+    currentPage: page,
+    pageSize: limit,
+    totalPages,
+    goToPage,
+    nextPage,
+    prevPage,
+    setTotalRecords
+  } = usePagination({ initialPageSize: 5, initialPage: 1 })
 
   const { data, loading, refetch } = useQuery(Equipments, {
     variables: {
@@ -22,15 +34,17 @@ const Equipment = () => {
   })
 
   const equipments = data?.equipments?.data || [];
-
+  const totalCount = data?.equipments?.total || 0
+    
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-      setPage(1);
-    }, 400)
-  
-    return () => clearTimeout(handler)
-  }, [searchInput]);
+    if (!loading && data?.rooms) {
+      setTotalRecords(totalCount);
+    }
+  }, [totalCount, loading, data, setTotalRecords])
+    
+  useEffect(() => {
+    goToPage(1);
+  }, [debouncedSearch])
 
   return (
     <div className="equipment-container">
@@ -50,7 +64,6 @@ const Equipment = () => {
             value={searchInput} 
             onChange={(e) => {
               setSearchInput(e.target.value);
-              setPage(1);
             }}
           />
         </div>
@@ -78,7 +91,7 @@ const Equipment = () => {
         <button
           className="page-btn"
           disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
+          onClick={prevPage}
         >
           Previous
         </button>
@@ -86,7 +99,7 @@ const Equipment = () => {
         <button
           className="page-btn"
           disabled={equipments.length < 6}
-          onClick={() => setPage((prev) => prev + 1)}
+          onClick={nextPage}
         >
           Next
         </button>
