@@ -1,14 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { AuthProvider } from './context/AuthContext.jsx'
-import { ApolloCache } from '@apollo/client'
-import { ApolloProvider } from '@apollo/client/react'
-import { client } from './apolloClient.js'
-import { PermissionProvider } from './context/PermissionContext.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
+import { AuthProvider } from "./shared/context/AuthContext.jsx";
+import { ApolloCache } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client/react";
+import { client } from "./services/apolloClient.js";
+import { PermissionProvider } from "./shared/context/PermissionContext.jsx";
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <PermissionProvider>
@@ -17,5 +17,5 @@ createRoot(document.getElementById('root')).render(
         </ApolloProvider>
       </PermissionProvider>
     </AuthProvider>
-  </StrictMode>
-)
+  </StrictMode>,
+);
