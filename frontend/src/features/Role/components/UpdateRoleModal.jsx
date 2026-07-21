@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { UpdateRole } from "../graphql/mutation";
 import { GetAllRoles } from "../../../shared/services/queries";
 
-const UpdateRoleModal = ({ onSubmitSuccess }) => {
+const UpdateRoleModal = memo(({ onSubmitSuccess }) => {
   const { data, loading: queryLoading } = useQuery(GetAllRoles);
   const [updateRole, { loading: mutationLoading, error }] = useMutation(
     UpdateRole,
@@ -19,7 +19,7 @@ const UpdateRoleModal = ({ onSubmitSuccess }) => {
       label: role.role_name,
     })) || [];
 
-  const formConfig = [
+  const formConfig = useMemo(() => [
     {
       name: "id",
       label: "Select Role to Update",
@@ -35,7 +35,7 @@ const UpdateRoleModal = ({ onSubmitSuccess }) => {
       placeholder: "Enter updated name",
       validators: [{ type: "required", message: "Updated name is required" }],
     },
-  ];
+  ], [roleOptions]);
 
   const handleSubmit = async (formData, resetForm) => {
     try {
@@ -67,6 +67,6 @@ const UpdateRoleModal = ({ onSubmitSuccess }) => {
       />
     </div>
   );
-};
+});
 
 export default UpdateRoleModal;

@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { memo } from 'react'
 import PropTypes from 'prop-types'
 
-const Button = ({ value, onClick, type }) => (
+const Button = memo(({ value, onClick, type }) => (
     <button type={type} className="btn-submit" onClick={onClick}>
         {value}
     </button>
-)
+))
 
 Button.propTypes = {
     value: PropTypes.string.isRequired,

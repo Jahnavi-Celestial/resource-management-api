@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import "./RoomDetailShimmer.css"; 
 
-const RoomDetailShimmer = () => {
+const RoomDetailShimmer = memo(() => {
   return (
     <div className="room-detail-container skeleton-wrapper">
       <header className="room-detail-header-skeleton">
@@ -53,6 +53,6 @@ const RoomDetailShimmer = () => {
       </div>
     </div>
   );
-};
+});
 
 export default RoomDetailShimmer;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { ViewOwnBookings as ViewOwnBookingsQuery } from "../graphql/queries";
@@ -6,6 +6,33 @@ import DataGrid from "../../../shared/components/DataGrid";
 import "./ViewOwnBookings.css";
 import { useAuth } from "../../Auth/hooks/useAuth";
 import { usePagination } from "../../../shared/hooks/usePagination";
+
+const columns = [
+    { key: "id", label: "Id" },
+    {
+      key: "purpose",
+      label: "Purpose",
+    },
+    {
+      key: "meetingRoom",
+      label: "Meeting Room",
+      render: (value, row) => row.meetingRoom?.name || "N/A",
+    },
+    {
+      key: "startTime",
+      label: "Scheduled Date",
+      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => (
+        <span className={`status-badge ${value?.toLowerCase() || "pending"}`}>
+          {value || "PENDING"}
+        </span>
+      ),
+    },
+  ];
 
 const ViewOwnBookings = () => {
   const { user } = useAuth();
@@ -49,42 +76,27 @@ const ViewOwnBookings = () => {
     goToPage(1);
   }, [status, sortOrder]);
 
-  const columns = [
-    { key: "id", label: "Id" },
-    {
-      key: "purpose",
-      label: "Purpose",
-    },
-    {
-      key: "meetingRoom",
-      label: "Meeting Room",
-      render: (value, row) => row.meetingRoom?.name || "N/A",
-    },
-    {
-      key: "startTime",
-      label: "Scheduled Date",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (value) => (
-        <span className={`status-badge ${value?.toLowerCase() || "pending"}`}>
-          {value || "PENDING"}
-        </span>
-      ),
-    },
-  ];
-
-  const handleSortToggle = () => {
+  const handleSortToggle = useCallback(() => {
     setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
-  };
+  }, []);
 
-  const handleRowClick = (row) => {
+  const handleRowClick = useCallback((row) => {
     if (row?.id) {
       navigate(`/bookingDetails/${row.id}`);
     }
-  };
+  }, [navigate]);
+
+  const handlePageChange = useCallback((newPage) => {
+    goToPage(newPage)
+  }, [goToPage]);
+
+  const handleLimitChange = useCallback((newLimit) => {
+    setPageSize(newLimit)
+  }, [setPageSize])
+
+  const handleStatusChange = useCallback((e) => {
+    setStatus(e.target.value)
+  }, [])
 
   return (
     <section className="own-bookings-section">
@@ -93,9 +105,7 @@ const ViewOwnBookings = () => {
         <select
           className="filter-select"
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-          }}
+          onChange={handleStatusChange}
         >
           <option value="">All Statuses</option>
           <option value="COMPLETED">Completed</option>
@@ -115,8 +125,8 @@ const ViewOwnBookings = () => {
         totalCount={totalCount}
         sortDirection={sortOrder}
         onSortToggle={handleSortToggle}
-        onPageChange={(newPage) => goToPage(newPage)}
-        onLimitChange={(newLimit) => setPageSize(newLimit)}
+        onPageChange={handlePageChange}
+        onLimitChange={handleLimitChange}
         onRowClick={handleRowClick}
       />
     </section>

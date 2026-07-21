@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import "./EmployeeDetailShimmer.css";
 
-const EmployeeDetailShimmer = () => {
+const EmployeeDetailShimmer = memo(() => {
   return (
     <div className="shimmer-detail-container">
       <header className="shimmer-detail-header">
@@ -43,6 +43,6 @@ const EmployeeDetailShimmer = () => {
       </div>
     </div>
   );
-};
+});
 
 export default EmployeeDetailShimmer;

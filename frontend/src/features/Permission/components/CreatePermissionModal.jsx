@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { useMutation } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { CreatePermission as CREATE_PERMISSION_MUTATION } from "../graphql/mutation";
 import { GetAllPermission } from "../../../shared/services/queries";
 
-const CreatePermissionModal = ({ onSubmitSuccess }) => {
+const CreatePermissionModal = memo(({ onSubmitSuccess }) => {
   const [createPermission, { loading, error }] = useMutation(
     CREATE_PERMISSION_MUTATION,
     {
@@ -12,7 +12,7 @@ const CreatePermissionModal = ({ onSubmitSuccess }) => {
     },
   );
 
-  const formConfig = [
+  const formConfig = useMemo(()=>[
     {
       name: "permission_name",
       label: "Permission Name",
@@ -22,7 +22,7 @@ const CreatePermissionModal = ({ onSubmitSuccess }) => {
         { type: "required", message: "Permission name is required" },
       ],
     },
-  ];
+  ], []);
 
   const handleSubmit = async (formData, resetForm) => {
     try {
@@ -49,6 +49,6 @@ const CreatePermissionModal = ({ onSubmitSuccess }) => {
       />
     </div>
   );
-};
+});
 
 export default CreatePermissionModal;

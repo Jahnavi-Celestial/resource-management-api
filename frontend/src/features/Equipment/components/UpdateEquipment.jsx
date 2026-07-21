@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { UpdateEquipment as UpdateEquipmentMutation } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 
-const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
+const UpdateEquipment = memo(({ onSubmitSuccess, equipment }) => {
   const [backendErrors, setBackendErrors] = useState({});
   const [updateEquipmentAction, { loading: isSubmitting }] = useMutation(
     UpdateEquipmentMutation,
@@ -38,7 +38,7 @@ const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
     }
   };
 
-  const formSchema = [
+  const formSchema = useMemo(() => [
     {
       name: "name",
       type: "text",
@@ -85,7 +85,7 @@ const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
         { value: "false", label: "False" },
       ],
     },
-  ];
+  ], [equipment]);
 
   return (
     <div className="form-container">
@@ -110,6 +110,6 @@ const UpdateEquipment = ({ onSubmitSuccess, equipment }) => {
       </div>
     </div>
   );
-};
+});
 
 export default UpdateEquipment;

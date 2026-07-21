@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 import { useMutation } from "@apollo/client/react";
 import { DeleteEquipment as DeleteEquipmentMutation } from "../graphql/mutation";
 import "./DeleteEquipment.css";
 import { useNavigate } from "react-router-dom";
 
-const DeleteEquipment = ({ onSubmitSuccess, id, refetch }) => {
+const DeleteEquipment = memo(({ onSubmitSuccess, id, refetch }) => {
   const navigate = useNavigate();
   const [deleteEquipmentAction] = useMutation(DeleteEquipmentMutation);
 
@@ -61,6 +61,6 @@ const DeleteEquipment = ({ onSubmitSuccess, id, refetch }) => {
       </div>
     </div>
   );
-};
+});
 
 export default DeleteEquipment;

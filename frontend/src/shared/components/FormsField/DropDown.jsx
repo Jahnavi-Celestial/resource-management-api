@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import PropTypes from 'prop-types'
 
-const Dropdown = ({ name, value, data, label, placeholder, styleClass, onChange, externalError }) => {
+const Dropdown = memo(({ name, value, data, label, placeholder, styleClass, onChange, externalError }) => {
     return (
         <div className={`form-group ${styleClass}`}>
             {label && <label className="form-label">{label}</label>}
@@ -18,7 +18,7 @@ const Dropdown = ({ name, value, data, label, placeholder, styleClass, onChange,
             {externalError && <span className="error-feedback">{externalError}</span>}
         </div>
     )
-}
+})
 
 Dropdown.propTypes = {
     name: PropTypes.string.isRequired,

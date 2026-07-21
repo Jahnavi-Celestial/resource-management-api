@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, useCallback, lazy } from "react";
 import { useQuery } from "@apollo/client/react";
 import {
   Bookings,
@@ -7,7 +7,6 @@ import {
   MonthlyBookingStatics,
 } from "../graphql/queries";
 import DataGrid from "../../../shared/components/DataGrid";
-import ViewOwnBookings from "../../Bookings/pages/ViewOwnBookings";
 import "./Home.css";
 import HomeShimmer from "../components/HomeShimmer";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +15,64 @@ import { useDebounce } from "../../../shared/hooks/useDebounce";
 import { usePagination } from "../../../shared/hooks/usePagination";
 import { usePermission } from "../../../shared/hooks/usePermission";
 import { Can } from "../../../shared/components/Can";
+
+const ViewOwnBookings = lazy(() => import("../../Bookings/pages/ViewOwnBookings"));
+
+const employeeColumns = [
+    { key: "id", label: "ID" },
+    {
+      key: "name",
+      label: "Name",
+      render: (_, row) => (
+        <span>{`${row?.firstName || ""} ${row?.lastName || ""}`.trim()}</span>
+      ),
+    },
+    { key: "email", label: "Email" },
+    {
+      key: "userRoles",
+      label: "Roles",
+      render: (userRoles) => (
+        <div>
+          {userRoles?.map((ur) => (
+            <span
+              key={ur?.id}
+              className="role-badge"
+              style={{ marginRight: "4px" }}
+            >
+              {ur?.role?.role_name}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const bookingColumns = [
+    { key: "id", label: "Booking ID" },
+    {
+      key: "meetingRoom",
+      label: "Room Name",
+      render: (meetingRoom, row) => <span>{meetingRoom?.name || "N/A"}</span>,
+    },
+    {
+      key: "employee",
+      label: "Booked By",
+      render: (employee, row) => (
+        <span>
+          {employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}
+        </span>
+      ),
+    },
+    { key: "purpose", label: "Purpose" },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => (
+        <span className={`status-text ${value?.toLowerCase()}`}>{value}</span>
+      ),
+    },
+  ];
+
 
 const Home = () => {
   const { user } = useAuth();
@@ -129,79 +186,51 @@ const Home = () => {
   );
   const monthlyStats = monthlyStatsData?.monthlyBookingStatics;
 
-  const employeeColumns = [
-    { key: "id", label: "ID" },
-    {
-      key: "name",
-      label: "Name",
-      render: (_, row) => (
-        <span>{`${row?.firstName || ""} ${row?.lastName || ""}`.trim()}</span>
-      ),
-    },
-    { key: "email", label: "Email" },
-    {
-      key: "userRoles",
-      label: "Roles",
-      render: (userRoles) => (
-        <div>
-          {userRoles?.map((ur) => (
-            <span
-              key={ur?.id}
-              className="role-badge"
-              style={{ marginRight: "4px" }}
-            >
-              {ur?.role?.role_name}
-            </span>
-          ))}
-        </div>
-      ),
-    },
-  ];
+  const handleSearchInput = useCallback((e)=>{
+    setSearchInput(e.target.value)
+  }, [debouncedSearch])
 
-  const bookingColumns = [
-    { key: "id", label: "Booking ID" },
-    {
-      key: "meetingRoom",
-      label: "Room Name",
-      render: (meetingRoom, row) => <span>{meetingRoom?.name || "N/A"}</span>,
-    },
-    {
-      key: "employee",
-      label: "Booked By",
-      render: (employee, row) => (
-        <span>
-          {employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}
-        </span>
-      ),
-    },
-    { key: "purpose", label: "Purpose" },
-    {
-      key: "status",
-      label: "Status",
-      render: (value) => (
-        <span className={`status-text ${value?.toLowerCase()}`}>{value}</span>
-      ),
-    },
-  ];
-
-  const handleEmployeeRowClick = (row) => {
+  const handleEmployeeRowClick = useCallback((row) => {
     if (row?.id) {
       navigate(`/employeeDetails/${row.id}`);
     }
-  };
+  },[navigate]);
 
-  const handleBookingRowClick = (row) => {
+  const handleEmpSortToggle = useCallback(() => {
+    setEmpSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
+  }, [])
+
+  const handleEmpPageChange = useCallback((newPage) => {
+    goToEmpPage(newPage)
+  }, [goToEmpPage]);
+
+  const handleEmpLimitChange = useCallback((newLimit) => {
+    setEmpPageSize(newLimit)
+  }, [setEmpPageSize])
+  
+  const handleBookingStatusChange = useCallback((e) => {
+    setBookingStatus(e.target.value)
+  }, [])
+
+  const handleBookingRowClick = useCallback((row) => {
     if (row?.id) {
       navigate(`/bookingDetails/${row.id}`);
     }
-  };
+  }, [navigate]);
 
-  if (
-    loadingBookings ||
-    loadingEmp ||
-    loadingMonthlyStatics ||
-    loadingMostBookedRoom
-  ) {
+  const handleBookingSortToggle = useCallback(() => {
+    setBookingSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
+  }, [])
+
+  const handleBookingPageChange = useCallback((newPage) => {
+    goToBookingPage(newPage)
+  }, [goToBookingPage]);
+
+  const handleBookingLimitChange = useCallback((newLimit) => {
+    setBookingPageSize(newLimit)
+  }, [setBookingPageSize])
+
+  if(!user && (loadingBookings || loadingEmp || loadingMonthlyStatics || loadingMostBookedRoom)){
     return <HomeShimmer />;
   }
   return (
@@ -220,7 +249,7 @@ const Home = () => {
 
       <section className="global-stats-section">
         <div className="room-stats-card">
-          <h3>Most Booked Room</h3>
+          <h2>Most Booked Room</h2>
           <div className="room-badge">
             {mostBookedRoomData?.mostBookedRoom?.name || "N/A"}
           </div>
@@ -231,7 +260,7 @@ const Home = () => {
         </div>
 
         <div className="employee-info-card">
-          <h3>My Quick Profile</h3>
+          <h2>My Quick Profile</h2>
           <p className="welcome-subtext">Registered Email Address Context:</p>
           <strong
             style={{
@@ -253,7 +282,7 @@ const Home = () => {
         <Can permission="VIEW_MONTHLY_STATICS">
           <div className="room-stats-card stats-analytics-card full-row-card">
             <div className="card-header-inline">
-              <h3>Monthly Statistics</h3>
+              <h2>Monthly Statistics</h2>
               <input
                 type="month"
                 className="stats-date-picker"
@@ -294,7 +323,9 @@ const Home = () => {
 
       <Can permission="VIEW_OWN_BOOKINGS">
         <div className="single-column-layout">
-          <ViewOwnBookings />
+          <Suspense fallback={<div className="loading-placeholder">Loading Your Bookings...</div>}>
+            <ViewOwnBookings />
+          </Suspense>
         </div>
       </Can>
 
@@ -309,7 +340,7 @@ const Home = () => {
                   type="text"
                   placeholder="Search employees..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={handleSearchInput}
                 />
               </div>
               <DataGrid
@@ -320,11 +351,9 @@ const Home = () => {
                 limit={empLimit}
                 totalCount={totalEmployeesCount}
                 sortDirection={empSort}
-                onSortToggle={() =>
-                  setEmpSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
-                }
-                onPageChange={(newPage) => goToEmpPage(newPage)}
-                onLimitChange={(newLimit) => setEmpPageSize(newLimit)}
+                onSortToggle={handleEmpSortToggle}
+                onPageChange={handleEmpPageChange}
+                onLimitChange={handleEmpLimitChange}
                 onRowClick={handleEmployeeRowClick}
               />
             </div>
@@ -337,9 +366,8 @@ const Home = () => {
                 <select
                   className="filter-select management-select-input"
                   value={bookingStatus}
-                  onChange={(e) => {
-                    setBookingStatus(e.target.value);
-                  }}
+                  onChange={handleBookingStatusChange}
+                  aria-label="status-select"
                 >
                   <option value="">All Statuses</option>
                   <option value="COMPLETED">Completed</option>
@@ -357,11 +385,9 @@ const Home = () => {
                 limit={bookingLimit}
                 totalCount={totalBookingsCount}
                 sortDirection={bookingSort}
-                onSortToggle={() =>
-                  setBookingSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
-                }
-                onPageChange={(newPage) => goToBookingPage(newPage)}
-                onLimitChange={(newLimit) => setBookingPageSize(newLimit)}
+                onSortToggle={handleBookingSortToggle}
+                onPageChange={handleBookingPageChange}
+                onLimitChange={handleBookingLimitChange}
                 onRowClick={handleBookingRowClick}
               />
             </div>

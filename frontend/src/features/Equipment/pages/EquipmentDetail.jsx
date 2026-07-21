@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import "./EquipmentDetail.css";
@@ -8,8 +8,9 @@ import { usePermission } from "../../../shared/hooks/usePermission";
 import { Equipment, EquipmentUsage } from "../graphql/queries";
 import EquipmentDetailShimmer from "../components/EquipmentDetailShimmer";
 import { Can } from "../../../shared/components/Can";
-import UpdateEquipment from "../components/UpdateEquipment";
-import DeleteEquipment from "../components/DeleteEquipment";
+
+const UpdateEquipment = lazy(() => import("../components/UpdateEquipment"));
+const DeleteEquipment = lazy(() => import("../components/DeleteEquipment"));
 
 const EquipmentDetail = () => {
   const { id } = useParams()
@@ -181,6 +182,7 @@ const EquipmentDetail = () => {
               &times;
             </button>
 
+            <Suspense fallback={<div className="loading-placeholder">Loading...</div>}>
             {activeModal === "updateEquipment" && (
               <UpdateEquipment
                 onSubmitSuccess={closeDialog}
@@ -194,6 +196,7 @@ const EquipmentDetail = () => {
                 refetch={null}
               />
             )}
+            </Suspense>
           </div>
         </div>
       )}

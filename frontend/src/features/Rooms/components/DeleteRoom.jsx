@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import { DeleteRoom as DeleteRoomMutation } from "../graphql/mutation";
 import "./DeleteRoom.css";
 
-const DeleteRoom = ({ onSubmitSuccess, id }) => {
+const DeleteRoom = memo(({ onSubmitSuccess, id }) => {
   const navigate = useNavigate();
   const [deleteRoomAction] = useMutation(DeleteRoomMutation);
 
@@ -58,6 +58,6 @@ const DeleteRoom = ({ onSubmitSuccess, id }) => {
       </div>
     </div>
   );
-};
+});
 
 export default DeleteRoom;

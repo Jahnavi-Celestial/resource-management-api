@@ -1,6 +1,6 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 
-const DataGrid = ({
+const DataGrid = memo(({
   columns = [],
   data = [],
   loading = false,
@@ -15,11 +15,31 @@ const DataGrid = ({
 }) => {
   const totalPages = Math.ceil(Number(totalCount) / Number(limit)) || 1;
 
+  const handleLimitChange = useCallback((e) => {
+    if (onLimitChange) onLimitChange(Number(e.target.value));
+  }, [onLimitChange]);
+
+  const handleSortToggle = useCallback((col) => {
+    if (col.key === "id" && onSortToggle) onSortToggle();
+  }, [onSortToggle]);
+
+  const handleRowClick = useCallback((row) => {
+    if (onRowClick) onRowClick(row);
+  }, [onRowClick]);
+
+  const handlePrevPage = useCallback(() => {
+    if (onPageChange) onPageChange(page - 1);
+  }, [page, onPageChange]);
+
+  const handleNextPage = useCallback(() => {
+    if (onPageChange) onPageChange(page + 1);
+  }, [page, onPageChange]);
+
   return (
     <div className="datagrid-container">
       <div className="grid-header" style={{ marginBottom: "1rem" }}>
         <label>Rows per page: </label>
-        <select value={limit} onChange={(e) => onLimitChange(Number(e.target.value))}>
+        <select value={limit} onChange={handleLimitChange} aria-label="grid-select">
           {[5, 10, 15, 20].map((size) => (
             <option key={size} value={size}>{size}</option>
           ))}
@@ -33,7 +53,7 @@ const DataGrid = ({
               <th 
                 key={col.key} 
                 style={{ padding: "10px", cursor: col.key === "id" ? "pointer" : "default" }}
-                onClick={() => col.key === "id" && onSortToggle()}
+                onClick={() => handleSortToggle(col)}
               >
                 {col.label}
                 {col.key === "id" && (sortDirection === "DESC" ? " ▲" : " ▼")}
@@ -63,7 +83,7 @@ const DataGrid = ({
                   borderBottom: "1px solid #eee",
                   cursor: onRowClick ? "pointer" : "default" 
                 }}
-                onClick={() => onRowClick && onRowClick(row)}
+                onClick={() => handleRowClick(row)}
               >
                 {columns.map((col) => (
                   <td key={col.key} style={{ padding: "10px" }}>
@@ -80,17 +100,17 @@ const DataGrid = ({
         <div>
             <p>Page {page} of {totalPages}</p>
         </div>
-        <div >
+        <div>
             <button
                 disabled={page === 1 || loading}
-                onClick={() => onPageChange(page - 1)}
+                onClick={handlePrevPage}
                 style={{margin: "0 10px 0 10px"}}
             >
                 Previous
             </button>
             <button
                 disabled={page >= totalPages || loading}
-                onClick={() => onPageChange(page + 1)}
+                onClick={handleNextPage}
             >
                 Next
             </button>
@@ -98,6 +118,6 @@ const DataGrid = ({
       </div>
     </div>
   );
-};
+});
 
 export default DataGrid;

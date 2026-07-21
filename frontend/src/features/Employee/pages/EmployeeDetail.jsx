@@ -1,10 +1,6 @@
 import { useQuery } from "@apollo/client/react";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateEmployee from "../components/UpdateEmployee";
-import DeleteEmployee from "../components/DeleteEmployee";
-import RoleActionModal from "../../Role/components/RoleActionModal";
-import PermissionActionModal from "../../Permission/components/PermissionActionModal";
 import EmployeeDetailShimmer from "../components/EmployeeDetailShimmer";
 import { useAuth } from "../../Auth/hooks/useAuth";
 import { useDialog } from "../../../shared/hooks/useDialog";
@@ -12,6 +8,11 @@ import { usePermission } from "../../../shared/hooks/usePermission";
 import { Can } from "../../../shared/components/Can";
 import { BookingPerEmployee, Employee } from "../graphql/queries";
 import "./EmployeeDetail.css";
+
+const UpdateEmployee = React.lazy(() => import("../components/UpdateEmployee"));
+const DeleteEmployee = React.lazy(() => import("../components/DeleteEmployee"));
+const RoleActionModal = React.lazy(() => import("../../Role/components/RoleActionModal"));
+const PermissionActionModal = React.lazy(() => import("../../Permission/components/PermissionActionModal"));
 
 const EmployeeDetail = () => {
   const { id } = useParams();
@@ -160,6 +161,7 @@ const EmployeeDetail = () => {
               &times;
             </button>
 
+            <Suspense fallback={<div className="loading-placeholder">Loading...</div>}>
             {activeModal === "updateEmployee" && (
               <UpdateEmployee
                 onSubmitSuccess={closeDialog}
@@ -199,6 +201,7 @@ const EmployeeDetail = () => {
                 onSubmitSuccess={closeDialog}
               />
             )}
+            </Suspense>
           </div>
         </div>
       )}

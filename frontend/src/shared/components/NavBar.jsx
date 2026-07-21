@@ -1,9 +1,5 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import CreateEmployee from "../../features/Employee/components/CreateEmployee";
-import CreateEquipment from "../../features/Equipment/components/CreateEquipment";
-import CreateRoom from "../../features/Rooms/components/CreateRoom";
-import CreateBooking from "../../features/Bookings/components/CreateBooking";
 import "./NavBar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
@@ -12,6 +8,11 @@ import { useDialog } from "../hooks/useDialog";
 import { useNotification } from "../hooks/useNotification";
 import { usePermission } from "../hooks/usePermission";
 import { Can } from "./Can";
+
+const CreateEmployee = lazy(() => import("../../features/Employee/components/CreateEmployee"));
+const CreateEquipment = lazy(() => import("../../features/Equipment/components/CreateEquipment"));
+const CreateRoom = lazy(() => import("../../features/Rooms/components/CreateRoom"));
+const CreateBooking = lazy(() => import("../../features/Bookings/components/CreateBooking"));
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -38,15 +39,13 @@ const NavBar = () => {
     handleMarkAllAsRead,
   } = useNotification();
 
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = useCallback(() => {
     setIsMenuOpen(!isMenuOpen);
-    setIsNotifOpen(false);
-  };
+  }, []);
 
   const handleOpenModal = (modalName) => {
     openDialog(modalName);
     setIsMenuOpen(false);
-    setIsNotifOpen(false);
   };
 
   const handleLogout = () => {
@@ -63,7 +62,7 @@ const NavBar = () => {
 
       <div className="navbar-right-section">
         <div className="notification-bell-container">
-          <button className="bell-btn" onClick={toggleNotifPanel}>
+          <button className="bell-btn" onClick={toggleNotifPanel} aria-label="Bell-Icon">
             <FontAwesomeIcon icon={faBell} />
             {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
           </button>
@@ -102,6 +101,7 @@ const NavBar = () => {
         <button
           className={`mobile-menu-toggle ${isMenuOpen ? "open" : ""}`}
           onClick={toggleMobileMenu}
+          aria-label="Menu-Bar"
         >
           <span></span>
           <span></span>
@@ -196,18 +196,12 @@ const NavBar = () => {
               ✕
             </button>
 
-            {activeModal === "employee" && (
-              <CreateEmployee onSubmitSuccess={closeDialog} />
-            )}
-            {activeModal === "equipment" && (
-              <CreateEquipment onSubmitSuccess={closeDialog} />
-            )}
-            {activeModal === "room" && (
-              <CreateRoom onSubmitSuccess={closeDialog} />
-            )}
-            {activeModal === "booking" && (
-              <CreateBooking onSubmitSuccess={closeDialog} />
-            )}
+            <Suspense fallback={<div className="loading-placeholder">Loading...</div>}>
+              {activeModal === "employee" && <CreateEmployee onSubmitSuccess={closeDialog} />}
+              {activeModal === "equipment" && <CreateEquipment onSubmitSuccess={closeDialog} />}
+              {activeModal === "room" && <CreateRoom onSubmitSuccess={closeDialog} />}
+              {activeModal === "booking" && <CreateBooking onSubmitSuccess={closeDialog} />}
+            </Suspense>
           </div>
         </div>
       )}

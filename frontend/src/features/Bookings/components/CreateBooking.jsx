@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { client } from "../../../services/apolloClient";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CreateBooking as CreateBookingMutation } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import "../../../shared/components/FormsField/Form.css";
+import { Equipments, Rooms } from "../../../shared/services/queries";
 
-const CreateBooking = ({ onSubmitSuccess }) => {
+const CreateBooking = memo(({ onSubmitSuccess }) => {
   const [selectedEquipId, setSelectedEquipId] = useState("");
   const [equipQuantity, setEquipQuantity] = useState(1);
   const [backendErrors, setBackendErrors] = useState({});
@@ -279,6 +280,6 @@ const CreateBooking = ({ onSubmitSuccess }) => {
       </div>
     </div>
   );
-};
+});
 
 export default CreateBooking;

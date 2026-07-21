@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { DeleteRole, DeletePermission } from "../graphql/mutation";
@@ -7,7 +7,7 @@ import {
   GetAllRoles,
 } from "../../../shared/services/queries";
 
-const DeleteRoleOrPermissionModal = ({ type, onSubmitSuccess }) => {
+const DeleteRoleOrPermissionModal = memo(({ type, onSubmitSuccess }) => {
   const isRole = type === "role";
 
   const { data: roleData, loading: roleLoading } = useQuery(GetAllRoles, {
@@ -73,6 +73,6 @@ const DeleteRoleOrPermissionModal = ({ type, onSubmitSuccess }) => {
       />
     </div>
   );
-};
+});
 
 export default DeleteRoleOrPermissionModal;

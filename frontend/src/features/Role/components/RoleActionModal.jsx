@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-// import { GetAllRoles, Employee } from "../../../graphql/queries";
 import { AssignRole, RemoveRole } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { GetAllRoles } from "../../../shared/services/queries";
 import { Employee } from "../../Employee/graphql/queries";
 
-const RoleActionModal = ({ actionType, userId, onSubmitSuccess }) => {
+const RoleActionModal = memo(({ actionType, userId, onSubmitSuccess }) => {
   const [backendErrors, setBackendErrors] = useState({});
   const { data, loading, error } = useQuery(GetAllRoles);
 
@@ -56,7 +55,7 @@ const RoleActionModal = ({ actionType, userId, onSubmitSuccess }) => {
     );
   }
 
-  const formSchema = [
+  const formSchema = useMemo(()=>[
     {
       name: "roleId",
       type: "select",
@@ -68,7 +67,7 @@ const RoleActionModal = ({ actionType, userId, onSubmitSuccess }) => {
         label: role.role_name,
       })),
     },
-  ];
+  ], [data]);
 
   return (
     <div className="form-container">
@@ -95,6 +94,6 @@ const RoleActionModal = ({ actionType, userId, onSubmitSuccess }) => {
       </div>
     </div>
   );
-};
+});
 
 export default RoleActionModal;

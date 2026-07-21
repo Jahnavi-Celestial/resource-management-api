@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { UpdateEmployee as UpdateEmployeeMutation } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { GetAllRoles } from "../../../shared/services/queries";
 
-const UpdateEmployee = ({ onSubmitSuccess, employee }) => {
+const UpdateEmployee = memo(({ onSubmitSuccess, employee }) => {
   const [backendErrors, setBackendErrors] = useState({});
   const { data, loading, error } = useQuery(GetAllRoles);
 
@@ -65,7 +65,7 @@ const UpdateEmployee = ({ onSubmitSuccess, employee }) => {
     label: role.role_name,
   }));
 
-  const formSchema = [
+  const formSchema = useMemo(() => [
     {
       name: "firstName",
       type: "text",
@@ -123,7 +123,7 @@ const UpdateEmployee = ({ onSubmitSuccess, employee }) => {
       ],
       options: roleOptions,
     },
-  ];
+  ], [roleOptions]);
 
   return (
     <div className="form-container">
@@ -148,6 +148,6 @@ const UpdateEmployee = ({ onSubmitSuccess, employee }) => {
       </div>
     </div>
   );
-};
+});
 
 export default UpdateEmployee;

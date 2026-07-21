@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { UpdatePermission } from "../graphql/mutation";
 import { GetAllPermission } from "../../../shared/services/queries";
 
-const UpdatePermissionModal = ({ onSubmitSuccess }) => {
+const UpdatePermissionModal = memo(({ onSubmitSuccess }) => {
   const { data, loading: queryLoading } = useQuery(GetAllPermission);
   const [updatePermission, { loading: mutationLoading, error }] = useMutation(
     UpdatePermission,
@@ -19,7 +19,7 @@ const UpdatePermissionModal = ({ onSubmitSuccess }) => {
       label: p.permission_name,
     })) || [];
 
-  const formConfig = [
+  const formConfig = useMemo(() => [
     {
       name: "id",
       label: "Select Permission to Update",
@@ -37,7 +37,7 @@ const UpdatePermissionModal = ({ onSubmitSuccess }) => {
       placeholder: "Enter updated name",
       validators: [{ type: "required", message: "Updated name is required" }],
     },
-  ];
+  ], [permissionOptions, data]);
 
   const handleSubmit = async (formData, resetForm) => {
     try {
@@ -69,6 +69,6 @@ const UpdatePermissionModal = ({ onSubmitSuccess }) => {
       />
     </div>
   );
-};
+});
 
 export default UpdatePermissionModal;

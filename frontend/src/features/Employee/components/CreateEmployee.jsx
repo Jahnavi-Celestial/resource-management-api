@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CreateEmployee as CreateEmployeeMutation } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { GetAllRoles } from "../../../shared/services/queries";
 
-const CreateEmployee = ({ onSubmitSuccess }) => {
+const CreateEmployee = memo(({ onSubmitSuccess }) => {
   const [backendErrors, setBackendErrors] = useState({});
   const { data, loading, error } = useQuery(GetAllRoles);
 
@@ -120,6 +120,6 @@ const CreateEmployee = ({ onSubmitSuccess }) => {
       </div>
     </div>
   );
-};
+});
 
 export default CreateEmployee;

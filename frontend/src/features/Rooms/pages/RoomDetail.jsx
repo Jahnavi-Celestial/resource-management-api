@@ -1,8 +1,6 @@
 import { useQuery } from "@apollo/client/react";
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateRoom from "../components/UpdateRoom";
-import DeleteRoom from "../components/DeleteRoom";
 import "./RoomDetail.css";
 import RoomDetailShimmer from "../components/RoomDetailShimmer";
 import { useAuth } from "../../Auth/hooks/useAuth";
@@ -10,6 +8,9 @@ import { useDialog } from "../../../shared/hooks/useDialog";
 import { usePermission } from "../../../shared/hooks/usePermission";
 import { Can } from "../../../shared/components/Can";
 import { Room } from "../graphql/queries";
+
+const UpdateRoom = lazy(() => import("../components/UpdateRoom"));
+const DeleteRoom = lazy(() => import("../components/DeleteRoom"));
 
 const RoomDetail = () => {
   const { id } = useParams();
@@ -160,6 +161,7 @@ const RoomDetail = () => {
               &times;
             </button>
 
+            <Suspense fallback={<div className="loading-placeholder">Loading...</div>}>
             {activeModal === "updateRoom" && (
               <UpdateRoom onSubmitSuccess={closeDialog} room={room} />
             )}
@@ -170,6 +172,7 @@ const RoomDetail = () => {
                 refetch={null}
               />
             )}
+            </Suspense>
           </div>
         </div>
       )}

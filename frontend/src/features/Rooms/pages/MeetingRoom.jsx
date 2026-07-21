@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import RoomCard from "../components/RoomCard";
 import "./MeetingRoom.css";
@@ -34,7 +34,7 @@ const MeetingRoom = () => {
   });
 
   const rooms = data?.rooms?.data || [];
-  const totalCount = data?.room?.total || 0;
+  const totalCount = data?.rooms?.total || 0;
 
   useEffect(() => {
     if (!loading && data?.rooms) {
@@ -45,6 +45,10 @@ const MeetingRoom = () => {
   useEffect(() => {
     goToPage(1);
   }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback((e) => {
+    setSearchInput(e.target.value)
+  }, [])
 
   return (
     <div className="rooms-container">
@@ -62,9 +66,7 @@ const MeetingRoom = () => {
             placeholder="Search rooms by name..."
             className="room-search-input"
             value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-            }}
+            onChange={handleSearchChange}
           />
         </div>
       </header>

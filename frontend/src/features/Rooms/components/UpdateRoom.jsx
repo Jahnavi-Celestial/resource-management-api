@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { UpdateRoom as UpdateRoomMutation } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 
-const UpdateRoom = ({ onSubmitSuccess, room }) => {
+const UpdateRoom = memo(({ onSubmitSuccess, room }) => {
   const [backendErrors, setBackendErrors] = useState({});
   const [updateRoomAction, { loading: isSubmitting }] =
     useMutation(UpdateRoomMutation);
@@ -38,7 +38,7 @@ const UpdateRoom = ({ onSubmitSuccess, room }) => {
     }
   };
 
-  const formSchema = [
+  const formSchema = useMemo(() => [
     {
       name: "name",
       type: "text",
@@ -92,7 +92,7 @@ const UpdateRoom = ({ onSubmitSuccess, room }) => {
         { value: "false", label: "False" },
       ],
     },
-  ];
+  ], [room]);
 
   return (
     <div className="form-container">
@@ -115,6 +115,6 @@ const UpdateRoom = ({ onSubmitSuccess, room }) => {
       </div>
     </div>
   );
-};
+});
 
 export default UpdateRoom;

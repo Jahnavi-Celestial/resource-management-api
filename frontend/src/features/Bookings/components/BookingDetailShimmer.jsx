@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import "./BookingDetailShimmer.css";
 
-const BookingDetailShimmer = () => {
+const BookingDetailShimmer = memo(() => {
   return (
     <div className="bd-shimmer-bg">
       <div className="bd-shimmer-container">
@@ -81,6 +81,6 @@ const BookingDetailShimmer = () => {
       </div>
     </div>
   );
-};
+});
 
 export default BookingDetailShimmer;

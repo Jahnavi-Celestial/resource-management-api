@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./EquipmentCard.css";
 
-const EquipmentCard = ({ equipment }) => {
+const EquipmentCard = memo(({ equipment }) => {
   const navigate = useNavigate()
 
   const handleCardClick = () => {
@@ -31,6 +31,6 @@ const EquipmentCard = ({ equipment }) => {
       </div>
     </div>
   )
-}
+})
 
 export default EquipmentCard

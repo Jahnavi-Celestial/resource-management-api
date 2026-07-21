@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RoomCard.css";
 
-const RoomCard = ({ room }) => {
+const RoomCard = memo(({ room }) => {
   const navigate = useNavigate()
 
   const handleCardClick = () => {
@@ -43,6 +43,6 @@ const RoomCard = ({ room }) => {
       </div>
     </div>
   )
-}
+})
 
 export default RoomCard

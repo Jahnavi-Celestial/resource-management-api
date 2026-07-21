@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import "./AdminAction.css";
 import { useDialog } from "../hooks/useDialog";
-import CreateRoleModal from "../../features/Role/components/CreateRoleModal";
-import UpdateRoleModal from "../../features/Role/components/UpdateRoleModal";
-import CreatePermissionModal from "../../features/Permission/components/CreatePermissionModal";
-import UpdatePermissionModal from "../../features/Permission/components/UpdatePermissionModal";
-import DeleteRoleOrPermissionModal from "../../features/Role/components/DeleteRoleOrPermission";
+
+const CreateRoleModal = lazy(() => import("../../features/Role/components/CreateRoleModal"));
+const UpdateRoleModal = lazy(() => import("../../features/Role/components/UpdateRoleModal"));
+const CreatePermissionModal = lazy(() => import("../../features/Permission/components/CreatePermissionModal"));
+const UpdatePermissionModal = lazy(() => import("../../features/Permission/components/UpdatePermissionModal"));
+const DeleteRoleOrPermissionModal = lazy(() => import("../../features/Role/components/DeleteRoleOrPermission"));
 
 const AdminAction = () => {
   const [activeTab, setActiveTab] = useState("roles");
@@ -96,6 +97,7 @@ const AdminAction = () => {
               ✕
             </button>
 
+            <Suspense fallback={<div className="modal-loading">Loading form...</div>}>
             {activeModal === "createRole" && (
               <CreateRoleModal onSubmitSuccess={closeDialog} />
             )}
@@ -120,6 +122,7 @@ const AdminAction = () => {
                 onSubmitSuccess={closeDialog}
               />
             )}
+            </Suspense>
           </div>
         </div>
       )}

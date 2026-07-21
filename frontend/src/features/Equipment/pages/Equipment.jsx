@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import EquipmentCard from "../components/EquipmentCard";
 import EquipmentShimmer from "../components/EquipmentShimmer";
@@ -46,6 +46,8 @@ const Equipment = () => {
     goToPage(1);
   }, [debouncedSearch])
 
+  const handleSearchInput = useCallback((e) => setSearchInput(e.target.value), [])
+
   return (
     <div className="equipment-container">
       <header className="equipment-header">
@@ -62,9 +64,7 @@ const Equipment = () => {
             placeholder="Search items by name..."
             className="equipment-search-input"
             value={searchInput} 
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-            }}
+            onChange={handleSearchInput}
           />
         </div>
       </header>

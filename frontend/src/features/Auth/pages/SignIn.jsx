@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import "./SignIn.css";
@@ -18,7 +18,7 @@ const SignIn = () => {
     skip: isLogin,
   });
 
-  const handleFormSubmit = async (formData, resetForm) => {
+  const handleFormSubmit = useCallback(async (formData, resetForm) => {
     setBackendErrors({});
     try {
       if (isLogin) {
@@ -61,14 +61,14 @@ const SignIn = () => {
         setBackendErrors({ global: err.message });
       }
     }
-  };
+  }, [isLogin, loginAction, registerAction, setToken, setUser]);
 
-  const toggleAuthMode = () => {
+  const toggleAuthMode = useCallback(() => {
     setBackendErrors({});
     setIsLogin(!isLogin);
-  };
+  }, []);
 
-  const loginSchema = [
+  const loginSchema = useMemo(() => [
     {
       name: "email",
       type: "email",
@@ -81,9 +81,9 @@ const SignIn = () => {
       placeholder: "Password",
       validators: [{ type: "required", message: "Password is required" }],
     },
-  ];
+  ], []);
 
-  const registerSchema = [
+  const registerSchema = useMemo(() => [
     {
       name: "firstName",
       type: "text",
@@ -118,7 +118,7 @@ const SignIn = () => {
         label: role.role_name,
       })),
     },
-  ];
+  ], [data]);
 
   if (!isLogin && rolesLoading) {
     return (

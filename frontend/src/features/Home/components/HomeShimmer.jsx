@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import "./HomeShimmer.css";
 
-const HomeShimmer = () => {
+const HomeShimmer = memo(() => {
   return (
     <div className="shimmer-container">
       <header className="shimmer-header">
@@ -63,6 +63,6 @@ const HomeShimmer = () => {
       </div>
     </div>
   );
-};
+});
 
 export default HomeShimmer;

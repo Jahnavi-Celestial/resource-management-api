@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext()
@@ -32,8 +32,17 @@ export const AuthProvider = ({children}) => {
         return permissions.includes(permissionName)
     }
 
+    const contextValue = useMemo(() => ({
+        token,
+        setToken,
+        user,
+        setUser,
+        permissions,
+        hasPermission
+    }), [token, setToken, user, permissions, hasPermission]);
+
     return (
-        <AuthContext.Provider value={{ token, setToken, user, setUser, permissions, hasPermission }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     )

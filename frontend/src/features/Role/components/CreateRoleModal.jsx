@@ -1,15 +1,15 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { useMutation } from "@apollo/client/react";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
 import { CreateRole as CREATE_ROLE_MUTATION } from "../graphql/mutation";
 import { GetAllRoles } from "../../../shared/services/queries";
 
-const CreateRoleModal = ({ onSubmitSuccess }) => {
+const CreateRoleModal = memo(({ onSubmitSuccess }) => {
   const [createRole, { loading, error }] = useMutation(CREATE_ROLE_MUTATION, {
     refetchQueries: [{ query: GetAllRoles }],
   });
 
-  const formConfig = [
+  const formConfig = useMemo(() => [
     {
       name: "role_name",
       label: "Role Name",
@@ -17,7 +17,7 @@ const CreateRoleModal = ({ onSubmitSuccess }) => {
       placeholder: "Enter role name (e.g., Editor)",
       validators: [{ type: "required", message: "Role name is required" }],
     },
-  ];
+  ], []);
 
   const handleSubmit = async (formData, resetForm) => {
     try {
@@ -42,6 +42,6 @@ const CreateRoleModal = ({ onSubmitSuccess }) => {
       />
     </div>
   );
-};
+});
 
 export default CreateRoleModal;

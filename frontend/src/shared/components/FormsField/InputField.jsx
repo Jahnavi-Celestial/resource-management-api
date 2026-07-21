@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import PropTypes from 'prop-types'
 
 export const validateInput = (validators, value) => {
@@ -11,7 +11,7 @@ export const validateInput = (validators, value) => {
     return ''
 }
 
-const InputField = ({ name, value, label, placeholder, validators, type, onChange, externalError }) => {
+const InputField = memo(({ name, value, label, placeholder, validators, type, onChange, externalError }) => {
     const [localError, setLocalError] = useState('')
 
     const handleChange = (event) => {
@@ -45,7 +45,7 @@ const InputField = ({ name, value, label, placeholder, validators, type, onChang
             {activeError && <span className="error-feedback">{activeError}</span>}
         </div>
     )
-}
+})
 
 InputField.propTypes = {
     name: PropTypes.string.isRequired,

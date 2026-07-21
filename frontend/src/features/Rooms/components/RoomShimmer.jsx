@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import "./RoomShimmer.css";
 
-const RoomShimmer = () => {
+const RoomShimmer = memo(() => {
     const array = new Array(15).fill('')
   return (
     <div className="shimmer-rooms-container">
@@ -21,6 +21,6 @@ const RoomShimmer = () => {
       </div>
     </div>
   );
-};
+});
 
 export default RoomShimmer;

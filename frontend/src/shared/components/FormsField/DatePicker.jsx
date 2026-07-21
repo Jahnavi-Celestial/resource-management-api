@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import PropTypes from 'prop-types'
 
-const DatePicker = ({ name, value, label, onChange, externalError }) => {
+const DatePicker = memo(({ name, value, label, onChange, externalError }) => {
     return (
         <div className="form-group">
             {label && <label className="form-label">{label}</label>}
@@ -14,7 +14,7 @@ const DatePicker = ({ name, value, label, onChange, externalError }) => {
             {externalError && <span className="error-feedback">{externalError}</span>}
         </div>
     )
-}
+})
 
 DatePicker.propTypes = {
     name: PropTypes.string.isRequired,
