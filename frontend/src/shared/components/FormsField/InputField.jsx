@@ -11,11 +11,11 @@ export const validateInput = (validators, value) => {
     return ''
 }
 
-const InputField = memo(({ name, value, label, placeholder, validators, type, onChange, externalError }) => {
+const InputField = memo(({ name, value, checked, label, placeholder, validators, type, onChange, externalError }) => {
     const [localError, setLocalError] = useState('')
 
     const handleChange = (event) => {
-        const val = event.target.value
+        const val = type === 'checkbox' ? event.target.checked : event.target.value
         setLocalError(validateInput(validators, val))
         onChange(name, val)
     }
@@ -55,7 +55,8 @@ InputField.propTypes = {
     validators: PropTypes.array,
     type: PropTypes.string,
     onChange: PropTypes.func.isRequired,
-    externalError: PropTypes.string
+    externalError: PropTypes.string,
+    checked: PropTypes.bool
 }
 InputField.defaultProps = { value: '', label: '', placeholder: '', type: 'text', validators: [], externalError: '' }
 

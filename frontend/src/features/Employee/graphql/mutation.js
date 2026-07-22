@@ -26,8 +26,8 @@ mutation UpdateEmployee($input: UpdateEmployeeInput!) {
 }
 `
 
-export const DeleteEmployee = gql`
-mutation DeleteEmployee($deleteEmployeeId: Int!) {
-  deleteEmployee(id: $deleteEmployeeId)
+export const DeleteEmployees = gql`
+mutation DeleteEmployees($ids: [Int!]!) {
+  deleteEmployees(ids: $ids)
 }
 `

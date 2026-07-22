@@ -1,38 +1,39 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { ViewOwnBookings as ViewOwnBookingsQuery } from "../graphql/queries";
-import DataGrid from "../../../shared/components/DataGrid";
+import DataGrid from "../../../shared/components/grid/DataGrid";
 import "./ViewOwnBookings.css";
 import { useAuth } from "../../Auth/hooks/useAuth";
 import { usePagination } from "../../../shared/hooks/usePagination";
 
 const columns = [
-    { key: "id", label: "Id" },
-    {
-      key: "purpose",
-      label: "Purpose",
-    },
-    {
-      key: "meetingRoom",
-      label: "Meeting Room",
-      render: (value, row) => row.meetingRoom?.name || "N/A",
-    },
-    {
-      key: "startTime",
-      label: "Scheduled Date",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (value) => (
-        <span className={`status-badge ${value?.toLowerCase() || "pending"}`}>
-          {value || "PENDING"}
-        </span>
-      ),
-    },
-  ];
+  { field: "id", headerName: "Id", editable: false },
+  {
+    field: "meetingRoom",
+    headerName: "Meeting Room",
+    editable: false,
+    render: (_, row) => row.meetingRoom?.name || "N/A",
+  },
+  { field: "purpose", headerName: "Purpose", editable: false },
+  {
+    field: "startTime",
+    headerName: "Scheduled Date",
+    editable: false,
+    render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+  },
+  {
+    field: "status",
+    headerName: "Status",
+    editable: false,
+    filterOptions: ["PENDING", "APPROVED", "REJECTED", "COMPLETED", "CANCELLED"],
+    render: (value) => (
+      <span className={`status-badge ${value?.toLowerCase() || "pending"}`}>
+        {value || "PENDING"}
+      </span>
+    ),
+  },
+];
 
 const ViewOwnBookings = () => {
   const { user } = useAuth();
@@ -76,58 +77,70 @@ const ViewOwnBookings = () => {
     goToPage(1);
   }, [status, sortOrder]);
 
-  const handleSortToggle = useCallback(() => {
-    setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
-  }, []);
-
-  const handleRowClick = useCallback((row) => {
-    if (row?.id) {
-      navigate(`/bookingDetails/${row.id}`);
-    }
+  let combinedColumns = useMemo(() => {
+    const actionColumn = {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      editable: false,
+      render: (_, row) => (
+        <div className="action-buttons-cell">
+          <button
+            className="btn-inline-action btn-inline-view"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/bookingDetails/${row.id}`);
+            }}
+          >
+            View
+          </button>
+        </div>
+      ),
+    };
+    return [...columns, actionColumn];
   }, [navigate]);
 
-  const handlePageChange = useCallback((newPage) => {
-    goToPage(newPage)
-  }, [goToPage]);
+  const handleSortToggle = useCallback((field, direction) => {
+    setSortOrder(direction);
+  }, []);
 
-  const handleLimitChange = useCallback((newLimit) => {
-    setPageSize(newLimit)
-  }, [setPageSize])
+  const handlePageChange = useCallback(
+    (newPage) => {
+      goToPage(newPage);
+    },
+    [goToPage],
+  );
 
-  const handleStatusChange = useCallback((e) => {
-    setStatus(e.target.value)
-  }, [])
+  const handleLimitChange = useCallback(
+    (newLimit) => {
+      setPageSize(newLimit);
+    },
+    [setPageSize],
+  );
+
+  const handleColumnFilterChange = useCallback((filters) => {
+    setStatus(filters.status);
+  }, []);
 
   return (
     <section className="own-bookings-section">
       <div className="section-header">
         <h2>Your Personal Bookings</h2>
-        <select
-          className="filter-select"
-          value={status}
-          onChange={handleStatusChange}
-        >
-          <option value="">All Statuses</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
-          <option value="REJECTED">Rejected</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
       </div>
 
       <DataGrid
-        columns={columns}
+        columns={combinedColumns}
         data={bookings}
         loading={loading}
         page={page}
         limit={limit}
         totalCount={totalCount}
+        sortBy="id"
         sortDirection={sortOrder}
         onSortToggle={handleSortToggle}
         onPageChange={handlePageChange}
         onLimitChange={handleLimitChange}
-        onRowClick={handleRowClick}
+        onFilterChange={handleColumnFilterChange}
       />
     </section>
   );

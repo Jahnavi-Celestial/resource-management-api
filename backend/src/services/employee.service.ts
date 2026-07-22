@@ -3,7 +3,7 @@ import { EmployeeRepository } from "../repositories/employee.repository.ts";
 import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, AssignRemoveRoleInput } from "../dto/employee.input.ts";
 import { Employee } from "../entities/Employee.ts";
 import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
-import { FindOptionsWhere, ILike } from "typeorm";
+import { FindOptionsWhere, ILike, In } from "typeorm";
 import { sendMail } from "../jobs/emailService.ts";
 import { UserRoleRepository } from "../repositories/userRole.repository.ts";
 import { RoleRepository } from "../repositories/role.repository.ts";
@@ -58,29 +58,34 @@ export class EmployeeService {
       throw new NotFoundError("Employee");
     }
 
-    const hashedPassword = await bcrypt.hash(String(input.password), 10);
+    let hashedPassword = employee.password;
+    if(input.password){
+      hashedPassword = await bcrypt.hash(String(input.password), 10);
+      
+      const to = `${employee.email}`
+      const subject = 'Your Updated Login Credentials Details'
+      const text = `Your login credentials are: email- ${employee.email} and password- ${input.password}`
 
-    const to = `${employee.email}`
-    const subject = 'Your Updated Login Credentials Details'
-    const text = `Your login creadentials are: email- ${employee.email} and password- ${input.password}`
-    
-    sendMail(to, subject, text)
-
-    const changeUserRole = await this.userRoleRepo.findByEmployeeIdAndRoleId(employee.id, input.roleIdFrom)
-
-    if(!changeUserRole){
-      throw new NotFoundError('User Role From not found', "roleIdFrom")
+      sendMail(to, subject, text)
     }
 
-    const roleToChange = await this.roleRepo.findRoleById(input.roleIdTo)
+    if(input.roleIdFrom !== undefined && input.roleIdTo !== undefined){
+      const changeUserRole = await this.userRoleRepo.findByEmployeeIdAndRoleId(employee.id, input.roleIdFrom)
 
-    if(!roleToChange){
-      throw new NotFoundError('Target Role not found', "roleIdTo");
+      if(!changeUserRole){
+        throw new NotFoundError('Target Role not found', "roleIdTo");
+      }
+
+      const roleToChange = await this.roleRepo.findRoleById(input.roleIdTo)
+
+      if (!roleToChange) {
+        throw new NotFoundError('Target Role not found', "roleIdTo");
+      }
+
+      changeUserRole.role = roleToChange
+
+      await this.userRoleRepo.save(changeUserRole)
     }
-
-    changeUserRole.role = roleToChange
-
-    await this.userRoleRepo.save(changeUserRole)
 
     return this.employeeRepo.save({
       ...employee,
@@ -89,21 +94,40 @@ export class EmployeeService {
     });
   }
 
-  async deleteEmployee(id: number): Promise<boolean> {
-    const employee = await this.employeeRepo.findById(id);
-    if (!employee) {
-      throw new NotFoundError("Employee", "id");
+  async deleteEmployees(ids: number[]){
+    if (!ids || ids.length === 0){
+      return false
     }
-    return this.employeeRepo.delete(id);
+
+    const [existingEmployees, totalFound] = await this.employeeRepo.findAndCountEmployees(
+      { id: In(ids) as any }, 0, ids.length, "DESC"
+    )
+
+    if (totalFound !== ids.length) {
+      throw new NotFoundError("One or more employees not found", "ids");
+    }
+
+    const deletePromises = ids.map(id => this.employeeRepo.delete(id));
+    const results = await Promise.all(deletePromises);
+
+    return results.every(result => result === true);
   }
 
   async getEmployees(input: EmployeesFilterInput){
-    const { page, limit, searchTerm, sortOrder } = input;
+    const { page, limit, searchTerm, sortOrder, role } = input;
     const skip = (page - 1) * limit;
 
     const whereConditions: FindOptionsWhere<Employee> = {};
     if (searchTerm) {
       whereConditions.firstName = ILike(`%${searchTerm}%`);
+    }
+
+    if(role){
+      whereConditions.userRoles = {
+        role: {
+          role_name: ILike(`%${role}%`)
+        }
+      };
     }
 
     const [employees, totalCount] = await this.employeeRepo.findAndCountEmployees(

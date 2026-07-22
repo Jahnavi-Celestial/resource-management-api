@@ -1,12 +1,12 @@
-import React, { useState, useEffect, Suspense, useCallback, lazy } from "react";
-import { useQuery } from "@apollo/client/react";
+import React, {useState, useEffect, Suspense, useCallback, lazy, useMemo } from "react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import {
   Bookings,
   Employees,
   MostBookedRoom,
   MonthlyBookingStatics,
 } from "../graphql/queries";
-import DataGrid from "../../../shared/components/DataGrid";
+import DataGrid from "../../../shared/components/grid/DataGrid";
 import "./Home.css";
 import HomeShimmer from "../components/HomeShimmer";
 import { useNavigate } from "react-router-dom";
@@ -15,64 +15,58 @@ import { useDebounce } from "../../../shared/hooks/useDebounce";
 import { usePagination } from "../../../shared/hooks/usePagination";
 import { usePermission } from "../../../shared/hooks/usePermission";
 import { Can } from "../../../shared/components/Can";
+import {
+  DeleteEmployees,
+  UpdateEmployee,
+} from "../../Employee/graphql/mutation";
+import { GetAllRoles } from "../../../shared/services/queries";
 
-const ViewOwnBookings = lazy(() => import("../../Bookings/pages/ViewOwnBookings"));
+const ViewOwnBookings = lazy(
+  () => import("../../Bookings/pages/ViewOwnBookings"),
+);
 
 const employeeColumns = [
-    { key: "id", label: "ID" },
-    {
-      key: "name",
-      label: "Name",
-      render: (_, row) => (
-        <span>{`${row?.firstName || ""} ${row?.lastName || ""}`.trim()}</span>
-      ),
-    },
-    { key: "email", label: "Email" },
-    {
-      key: "userRoles",
-      label: "Roles",
-      render: (userRoles) => (
-        <div>
-          {userRoles?.map((ur) => (
-            <span
-              key={ur?.id}
-              className="role-badge"
-              style={{ marginRight: "4px" }}
-            >
-              {ur?.role?.role_name}
-            </span>
-          ))}
-        </div>
-      ),
-    },
-  ];
+  { field: "id", headerName: "ID", editable: false },
+  { field: "firstName", headerName: "First Name" },
+  { field: "lastName", headerName: "Last Name" },
+  { field: "email", headerName: "Email" },
+];
 
-  const bookingColumns = [
-    { key: "id", label: "Booking ID" },
-    {
-      key: "meetingRoom",
-      label: "Room Name",
-      render: (meetingRoom, row) => <span>{meetingRoom?.name || "N/A"}</span>,
-    },
-    {
-      key: "employee",
-      label: "Booked By",
-      render: (employee, row) => (
-        <span>
-          {employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}
-        </span>
-      ),
-    },
-    { key: "purpose", label: "Purpose" },
-    {
-      key: "status",
-      label: "Status",
-      render: (value) => (
-        <span className={`status-text ${value?.toLowerCase()}`}>{value}</span>
-      ),
-    },
-  ];
-
+const bookingColumns = [
+  { field: "id", headerName: "Booking ID", editable: false },
+  {
+    field: "meetingRoom",
+    headerName: "Room Name",
+    editable: false,
+    render: (meetingRoom) => <span>{meetingRoom?.name || "N/A"}</span>,
+  },
+  {
+    field: "employee",
+    headerName: "Booked By",
+    editable: false,
+    render: (employee) => (
+      <span>
+        {employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}
+      </span>
+    ),
+  },
+  { field: "purpose", headerName: "Purpose", editable: false },
+  {
+    field: "status",
+    headerName: "Status",
+    editable: false,
+    filterOptions: [
+      "PENDING",
+      "APPROVED",
+      "REJECTED",
+      "COMPLETED",
+      "CANCELLED",
+    ],
+    render: (value) => (
+      <span className={`status-text ${value?.toLowerCase()}`}>{value}</span>
+    ),
+  },
+];
 
 const Home = () => {
   const { user } = useAuth();
@@ -87,6 +81,10 @@ const Home = () => {
   const [searchInput, setSearchInput] = useState("");
   const [empSort, setEmpSort] = useState("DESC");
 
+  const [localEmployees, setLocalEmployees] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [employeeRoleFilter, setEmployeeRoleFilter] = useState("");
+
   const {
     currentPage: empPage,
     pageSize: empLimit,
@@ -97,6 +95,7 @@ const Home = () => {
 
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingSort, setBookingSort] = useState("DESC");
+  const [localBookings, setLocalBookings] = useState([]);
 
   const {
     currentPage: bookingPage,
@@ -113,13 +112,18 @@ const Home = () => {
 
   const debouncedSearch = useDebounce(searchInput, 500);
 
-  const { data: employeesData, loading: loadingEmp } = useQuery(Employees, {
+  const {
+    data: employeesData,
+    loading: loadingEmp,
+    refetch: refetchEmployees,
+  } = useQuery(Employees, {
     variables: {
       input: {
         page: empPage,
         limit: empLimit,
         searchTerm: debouncedSearch,
         sortOrder: empSort,
+        role: employeeRoleFilter || null,
       },
     },
     skip: !viewEmployee,
@@ -129,14 +133,15 @@ const Home = () => {
   const totalEmployeesCount = employeesData?.employees?.total || 0;
 
   useEffect(() => {
-    if (!loadingEmp && employeesData?.employees) {
+    if (!loadingEmp && employeesData?.employees?.data) {
+      setLocalEmployees(employeesData.employees.data);
       setEmpTotalRecords(totalEmployeesCount);
     }
   }, [totalEmployeesCount, loadingEmp, employeesData, setEmpTotalRecords]);
 
   useEffect(() => {
     goToEmpPage(1);
-  }, [debouncedSearch, empSort]);
+  }, [debouncedSearch, empSort, employeeRoleFilter]);
 
   const { data: bookingData, loading: loadingBookings } = useQuery(Bookings, {
     variables: {
@@ -154,7 +159,8 @@ const Home = () => {
   const totalBookingsCount = bookingData?.bookings?.total || 0;
 
   useEffect(() => {
-    if (!loadingBookings && bookingData?.bookings) {
+    if (!loadingBookings && bookingData?.bookings?.data) {
+      setLocalBookings(bookingData.bookings.data);
       setBookingTotalRecords(totalBookingsCount);
     }
   }, [
@@ -186,51 +192,179 @@ const Home = () => {
   );
   const monthlyStats = monthlyStatsData?.monthlyBookingStatics;
 
-  const handleSearchInput = useCallback((e)=>{
-    setSearchInput(e.target.value)
-  }, [debouncedSearch])
+  const handleSearchInput = useCallback((term) => {
+    setSearchInput(term);
+  }, []);
 
-  const handleEmployeeRowClick = useCallback((row) => {
-    if (row?.id) {
-      navigate(`/employeeDetails/${row.id}`);
+  const handleEmpSortToggle = useCallback((field, direction) => {
+    setEmpSort(direction);
+  }, []);
+
+  const handleEmpPageChange = useCallback(
+    (newPage) => {
+      goToEmpPage(newPage);
+    },
+    [goToEmpPage],
+  );
+
+  const handleEmpLimitChange = useCallback(
+    (newLimit) => {
+      setEmpPageSize(newLimit);
+    },
+    [setEmpPageSize],
+  );
+
+  const handleEmployeeColumnFilterChange = useCallback((filters) => {
+    setEmployeeRoleFilter(filters.userRoles || "");
+  }, []);
+
+  const handleBookingColumnFilterChange = useCallback((filters) => {
+    setBookingStatus(filters.status || "");
+  }, []);
+
+  const handleBookingSortToggle = useCallback((field, direction) => {
+    setBookingSort(direction);
+  }, []);
+
+  const handleBookingPageChange = useCallback(
+    (newPage) => {
+      goToBookingPage(newPage);
+    },
+    [goToBookingPage],
+  );
+
+  const handleBookingLimitChange = useCallback(
+    (newLimit) => {
+      setBookingPageSize(newLimit);
+    },
+    [setBookingPageSize],
+  );
+
+  const [mutateUpdateEmployee] = useMutation(UpdateEmployee);
+  const [mutateDeleteEmployees] = useMutation(DeleteEmployees);
+  const { data: rolesData } = useQuery(GetAllRoles);
+  const roleOptions = rolesData?.getAllRoles?.map((r) => r.role_name) || [];
+
+  const handleBulkDeleteEmployees = useCallback(async () => {
+    try {
+      const targetIds = selectedEmployees.map((id) => Number(id));
+      const { data } = await mutateDeleteEmployees({
+        variables: { ids: targetIds },
+      });
+      if (data?.deleteEmployees) {
+        setSelectedEmployees([]);
+        refetchEmployees();
+      }
+    } catch (err) {
+      console.error("Bulk delete failed:", err);
     }
-  },[navigate]);
+  }, [selectedEmployees, mutateDeleteEmployees, refetchEmployees]);
 
-  const handleEmpSortToggle = useCallback(() => {
-    setEmpSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
-  }, [])
+  const handleCellSave = useCallback(
+    async (rowId, field, updatedValue) => {
+      try {
+        const targetRow = localEmployees.find((emp) => emp.id === rowId);
+        if (!targetRow) return;
 
-  const handleEmpPageChange = useCallback((newPage) => {
-    goToEmpPage(newPage)
-  }, [goToEmpPage]);
+        const inputVariables = {
+          id: Number(rowId),
+          firstName: field === "firstName" ? updatedValue : targetRow.firstName,
+          lastName: field === "lastName" ? updatedValue : targetRow.lastName,
+          email: field === "email" ? updatedValue : targetRow.email,
+        };
 
-  const handleEmpLimitChange = useCallback((newLimit) => {
-    setEmpPageSize(newLimit)
-  }, [setEmpPageSize])
-  
-  const handleBookingStatusChange = useCallback((e) => {
-    setBookingStatus(e.target.value)
-  }, [])
+        const { data } = await mutateUpdateEmployee({
+          variables: { input: inputVariables },
+        });
 
-  const handleBookingRowClick = useCallback((row) => {
-    if (row?.id) {
-      navigate(`/bookingDetails/${row.id}`);
-    }
-  }, [navigate]);
+        if (data?.updateEmployee) {
+          setLocalEmployees((prev) =>
+            prev.map((row) =>
+              row.id === rowId ? { ...row, [field]: updatedValue } : row,
+            ),
+          );
+        }
+      } catch (err) {
+        console.error("Inline save failed:", err);
+      }
+    },
+    [localEmployees, mutateUpdateEmployee],
+  );
 
-  const handleBookingSortToggle = useCallback(() => {
-    setBookingSort((prev) => (prev === "DESC" ? "ASC" : "DESC"))
-  }, [])
+  const combinedEmpColumns = useMemo(() => {
+    const roleColumn = {
+      field: "userRoles",
+      headerName: "Roles",
+      editable: false,
+      filterOptions: roleOptions,
+      render: (userRoles) => (
+        <div>
+          {userRoles?.map((ur) => (
+            <span
+              key={ur?.id}
+              className="role-badge"
+              style={{ marginRight: "4px" }}
+            >
+              {ur?.role?.role_name}
+            </span>
+          ))}
+        </div>
+      ),
+    };
 
-  const handleBookingPageChange = useCallback((newPage) => {
-    goToBookingPage(newPage)
-  }, [goToBookingPage]);
+    const empActionColumn = {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      editable: false,
+      render: (_, row) => (
+        <div className="action-buttons-cell">
+          <button
+            className="btn-inline-action btn-inline-view"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/employeeDetails/${row.id}`);
+            }}
+          >
+            View
+          </button>
+        </div>
+      ),
+    };
 
-  const handleBookingLimitChange = useCallback((newLimit) => {
-    setBookingPageSize(newLimit)
-  }, [setBookingPageSize])
+    return [...employeeColumns, roleColumn, empActionColumn];
+  });
 
-  if(!user && (loadingBookings || loadingEmp || loadingMonthlyStatics || loadingMostBookedRoom)){
+  const combinedBookingColumns = useMemo(() => {
+    const bookingActionColumn = {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      editable: false,
+      render: (_, row) => (
+        <div className="action-buttons-cell">
+          <button
+            className="btn-inline-action btn-inline-view"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/bookingDetails/${row.id}`);
+            }}
+          >
+            View
+          </button>
+        </div>
+      ),
+    };
+    return [...bookingColumns, bookingActionColumn];
+  });
+
+  if (
+    !user &&
+    (loadingBookings ||
+      loadingEmp ||
+      loadingMonthlyStatics ||
+      loadingMostBookedRoom)
+  ) {
     return <HomeShimmer />;
   }
   return (
@@ -323,7 +457,13 @@ const Home = () => {
 
       <Can permission="VIEW_OWN_BOOKINGS">
         <div className="single-column-layout">
-          <Suspense fallback={<div className="loading-placeholder">Loading Your Bookings...</div>}>
+          <Suspense
+            fallback={
+              <div className="loading-placeholder">
+                Loading Your Bookings...
+              </div>
+            }
+          >
             <ViewOwnBookings />
           </Suspense>
         </div>
@@ -335,26 +475,27 @@ const Home = () => {
             <div className="management-card">
               <div className="management-card-header">
                 <h2>Employee Management</h2>
-                <input
-                  className="filter-input management-input"
-                  type="text"
-                  placeholder="Search employees..."
-                  value={searchInput}
-                  onChange={handleSearchInput}
-                />
               </div>
+
               <DataGrid
-                columns={employeeColumns}
-                data={employees}
+                columns={combinedEmpColumns}
+                data={localEmployees}
                 loading={loadingEmp}
                 page={empPage}
                 limit={empLimit}
                 totalCount={totalEmployeesCount}
+                sortBy="id"
                 sortDirection={empSort}
+                selectionMode="multi"
+                selectedRows={selectedEmployees}
+                onSelectionChange={setSelectedEmployees}
                 onSortToggle={handleEmpSortToggle}
                 onPageChange={handleEmpPageChange}
                 onLimitChange={handleEmpLimitChange}
-                onRowClick={handleEmployeeRowClick}
+                onSearchChange={handleSearchInput}
+                onFilterChange={handleEmployeeColumnFilterChange}
+                onBulkDelete={handleBulkDeleteEmployees}
+                onCellSave={handleCellSave}
               />
             </div>
           </Can>
@@ -363,32 +504,21 @@ const Home = () => {
             <div className="management-card">
               <div className="management-card-header">
                 <h2>Booking Logs</h2>
-                <select
-                  className="filter-select management-select-input"
-                  value={bookingStatus}
-                  onChange={handleBookingStatusChange}
-                  aria-label="status-select"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="APPROVED">Approved</option>
-                  <option value="REJECTED">Rejected</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
               </div>
+
               <DataGrid
-                columns={bookingColumns}
-                data={bookings}
+                columns={combinedBookingColumns}
+                data={localBookings}
                 loading={loadingBookings}
                 page={bookingPage}
                 limit={bookingLimit}
                 totalCount={totalBookingsCount}
+                sortBy="id"
                 sortDirection={bookingSort}
                 onSortToggle={handleBookingSortToggle}
                 onPageChange={handleBookingPageChange}
                 onLimitChange={handleBookingLimitChange}
-                onRowClick={handleBookingRowClick}
+                onFilterChange={handleBookingColumnFilterChange}
               />
             </div>
           </Can>

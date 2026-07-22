@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
-import { DeleteEmployee as DeleteEmployeeMutation } from "../graphql/mutation";
+import { DeleteEmployees as DeleteEmployeeMutation } from "../graphql/mutation";
 import "./DeleteEmployee.css";
 
 const DeleteEmployee = memo(({ onSubmitSuccess, id }) => {
@@ -11,7 +11,7 @@ const DeleteEmployee = memo(({ onSubmitSuccess, id }) => {
   const handleDeleteBtn = async () => {
     try {
       await deleteEmployeeAction({
-        variables: { deleteEmployeeId: id },
+        variables: { ids: [id] },
       });
 
       if (onSubmitSuccess) {

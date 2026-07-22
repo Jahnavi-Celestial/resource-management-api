@@ -40,7 +40,7 @@ const NavBar = () => {
   } = useNotification();
 
   const toggleMobileMenu = useCallback(() => {
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen(prev => !prev);
   }, []);
 
   const handleOpenModal = (modalName) => {

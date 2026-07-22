@@ -54,10 +54,10 @@ export class EmployeeResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(PermissionMiddleware("DELETE_EMPLOYEE"))
-  async deleteEmployee(
-    @Arg("id", () => Int) id: number
+  async deleteEmployees(
+    @Arg("ids", () => [Int]) ids: number[]
   ){
-    return this.employeeService.deleteEmployee(id);
+    return this.employeeService.deleteEmployees(ids);
   }
 
   @Query(() => PaginatedEmployees)
