@@ -128,7 +128,7 @@ const DynamicForm = memo(({ config, onSubmit, backendErrors, isSubmitting }) => 
         <form onSubmit={handleSubmit}>
             {config.map(renderField)}
             <div className="footer-actions">
-                <Button type="submit" value={isSubmitting ? 'Saving...' : 'Submit'} />
+                <Button type="submit" value={isSubmitting ? 'Submitting...' : 'Submit'} />
             </div>
         </form>
     )

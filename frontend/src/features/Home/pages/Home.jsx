@@ -1,12 +1,11 @@
-import React, {useState, useEffect, Suspense, useCallback, lazy, useMemo } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import React, { useState, useEffect, Suspense, useCallback, lazy, useMemo, useRef } from "react";
+import { useQuery, useMutation, useApolloClient } from "@apollo/client/react";
 import {
   Bookings,
   Employees,
   MostBookedRoom,
   MonthlyBookingStatics,
 } from "../graphql/queries";
-import DataGrid from "../../../shared/components/grid/DataGrid";
 import "./Home.css";
 import HomeShimmer from "../components/HomeShimmer";
 import { useNavigate } from "react-router-dom";
@@ -20,51 +19,46 @@ import {
   UpdateEmployee,
 } from "../../Employee/graphql/mutation";
 import { GetAllRoles } from "../../../shared/services/queries";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+import { filter } from "rxjs";
+import { PermissionContext } from "../../../shared/context/PermissionContext";
 
 const ViewOwnBookings = lazy(
   () => import("../../Bookings/pages/ViewOwnBookings"),
 );
 
-const employeeColumns = [
-  { field: "id", headerName: "ID", editable: false },
-  { field: "firstName", headerName: "First Name" },
-  { field: "lastName", headerName: "Last Name" },
-  { field: "email", headerName: "Email" },
-];
-
 const bookingColumns = [
-  { field: "id", headerName: "Booking ID", editable: false },
+  { field: "id", headerName: "Booking ID", width: 120, editable: false, sortable: false },
   {
-    field: "meetingRoom",
+    field: "meetingRoom.name",
     headerName: "Room Name",
     editable: false,
-    render: (meetingRoom) => <span>{meetingRoom?.name || "N/A"}</span>,
+    sortable: false,
+    valueGetter: (params) => params.data?.meetingRoom?.name || "N/A"
   },
   {
     field: "employee",
     headerName: "Booked By",
     editable: false,
-    render: (employee) => (
-      <span>
-        {employee ? `${employee.firstName} ${employee.lastName}` : "N/A"}
-      </span>
-    ),
+    sortable: false,
+    valueGetter: (params) => {
+      const emp = params.data?.employee;
+      return emp ? `${emp.firstName} ${emp.lastName}` : "N/A";
+    }
   },
-  { field: "purpose", headerName: "Purpose", editable: false },
+  { field: "purpose", headerName: "Purpose", editable: false, sortable: false },
   {
     field: "status",
     headerName: "Status",
     editable: false,
-    filterOptions: [
-      "PENDING",
-      "APPROVED",
-      "REJECTED",
-      "COMPLETED",
-      "CANCELLED",
-    ],
-    render: (value) => (
-      <span className={`status-text ${value?.toLowerCase()}`}>{value}</span>
-    ),
+    sortable: false,
+    filter: true,
+    filterParams: {
+      filterOptions: ['equals'],
+      maxNumConditions: 1,
+    }
   },
 ];
 
@@ -73,37 +67,23 @@ const Home = () => {
   const roles = user?.roles;
   const navigate = useNavigate();
 
+  const client = useApolloClient();
+
+  const empGridRef = useRef(null);
+  const bookingGridRef = useRef(null);
+
+  const [empPageSize, setEmpPageSize] = useState(5);
+  const [bookingPageSize, setBookingPageSize] = useState(5);
+
   const { hasPermission } = usePermission();
+  const canEdit = hasPermission('UPDATE_EMPLOYEE');
   const viewEmployee = hasPermission("VIEW_EMPLOYEE");
   const viewAllBooking = hasPermission("VIEW_ALL_BOOKINGS");
   const viewMonthlyStatics = hasPermission("VIEW_MONTHLY_STATICS");
 
   const [searchInput, setSearchInput] = useState("");
-  const [empSort, setEmpSort] = useState("DESC");
 
-  const [localEmployees, setLocalEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [employeeRoleFilter, setEmployeeRoleFilter] = useState("");
-
-  const {
-    currentPage: empPage,
-    pageSize: empLimit,
-    goToPage: goToEmpPage,
-    setPageSize: setEmpPageSize,
-    setTotalRecords: setEmpTotalRecords,
-  } = usePagination({ initialPageSize: 5, initialPage: 1 });
-
-  const [bookingStatus, setBookingStatus] = useState("");
-  const [bookingSort, setBookingSort] = useState("DESC");
-  const [localBookings, setLocalBookings] = useState([]);
-
-  const {
-    currentPage: bookingPage,
-    pageSize: bookingLimit,
-    goToPage: goToBookingPage,
-    setPageSize: setBookingPageSize,
-    setTotalRecords: setBookingTotalRecords,
-  } = usePagination({ initialPageSize: 5, initialPage: 1 });
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -112,70 +92,12 @@ const Home = () => {
 
   const debouncedSearch = useDebounce(searchInput, 500);
 
-  const {
-    data: employeesData,
-    loading: loadingEmp,
-    refetch: refetchEmployees,
-  } = useQuery(Employees, {
-    variables: {
-      input: {
-        page: empPage,
-        limit: empLimit,
-        searchTerm: debouncedSearch,
-        sortOrder: empSort,
-        role: employeeRoleFilter || null,
-      },
-    },
-    skip: !viewEmployee,
-    fetchPolicy: "network-only",
-  });
-  const employees = employeesData?.employees?.data || [];
-  const totalEmployeesCount = employeesData?.employees?.total || 0;
+  const [mutateUpdateEmployee] = useMutation(UpdateEmployee);
+  const [mutateDeleteEmployees] = useMutation(DeleteEmployees);
+  const { data: rolesData } = useQuery(GetAllRoles);
+  const roleOptions = rolesData?.getAllRoles?.map((r) => r.role_name) || [];
 
-  useEffect(() => {
-    if (!loadingEmp && employeesData?.employees?.data) {
-      setLocalEmployees(employeesData.employees.data);
-      setEmpTotalRecords(totalEmployeesCount);
-    }
-  }, [totalEmployeesCount, loadingEmp, employeesData, setEmpTotalRecords]);
-
-  useEffect(() => {
-    goToEmpPage(1);
-  }, [debouncedSearch, empSort, employeeRoleFilter]);
-
-  const { data: bookingData, loading: loadingBookings } = useQuery(Bookings, {
-    variables: {
-      input: {
-        page: bookingPage,
-        limit: bookingLimit,
-        bookingStatus: bookingStatus || null,
-        sortOrder: bookingSort,
-      },
-    },
-    skip: !viewAllBooking,
-    fetchPolicy: "network-only",
-  });
-  const bookings = bookingData?.bookings?.data || [];
-  const totalBookingsCount = bookingData?.bookings?.total || 0;
-
-  useEffect(() => {
-    if (!loadingBookings && bookingData?.bookings?.data) {
-      setLocalBookings(bookingData.bookings.data);
-      setBookingTotalRecords(totalBookingsCount);
-    }
-  }, [
-    totalBookingsCount,
-    loadingBookings,
-    bookingData,
-    setBookingTotalRecords,
-  ]);
-
-  useEffect(() => {
-    goToBookingPage(1);
-  }, [bookingStatus, bookingSort]);
-
-  const { data: mostBookedRoomData, loading: loadingMostBookedRoom } =
-    useQuery(MostBookedRoom);
+  const { data: mostBookedRoomData, loading: loadingMostBookedRoom } = useQuery(MostBookedRoom);
 
   const { data: monthlyStatsData, loading: loadingMonthlyStatics } = useQuery(
     MonthlyBookingStatics,
@@ -196,54 +118,262 @@ const Home = () => {
     setSearchInput(term);
   }, []);
 
-  const handleEmpSortToggle = useCallback((field, direction) => {
-    setEmpSort(direction);
+  const handleSelectionChanged = useCallback((event) => {
+    const selectedNodes = event.api.getSelectedNodes();
+    const selectedIds = selectedNodes.map((node) => node.data?.id).filter(Boolean);
+    setSelectedEmployees(selectedIds);
   }, []);
 
-  const handleEmpPageChange = useCallback(
-    (newPage) => {
-      goToEmpPage(newPage);
-    },
-    [goToEmpPage],
-  );
+  const handleGridCellValueChanged = useCallback(async (event) => {
+    const { data, colDef, newValue } = event;
+    const field = colDef.field;
+    try {
+      await mutateUpdateEmployee({
+        variables: {
+          input: {
+            id: Number(data.id),
+            firstName: field === "firstName" ? newValue : data.firstName,
+            lastName: field === "lastName" ? newValue : data.lastName,
+            email: field === "email" ? newValue : data.email,
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Inline save failed:", err);
+      if (empGridRef.current && empGridRef.current.api) {
+        empGridRef.current.api.refreshInfiniteCache();
+      }
+    }
+  }, [mutateUpdateEmployee]);
 
-  const handleEmpLimitChange = useCallback(
-    (newLimit) => {
-      setEmpPageSize(newLimit);
+  const employeeColumns = [
+    { field: "id", headerName: "ID", width: 80, editable: false, headerCheckboxSelection: true },
+    {
+      field: "firstName",
+      headerName: "First Name",
+      editable: canEdit,
+      sortable: false,
+      valueSetter: (params) => {
+        const updatedData = { ...params.data };
+        updatedData.firstName = params.newValue;
+        params.node.setData(updatedData);
+        return true;
+      }
     },
-    [setEmpPageSize],
-  );
+    {
+      field: "lastName",
+      headerName: "Last Name",
+      editable: canEdit,
+      sortable: false,
+      valueSetter: (params) => {
+        const updatedData = { ...params.data };
+        updatedData.lastName = params.newValue;
+        params.node.setData(updatedData);
+        return true;
+      }
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      editable: canEdit,
+      sortable: false,
+      valueSetter: (params) => {
+        const updatedData = { ...params.data };
+        updatedData.email = params.newValue;
+        params.node.setData(updatedData);
+        return true;
+      }
+    },
+    {
+      field: "userRoles",
+      headerName: "Roles",
+      editable: false,
+      sortable: false,
+      filter: "agTextColumnFilter",
+      filterParams: {
+        filterOptions: ['equals'],
+        maxNumConditions: 1,
+      },
+      cellRenderer: (params) => {
+        const userRoles = params.data?.userRoles;
+        return (
+          <div>
+            {userRoles?.map((ur) => (
+              <span key={ur?.id} className="role-badge" style={{ marginRight: "4px" }}>
+                {ur?.role?.role_name}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      editable: false,
+      cellRenderer: (params) => (
+        <div className="action-buttons-cell">
+          <button
+            className="btn-inline-action btn-inline-view"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/employeeDetails/${params.data.id}`);
+            }}
+          >
+            View
+          </button>
+        </div>
+      ),
+    }
+  ];
 
-  const handleEmployeeColumnFilterChange = useCallback((filters) => {
-    setEmployeeRoleFilter(filters.userRoles || "");
+  const combinedBookingColumns = useMemo(() => {
+    const bookingActionColumn = {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      editable: false,
+      cellRenderer: (params) => (
+        <div className="action-buttons-cell">
+          <button
+            className="btn-inline-action btn-inline-view"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/bookingDetails/${params.data.id}`);
+            }}
+          >
+            View
+          </button>
+        </div>
+      ),
+    };
+    return [...bookingColumns, bookingActionColumn];
+  }, [navigate]);
+
+  const getEmployeeDatasource = useCallback((currentSearchTerm, activeLimit) => {
+    return {
+      getRows: async (requestParams) => {
+        const startRow = requestParams.startRow;
+
+        const limit = activeLimit;
+        const page = Math.floor(startRow / limit) + 1;
+
+        let sortOrder = "DESC";
+        const idSort = requestParams.sortModel?.find(s => s.colId === "id");
+        if (idSort) {
+          sortOrder = idSort.sort.toUpperCase();
+        }
+
+        let selectedRole = null;
+        const filterModel = requestParams.filterModel || {};
+
+        if (filterModel.userRoles && filterModel.userRoles.filter) {
+          selectedRole = filterModel.userRoles.filter;
+        }
+
+        try {
+          const { data } = await client.query({
+            query: Employees,
+            variables: {
+              input: {
+                page: page,
+                limit: limit,
+                sortOrder: sortOrder,
+                searchTerm: currentSearchTerm || null,
+                role: selectedRole || null
+              },
+            },
+            fetchPolicy: "network-only",
+          });
+
+          const dataList = data?.employees?.data || [];
+          const totalRows = data?.employees?.total || 0;
+          requestParams.successCallback(dataList, totalRows);
+        } catch (error) {
+          console.error("Error fetching server-side employees", error);
+          requestParams.failCallback();
+        }
+      }
+    };
+  }, [client]);
+
+  useEffect(() => {
+    if (empGridRef.current && empGridRef.current.api) {
+      const freshDatasource = getEmployeeDatasource(debouncedSearch, empPageSize);
+      empGridRef.current.api.setGridOption("datasource", freshDatasource);
+    }
+  }, [debouncedSearch, empPageSize, getEmployeeDatasource]);
+
+  const onEmpGridReady = useCallback((params) => {
+    if (!viewEmployee) return;
+    const initialDatasource = getEmployeeDatasource(debouncedSearch, empPageSize);
+    params.api.setGridOption("datasource", initialDatasource);
+  }, [viewEmployee, getEmployeeDatasource, debouncedSearch, empPageSize]);
+
+  const onEmpPaginationChanged = useCallback((event) => {
+    if (event.newPageSize && empGridRef.current && empGridRef.current.api) {
+      const currentSelectedSize = empGridRef.current.api.getGridOption("paginationPageSize");
+      setEmpPageSize(currentSelectedSize);
+    }
   }, []);
 
-  const handleBookingColumnFilterChange = useCallback((filters) => {
-    setBookingStatus(filters.status || "");
+  const getBookingDatasource = useCallback((activeLimit) => {
+    return {
+      getRows: async (requestParams) => {
+        const startRow = requestParams.startRow;
+
+        const limit = activeLimit;
+        const page = Math.floor(startRow / limit) + 1;
+
+        let sortOrder = "DESC";
+        const idSort = requestParams.sortModel?.find(s => s.colId === "id");
+        if (idSort) {
+          sortOrder = idSort.sort.toUpperCase();
+        }
+
+        let bookingStatus = null;
+        if (requestParams.filterModel && requestParams.filterModel.status) {
+          bookingStatus = requestParams.filterModel.status.filter;
+        }
+
+        try {
+          const { data } = await client.query({
+            query: Bookings,
+            variables: {
+              input: {
+                page: page,
+                limit: limit,
+                sortOrder: sortOrder,
+                bookingStatus: bookingStatus,
+              },
+            },
+            fetchPolicy: "network-only",
+          });
+
+          const dataList = data?.bookings?.data || [];
+          const totalRows = data?.bookings?.total || 0;
+          requestParams.successCallback(dataList, totalRows);
+        } catch (error) {
+          console.error("Error fetching server-side bookings", error);
+          requestParams.failCallback();
+        }
+      }
+    };
+  }, [client]);
+
+  const onBookingGridReady = useCallback((params) => {
+    if (!viewAllBooking) return;
+    const initialDatasource = getBookingDatasource(bookingPageSize);
+    params.api.setGridOption("datasource", initialDatasource);
+  }, [viewAllBooking, getBookingDatasource, bookingPageSize]);
+
+  const onBookingPaginationChanged = useCallback((event) => {
+    if (event.newPageSize && bookingGridRef.current && bookingGridRef.current.api) {
+      const currentSelectedSize = bookingGridRef.current.api.getGridOption("paginationPageSize");
+      setBookingPageSize(currentSelectedSize);
+    }
   }, []);
-
-  const handleBookingSortToggle = useCallback((field, direction) => {
-    setBookingSort(direction);
-  }, []);
-
-  const handleBookingPageChange = useCallback(
-    (newPage) => {
-      goToBookingPage(newPage);
-    },
-    [goToBookingPage],
-  );
-
-  const handleBookingLimitChange = useCallback(
-    (newLimit) => {
-      setBookingPageSize(newLimit);
-    },
-    [setBookingPageSize],
-  );
-
-  const [mutateUpdateEmployee] = useMutation(UpdateEmployee);
-  const [mutateDeleteEmployees] = useMutation(DeleteEmployees);
-  const { data: rolesData } = useQuery(GetAllRoles);
-  const roleOptions = rolesData?.getAllRoles?.map((r) => r.role_name) || [];
 
   const handleBulkDeleteEmployees = useCallback(async () => {
     try {
@@ -253,110 +383,14 @@ const Home = () => {
       });
       if (data?.deleteEmployees) {
         setSelectedEmployees([]);
-        refetchEmployees();
+        if (empGridRef.current && empGridRef.current.api) {
+          empGridRef.current.api.refreshInfiniteCache();
+        }
       }
     } catch (err) {
       console.error("Bulk delete failed:", err);
     }
-  }, [selectedEmployees, mutateDeleteEmployees, refetchEmployees]);
-
-  const handleCellSave = useCallback(
-    async (rowId, field, updatedValue) => {
-      try {
-        const targetRow = localEmployees.find((emp) => emp.id === rowId);
-        if (!targetRow) return;
-
-        const inputVariables = {
-          id: Number(rowId),
-          firstName: field === "firstName" ? updatedValue : targetRow.firstName,
-          lastName: field === "lastName" ? updatedValue : targetRow.lastName,
-          email: field === "email" ? updatedValue : targetRow.email,
-        };
-
-        const { data } = await mutateUpdateEmployee({
-          variables: { input: inputVariables },
-        });
-
-        if (data?.updateEmployee) {
-          setLocalEmployees((prev) =>
-            prev.map((row) =>
-              row.id === rowId ? { ...row, [field]: updatedValue } : row,
-            ),
-          );
-        }
-      } catch (err) {
-        console.error("Inline save failed:", err);
-      }
-    },
-    [localEmployees, mutateUpdateEmployee],
-  );
-
-  const combinedEmpColumns = useMemo(() => {
-    const roleColumn = {
-      field: "userRoles",
-      headerName: "Roles",
-      editable: false,
-      filterOptions: roleOptions,
-      render: (userRoles) => (
-        <div>
-          {userRoles?.map((ur) => (
-            <span
-              key={ur?.id}
-              className="role-badge"
-              style={{ marginRight: "4px" }}
-            >
-              {ur?.role?.role_name}
-            </span>
-          ))}
-        </div>
-      ),
-    };
-
-    const empActionColumn = {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      editable: false,
-      render: (_, row) => (
-        <div className="action-buttons-cell">
-          <button
-            className="btn-inline-action btn-inline-view"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/employeeDetails/${row.id}`);
-            }}
-          >
-            View
-          </button>
-        </div>
-      ),
-    };
-
-    return [...employeeColumns, roleColumn, empActionColumn];
-  });
-
-  const combinedBookingColumns = useMemo(() => {
-    const bookingActionColumn = {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      editable: false,
-      render: (_, row) => (
-        <div className="action-buttons-cell">
-          <button
-            className="btn-inline-action btn-inline-view"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/bookingDetails/${row.id}`);
-            }}
-          >
-            View
-          </button>
-        </div>
-      ),
-    };
-    return [...bookingColumns, bookingActionColumn];
-  });
+  }, [selectedEmployees, mutateDeleteEmployees]);
 
   if (
     !user &&
@@ -475,28 +509,42 @@ const Home = () => {
             <div className="management-card">
               <div className="management-card-header">
                 <h2>Employee Management</h2>
+                {selectedEmployees.length > 0 && (
+                  <button className="btn-danger" onClick={handleBulkDeleteEmployees}>
+                    Delete Selected ({selectedEmployees.length})
+                  </button>
+                )}
               </div>
 
-              <DataGrid
-                columns={combinedEmpColumns}
-                data={localEmployees}
-                loading={loadingEmp}
-                page={empPage}
-                limit={empLimit}
-                totalCount={totalEmployeesCount}
-                sortBy="id"
-                sortDirection={empSort}
-                selectionMode="multi"
-                selectedRows={selectedEmployees}
-                onSelectionChange={setSelectedEmployees}
-                onSortToggle={handleEmpSortToggle}
-                onPageChange={handleEmpPageChange}
-                onLimitChange={handleEmpLimitChange}
-                onSearchChange={handleSearchInput}
-                onFilterChange={handleEmployeeColumnFilterChange}
-                onBulkDelete={handleBulkDeleteEmployees}
-                onCellSave={handleCellSave}
-              />
+              <div style={{ marginBottom: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Search employees..."
+                  value={searchInput}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  className="stats-date-picker"
+                  style={{ width: "250px" }}
+                />
+              </div>
+
+              <div className="ag-theme-quartz" style={{ height: 250, width: "100%" }}>
+                <AgGridReact
+                  key={`emp-grid-${empPageSize}`}
+                  ref={empGridRef}
+                  columnDefs={employeeColumns}
+                  rowModelType="infinite"
+                  onGridReady={onEmpGridReady}
+                  rowSelection={{ mode: 'multiRow', checkboxes: true, headerCheckbox: true }}
+                  onSelectionChanged={handleSelectionChanged}
+                  onCellValueChanged={handleGridCellValueChanged}
+                  pagination={true}
+                  paginationPageSize={empPageSize}
+                  cacheBlockSize={empPageSize}
+                  paginationPageSizeSelector={[5, 10, 15, 20]}
+                  onPaginationChanged={onEmpPaginationChanged}
+                  rowHeight={35}
+                />
+              </div>
             </div>
           </Can>
 
@@ -506,20 +554,21 @@ const Home = () => {
                 <h2>Booking Logs</h2>
               </div>
 
-              <DataGrid
-                columns={combinedBookingColumns}
-                data={localBookings}
-                loading={loadingBookings}
-                page={bookingPage}
-                limit={bookingLimit}
-                totalCount={totalBookingsCount}
-                sortBy="id"
-                sortDirection={bookingSort}
-                onSortToggle={handleBookingSortToggle}
-                onPageChange={handleBookingPageChange}
-                onLimitChange={handleBookingLimitChange}
-                onFilterChange={handleBookingColumnFilterChange}
-              />
+              <div className="ag-theme-quartz" style={{ height: 250, width: "100%" }}>
+                <AgGridReact
+                  key={`emp-grid-${bookingPageSize}`}
+                  ref={bookingGridRef}
+                  columnDefs={combinedBookingColumns}
+                  rowModelType="infinite"
+                  onGridReady={onBookingGridReady}
+                  pagination={true}
+                  paginationPageSize={bookingPageSize}
+                  cacheBlockSize={bookingPageSize}
+                  paginationPageSizeSelector={[5, 10, 15, 20]}
+                  onPaginationChanged={onBookingPaginationChanged}
+                  rowHeight={35}
+                />
+              </div>
             </div>
           </Can>
         </section>

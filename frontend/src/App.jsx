@@ -86,8 +86,8 @@ const router = createBrowserRouter([
             element: <UnAuthorized />,
           },
           {
-            path: "/admin/actions",
-            element: <AdminAction />,
+            element: <PermissionGuard requiredPermission={"CREATE_ROLE" || "UPDATE_ROLE" || "DELETE_ROLE" || "CREATE_PERMISSION" || "UPDATE_PERMISSION" || "DELETE_PERMISSION" || "ASSIGN_PERMISSION" || "REMOVE_PERMISSION"} />,
+            children: [{path: "/admin/actions", element: <AdminAction />,}]
           },
         ],
       },

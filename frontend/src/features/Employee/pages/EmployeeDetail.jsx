@@ -12,7 +12,6 @@ import "./EmployeeDetail.css";
 const UpdateEmployee = React.lazy(() => import("../components/UpdateEmployee"));
 const DeleteEmployee = React.lazy(() => import("../components/DeleteEmployee"));
 const RoleActionModal = React.lazy(() => import("../../Role/components/RoleActionModal"));
-const PermissionActionModal = React.lazy(() => import("../../Permission/components/PermissionActionModal"));
 
 const EmployeeDetail = () => {
   const { id } = useParams();
@@ -135,25 +134,6 @@ const EmployeeDetail = () => {
             </button>
           </Can>
         </div>
-
-        <div>
-          <Can permission={"ASSIGN_PERMISSION"}>
-            <button
-              className="btn-edit"
-              onClick={() => openDialog("assignPermission")}
-            >
-              Assign Permission
-            </button>
-          </Can>
-          <Can permission={"REMOVE_PERMISSION"}>
-            <button
-              className="btn-delete"
-              onClick={() => openDialog("removePermission")}
-            >
-              Remove Permission
-            </button>
-          </Can>
-        </div>
       </div>
 
       {activeModal && (
@@ -188,18 +168,6 @@ const EmployeeDetail = () => {
               <RoleActionModal
                 actionType="remove"
                 userId={Number(id)}
-                onSubmitSuccess={closeDialog}
-              />
-            )}
-            {activeModal === "assignPermission" && (
-              <PermissionActionModal
-                actionType="assign"
-                onSubmitSuccess={closeDialog}
-              />
-            )}
-            {activeModal === "removePermission" && (
-              <PermissionActionModal
-                actionType="remove"
                 onSubmitSuccess={closeDialog}
               />
             )}

@@ -49,6 +49,11 @@ export class RoleService{
       throw new NotFoundError("Role", "id");
     }
 
+    const roleCount = await this.roleRepo.findRole()
+    if(roleCount.length <= 1){
+      throw new Error("Cannot delete role. At least one role must exist in the system.");
+    }
+
     return this.roleRepo.deleteRole(id);
   }
 

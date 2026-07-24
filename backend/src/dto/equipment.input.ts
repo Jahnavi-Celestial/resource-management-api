@@ -12,7 +12,7 @@ export class CreateEquipmentInput{
   @Field(() => Int)
   @IsNotEmpty({ message: "Quantity available cannot be empty" })
   @IsInt({ message: "Quantity available must be a number" })
-  @Min(0, { message: "Quantity must be positive" })
+  @Min(1, { message: "Created Quantity must be at least 1"})
   quantityAvailable!: number;
 
   @Field(() => Boolean)

@@ -140,8 +140,8 @@ const NavBar = () => {
           Equipment
         </NavLink>
 
-        {roles?.includes("admin") && (
           <div className="role-actions-group">
+            <Can permission={"CREATE_ROLE" || "UPDATE_ROLE" || "DELETE_ROLE" || "CREATE_PERMISSION" || "UPDATE_PERMISSION" || "DELETE_PERMISSION" || "ASSIGN_PERMISSION" || "REMOVE_PERMISSION"}>
             <NavLink
               to="/admin/actions"
               className={({ isActive }) =>
@@ -152,26 +152,32 @@ const NavBar = () => {
             >
               Manage Role/Permission
             </NavLink>
+            </Can>
+            <Can permission={'CREATE_EMPLOYEE'}>
             <button
               className="nav-action-btn"
               onClick={() => handleOpenModal("employee")}
             >
               + Employee
             </button>
+            </Can>
+            <Can permission={'CREATE_EQUIPMENT'}>
             <button
               className="nav-action-btn"
               onClick={() => handleOpenModal("equipment")}
             >
               + Equipment
             </button>
+            </Can>
+            <Can permission={'CREATE_ROOM'}>
             <button
               className="nav-action-btn"
               onClick={() => handleOpenModal("room")}
             >
               + Room
             </button>
+            </Can>
           </div>
-        )}
 
         <Can permission={"CREATE_BOOKING"}>
           <div className="role-actions-group">

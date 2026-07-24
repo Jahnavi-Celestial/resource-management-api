@@ -54,7 +54,8 @@ export class RoleResolver {
   async assignPermission(
     @Arg("input", ()=>AssignPermissionInput) input: AssignPermissionInput
   ){
-        return this.roleService.assignPermissionToRole
+      this.roleService.assignPermissionToRole(input)
+      return true
   }
 
   @Mutation(() => Boolean)
@@ -62,7 +63,8 @@ export class RoleResolver {
   async removePermission(
     @Arg("input", ()=>RemovePermissionInput) input: RemovePermissionInput
   ){
-        return this.roleService.removePermissionFromRole
+      this.roleService.removePermissionFromRole(input)
+      return true
   }
 
   @Query(()=>[Roles])

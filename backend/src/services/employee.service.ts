@@ -125,7 +125,7 @@ export class EmployeeService {
     if(role){
       whereConditions.userRoles = {
         role: {
-          role_name: ILike(`%${role}%`)
+          role_name: role
         }
       };
     }
