@@ -65,7 +65,9 @@ const EmployeeDetail = () => {
           <h2 className="profile-name">
             {employee?.firstName} {employee?.lastName}
           </h2>
-          <span className="profile-role-badge">{employee?.role}</span>
+          {
+            employee?.userRoles?.map((ur, index) => <span className="profile-role-badge" key={index}>{ur.role.role_name}</span>)
+          }
 
           <div className="profile-fields-list">
             <div className="field-item">

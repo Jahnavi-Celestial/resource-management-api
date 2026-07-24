@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { AssignPermission, RemovePermission } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
@@ -49,7 +49,7 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
     );
   }
 
-  const formSchema = useMemo(() => [
+  const formSchema = [
     {
       name: "roleId",
       type: "select",
@@ -121,7 +121,7 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
         );
       },
     },
-  ], [rolesData, permissionsData]);
+  ];
 
   return (
     <div className="form-container">
