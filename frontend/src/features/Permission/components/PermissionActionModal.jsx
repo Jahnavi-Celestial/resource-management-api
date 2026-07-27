@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { AssignPermission, RemovePermission } from "../graphql/mutation";
 import DynamicForm from "../../../shared/components/FormsField/DynamicForm";
@@ -6,9 +6,19 @@ import {
   GetAllPermission,
   GetAllRoles,
 } from "../../../shared/services/queries";
+import { GetAllPermissionForRole } from "../graphql/queries";
 
 const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
   const [backendErrors, setBackendErrors] = useState({});
+  const [selectedRoleId, setSelectedRoleId] = useState(null)
+
+  const { data: rolePermData, loading: rolePermLoading} = useQuery(GetAllPermissionForRole, {
+    variables: { roleId: Number(selectedRoleId) },
+    skip: !selectedRoleId,
+    fetchPolicy: "network-only"
+  })
+
+  const existingPermIds = rolePermData?.getAllPermissionForRole?.map(p => Number(p.permission.id)) || []
 
   const { data: rolesData, loading: rolesLoading } = useQuery(GetAllRoles);
   const { data: permissionsData, loading: permissionsLoading } =
@@ -32,6 +42,7 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
         },
       });
       resetForm();
+      setSelectedRoleId(null);
     } catch (err) {
       if (err.graphQLErrors && err.graphQLErrors?.extensions?.validation) {
         setBackendErrors(err.graphQLErrors.extensions.validation);
@@ -41,15 +52,7 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
     }
   };
 
-  if (rolesLoading || permissionsLoading) {
-    return (
-      <div className="state-container">
-        <p>Loading form fields...</p>
-      </div>
-    );
-  }
-
-  const formSchema = [
+  const formSchema = useMemo(() => ([
     {
       name: "roleId",
       type: "select",
@@ -62,6 +65,10 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
         value: role.id,
         label: role.role_name,
       })),
+      onChange: ((e) => {
+        const val = e?.target ? e.target.value : e; 
+        setSelectedRoleId(val);
+      })
     },
     {
       name: "permissionIds",
@@ -82,6 +89,12 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
             : [...selectedList, id];
           onChange(name, updatedList);
         };
+
+        if (existingPermIds && existingPermIds.length > 0 && selectedList.length === 0){
+          setTimeout(() => {
+            onChange(name, existingPermIds.map(Number));
+          }, 0);
+        }
 
         return (
           <div key={name} className="form-group">
@@ -121,7 +134,15 @@ const PermissionActionModal = memo(({ actionType, onSubmitSuccess }) => {
         );
       },
     },
-  ];
+  ]), [rolesData, permissionsData, rolePermLoading]);
+
+  if (rolesLoading || permissionsLoading) {
+    return (
+      <div className="state-container">
+        <p>Loading form fields...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="form-container">

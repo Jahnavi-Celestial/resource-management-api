@@ -1,6 +1,6 @@
-import { EquipmentRepository } from "../repositories/equipment.respository.ts";
-import { CreateEquipmentInput, EquipmentsFilterInput, UpdateEquipmentInput } from "../dto/equipment.input.ts";
-import { Equipment } from "../entities/Equipment.ts";
+import { EquipmentRepository } from "../repositories/index.ts";
+import { CreateEquipmentInput, EquipmentsFilterInput, UpdateEquipmentInput } from "../dto/index.ts";
+import { Equipment } from "../entities/index.ts";
 import { FindOptionsWhere, ILike } from "typeorm";
 import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import AppDataSource from "../config/db.ts";
@@ -17,7 +17,10 @@ export class EquipmentService {
         throw new ConflictError("Equipment already exists, you can only update it.", "name");
     }
 
-    const newEquip = this.equipmentRepo.create(input);
+    const newEquip = this.equipmentRepo.create({
+      ...input,
+      name: input.name.toLowerCase()
+    });
     return this.equipmentRepo.save(newEquip);
   }
 
@@ -30,6 +33,7 @@ export class EquipmentService {
     return this.equipmentRepo.save({
       ...searchEquip,
       ...input,
+      name: input.name.toLowerCase()
     });
   }
 

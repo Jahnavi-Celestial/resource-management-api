@@ -1,14 +1,24 @@
 import { FindOptionsWhere, ILike } from "typeorm";
-import { CreateMeetingRoomInput, RoomsFilterInput, UpdateMeetingRoomInput } from "../dto/meetingRoom.input.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
-import { MeetingRoomRepository } from "../repositories/meetingRoom.repository.ts";
-import { NotFoundError } from "../errors/AppErrors.ts";
+import { CreateMeetingRoomInput, RoomsFilterInput, UpdateMeetingRoomInput } from "../dto/index.ts";
+import { MeetingRoom } from "../entities/index.ts";
+import { MeetingRoomRepository } from "../repositories/index.ts";
+import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 
 export class MeetingRoomService {
   constructor(private meetingRoomRepo = new MeetingRoomRepository()) {}
 
   async createRoom(input: CreateMeetingRoomInput){
-    const newRoom = this.meetingRoomRepo.create(input);
+    const existingRoom = await this.meetingRoomRepo.findOneByNameAndLocation(input.name.toLowerCase(), input.location.toLowerCase());
+
+    if (existingRoom) {
+        throw new ConflictError("This room already exists. You cannot create a room with the same name at the same location.");
+    }
+
+    const newRoom = this.meetingRoomRepo.create({
+      ...input,
+      name: input.name.toLowerCase(),
+      location: input.location.toLowerCase()
+    });
     return this.meetingRoomRepo.save(newRoom);
   }
 
@@ -18,9 +28,19 @@ export class MeetingRoomService {
       throw new NotFoundError("Meeting Room", "id");
     }
 
+    if(searchRoom.name.toLowerCase() != input.name.toLowerCase() || searchRoom.location.toLowerCase() != input.location.toLowerCase()){
+        const existingRoom = await this.meetingRoomRepo.findOneByNameAndLocation(input.name.toLowerCase(), input.location.toLowerCase());
+
+        if(existingRoom){
+            throw new ConflictError("This room already exists. You cannot create a room with the same name at the same location.");
+        }
+    }
+
     return this.meetingRoomRepo.save({
       ...searchRoom,
       ...input,
+      name: input.name.toLowerCase(),
+      location: input.location.toLowerCase()
     });
   }
 

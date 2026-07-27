@@ -1,11 +1,14 @@
-import AppDataSource from "../config/db.ts";
-import { RolePermission } from "../entities/RolePermission.ts";
+import { EntityManager } from "typeorm";
+import { RolePermission } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-export class RolePermissionRepository{
-    private repo = AppDataSource.getRepository(RolePermission)
+export class RolePermissionRepository extends Manager{
+    constructor(manager?: EntityManager) {
+        super(manager);
+    }
 
     async findByRoleAndPermission(roleId: number, permissionId: number){
-        return this.repo.findOne({
+        return this.manager.findOne(RolePermission, {
             where: {
                 role: {
                     id: roleId
@@ -22,19 +25,19 @@ export class RolePermissionRepository{
     }
 
     async create(data: RolePermission | Partial<RolePermission>){
-        return this.repo.create(data);
+        return this.manager.create(RolePermission, data);
     }
 
     async save(data: RolePermission | Partial<RolePermission>){
-        return this.repo.save(data);
+        return this.manager.save(RolePermission, data);
     }
 
     async remove(data: RolePermission){
-        return this.repo.remove(data);
+        return this.manager.remove(RolePermission, data);
     }
 
     async findByRoleId(roleId: number){
-        return await this.repo.find({
+        return await this.manager.find(RolePermission, {
             where: {
                 role:{
                     id: roleId

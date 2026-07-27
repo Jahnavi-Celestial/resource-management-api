@@ -17,7 +17,7 @@ const UpdateEquipment = memo(({ onSubmitSuccess, equipment }) => {
           input: {
             id: equipment.id,
             name: formData.name,
-            quantityAvailable: parseInt(formData.quantityAvailable, 10) || 0,
+            quantityAvailable: parseInt(formData.quantityAvailable, 10),
             isActive:
               formData.isActive === "true" || formData.isActive === true,
           },

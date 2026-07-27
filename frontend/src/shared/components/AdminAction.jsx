@@ -5,7 +5,6 @@ import { Can } from "./Can";
 
 const CreateRoleModal = lazy(() => import("../../features/Role/components/CreateRoleModal"));
 const UpdateRoleModal = lazy(() => import("../../features/Role/components/UpdateRoleModal"));
-const CreatePermissionModal = lazy(() => import("../../features/Permission/components/CreatePermissionModal"));
 const UpdatePermissionModal = lazy(() => import("../../features/Permission/components/UpdatePermissionModal"));
 const DeleteRoleOrPermissionModal = lazy(() => import("../../features/Role/components/DeleteRoleOrPermission"));
 const PermissionActionModal = lazy(() => import("../../features/Permission/components/PermissionActionModal"));
@@ -73,15 +72,6 @@ const AdminAction = () => {
 
         {activeTab === "permissions" && (
           <div className="management-grid">
-            <Can permission={'CREATE_PERMISSION'}>
-            <div
-              className="action-card"
-              onClick={() => openDialog("createPermission")}
-            >
-              <h3>Create Permission</h3>
-              <p>Define new granular action access rules.</p>
-            </div>
-            </Can>
             <Can permission={'UPDATE_PERMISSION'}>
             <div
               className="action-card"
@@ -135,9 +125,6 @@ const AdminAction = () => {
             )}
             {activeModal === "updateRole" && (
               <UpdateRoleModal onSubmitSuccess={closeDialog} />
-            )}
-            {activeModal === "createPermission" && (
-              <CreatePermissionModal onSubmitSuccess={closeDialog} />
             )}
             {activeModal === "updatePermission" && (
               <UpdatePermissionModal onSubmitSuccess={closeDialog} />

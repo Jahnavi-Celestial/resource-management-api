@@ -1,6 +1,6 @@
 import { Arg, Query, Resolver, UseMiddleware } from "type-graphql";
-import { MostBookedRoom, BookingsPerEmployee, EquipmentUsage, MonthlyBookingStatics, BookingsPerEmployeeInput, EquipmentUsageInput, MonthlyBookingStatisticsInput } from "../dto/report.input.ts";
-import { ReportService } from "../services/report.service.ts";
+import { MostBookedRoom, BookingsPerEmployee, EquipmentUsage, MonthlyBookingStatics, BookingsPerEmployeeInput, EquipmentUsageInput, MonthlyBookingStatisticsInput } from "../dto/index.ts";
+import { ReportService } from "../services/index.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
 
 @Resolver()

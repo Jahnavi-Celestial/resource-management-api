@@ -1,12 +1,15 @@
-import AppDataSource from "../config/db.ts"
-import { Permission } from "../entities/Permission.ts"
+import { EntityManager } from "typeorm";
+import { Permission } from "../entities/index.ts"
+import { Manager } from "./index.ts";
 
 
-export class PermissionRepository{
-    private repo = AppDataSource.getRepository(Permission)
+export class PermissionRepository extends Manager{
+    constructor(manager?: EntityManager) {
+        super(manager);
+    }
 
     async findPermissionByName(name: string){
-        return this.repo.findOne({
+        return this.manager.findOne(Permission, {
             where:{
                 permission_name: name
             }
@@ -14,15 +17,15 @@ export class PermissionRepository{
     }
 
     async createPermission(data: Partial<Permission>){
-        return this.repo.create(data)
+        return this.manager.create(Permission, data)
     }
 
     async savePermission(data: Permission | Partial<Permission>){
-        return this.repo.save(data)
+        return this.manager.save(Permission, data)
     }
 
     async findPermissionById(id: number){
-        return this.repo.findOne({
+        return this.manager.findOne(Permission, {
             where:{
                 id
             }
@@ -30,11 +33,11 @@ export class PermissionRepository{
     }
 
     async deletePermission(id: number){
-        const result = await this.repo.delete(id)
+        const result = await this.manager.delete(Permission, id)
         return !!result.affected
     }
 
     async findPermission(){
-        return this.repo.find()
+        return this.manager.find(Permission)
     }
 }

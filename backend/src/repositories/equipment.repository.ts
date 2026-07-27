@@ -1,34 +1,35 @@
-import { FindOptionsWhere } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { Equipment } from "../entities/Equipment.ts";
+import { EntityManager, FindOptionsWhere } from "typeorm";
+import { Equipment } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-
-export class EquipmentRepository {
-  private repo = AppDataSource.getRepository(Equipment);
+export class EquipmentRepository extends Manager{
+  constructor(manager?: EntityManager) {
+    super(manager);
+  }
 
   async findById(id: number){
-    return this.repo.findOne({ where: { id } });
+    return this.manager.findOne(Equipment, { where: { id } });
   }
   
   async findByName(name: string){
-    return this.repo.findOne({ where: { name } });
+    return this.manager.findOne(Equipment, { where: { name } });
   }
 
   create(data: Partial<Equipment>): Equipment {
-    return this.repo.create(data);
+    return this.manager.create(Equipment, data);
   }
 
   async save(equipment: Equipment | Partial<Equipment>){
-    return this.repo.save(equipment);
+    return this.manager.save(Equipment, equipment);
   }
 
   async delete(id: number){
-    const result = await this.repo.delete(id);
+    const result = await this.manager.delete(Equipment, id);
     return !!result.affected;
   }
 
   async findByIdWithRelations(id: number){
-    return this.repo.findOne({
+    return this.manager.findOne(Equipment, {
       where: { id },
       relations: {
         bookings: {
@@ -46,7 +47,7 @@ export class EquipmentRepository {
     take: number,
     sortOrder: string
   ){
-    return this.repo.findAndCount({
+    return this.manager.findAndCount(Equipment, {
       where: whereConditions,
       relations: {
         bookings: {

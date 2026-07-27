@@ -53,7 +53,7 @@ const CreateEquipment = memo(({ onSubmitSuccess }) => {
       name: "quantityAvailable",
       type: "number",
       label: "Quantity Available",
-      defaultValue: 0,
+      defaultValue: 1,
       validators: [
         {
           type: "required",

@@ -1,14 +1,11 @@
-import { BookingRepository } from "../repositories/booking.repository.ts";
+import { BookingRepository } from "../repositories/index.ts";
 import {
   CreateBookingInput,
   ApproveBookingInput,
   RejectBookingInput,
   BookingsFilterInput,
-} from "../dto/booking.input.ts";
-import { Employee } from "../entities/Employee.ts";
-import { Booking, BookingStatus } from "../entities/Booking.ts";
-import { Equipment } from "../entities/Equipment.ts";
-import { AuditLog, AuditAction } from "../entities/AuditLog.ts";
+} from "../dto/index.ts";
+import { Employee, Booking, BookingStatus, Equipment, AuditLog, AuditAction } from "../entities/index.ts";
 import { FindOptionsWhere } from "typeorm";
 import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import AppDataSource from "../config/db.ts";
@@ -103,7 +100,7 @@ export class BookingService {
           }
         }
 
-        const newBooking = repo.createBooking({
+        const newBooking = await repo.createBooking({
           startTime: input.startTime,
           endTime: input.endTime,
           purpose: input.purpose,

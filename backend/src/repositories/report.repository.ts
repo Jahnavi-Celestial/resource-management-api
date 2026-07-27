@@ -1,14 +1,10 @@
 import { EntityManager } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { Booking } from "../entities/Booking.ts";
-import { Employee } from "../entities/Employee.ts";
-import { Equipment } from "../entities/Equipment.ts";
+import { Booking, Employee, Equipment } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-export class ReportRepository {
-  private manager: EntityManager;
-
-  constructor(transactionalManager?: EntityManager) {
-    this.manager = transactionalManager || AppDataSource.manager;
+export class ReportRepository extends Manager{
+  constructor(manager?: EntityManager) {
+    super(manager);
   }
 
   async getMostBookedRoomRaw(): Promise<any[]> {

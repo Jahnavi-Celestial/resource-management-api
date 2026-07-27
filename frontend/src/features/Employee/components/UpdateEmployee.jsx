@@ -19,12 +19,12 @@ const UpdateEmployee = memo(({ onSubmitSuccess, employee }) => {
         variables: {
           input: {
             id: employee.id,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            password: formData.password,
-            roleIdFrom: Number(formData.roleIdFrom),
-            roleIdTo: Number(formData.roleIdTo),
+            firstName: formData.firstName || null,
+            lastName: formData.lastName || null,
+            email: formData.email || null,
+            password: formData.password || null,
+            roleIdFrom: Number(formData.roleIdFrom) || null,
+            roleIdTo: Number(formData.roleIdTo) || null,
           },
         },
       });
@@ -71,7 +71,6 @@ const UpdateEmployee = memo(({ onSubmitSuccess, employee }) => {
       type: "text",
       label: "First Name",
       defaultValue: employee?.firstName || "",
-      validators: [{ type: "required", message: "First name is required" }],
     },
     {
       name: "lastName",
@@ -84,30 +83,17 @@ const UpdateEmployee = memo(({ onSubmitSuccess, employee }) => {
       type: "email",
       label: "Email",
       defaultValue: employee?.email || "",
-      validators: [{ type: "required", message: "Email is required" }],
     },
     {
       name: "password",
       type: "password",
       label: "Password",
-      validators: [
-        {
-          type: "required",
-          message: "Password validation verification is required",
-        },
-      ],
     },
     {
       name: "roleIdFrom",
       type: "select",
       label: "Role From",
       placeholder: "Select Role",
-      validators: [
-        {
-          type: "required",
-          message: "Selecting original role constraint is mandatory",
-        },
-      ],
       options: roleOptions,
     },
     {
@@ -115,12 +101,6 @@ const UpdateEmployee = memo(({ onSubmitSuccess, employee }) => {
       type: "select",
       label: "Role To",
       placeholder: "Select Role",
-      validators: [
-        {
-          type: "required",
-          message: "Selecting destination target role is mandatory",
-        },
-      ],
       options: roleOptions,
     },
   ], [roleOptions]);

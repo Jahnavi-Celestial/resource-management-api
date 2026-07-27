@@ -1,11 +1,14 @@
-import AppDataSource from "../config/db.ts";
-import { UserRole } from "../entities/UserRole.ts";
+import { EntityManager } from "typeorm";
+import { UserRole } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-export class UserRoleRepository{
-    private repo = AppDataSource.getRepository(UserRole)
+export class UserRoleRepository extends Manager{
+    constructor(manager?: EntityManager) {
+        super(manager);
+    }
 
     async findByEmployeeId(employeeId: number){
-        return this.repo.find({
+        return this.manager.find(UserRole, {
             where: {
                 employee: {
                     id: employeeId
@@ -18,15 +21,15 @@ export class UserRoleRepository{
     }
 
     async create(data: UserRole | Partial<UserRole>){
-        return this.repo.create(data)
+        return this.manager.create(UserRole, data)
     }
 
     async save(data: UserRole | Partial<UserRole>){
-        return this.repo.save(data)
+        return this.manager.save(UserRole, data)
     }
 
     async findByEmployeeIdAndRoleId(employeeId: number, roleId: number){
-        return this.repo.findOne({
+        return this.manager.findOne(UserRole, {
             where: {
                 employee: {
                     id: employeeId
@@ -43,6 +46,6 @@ export class UserRoleRepository{
     }
 
     async remove(userRole: UserRole){
-        return this.repo.remove(userRole);
+        return this.manager.remove(UserRole, userRole);
     }
 }

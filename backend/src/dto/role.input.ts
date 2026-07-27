@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, IsArray } from "class-validator";
+import { IsInt, IsNotEmpty, IsString, IsArray, IsAlpha } from "class-validator";
 import { Field, InputType, Int } from "type-graphql";
 
 @InputType()
@@ -6,6 +6,7 @@ export class CreateRoleInput{
   @Field(() => String)
   @IsNotEmpty({ message: "Role name cannot be empty" })
   @IsString({ message: "Role name must be text" })
+  @IsAlpha()
   name!: string;
 }
 

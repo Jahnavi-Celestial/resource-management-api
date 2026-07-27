@@ -1,15 +1,11 @@
 import { EntityManager, FindOptionsWhere, Not } from "typeorm";
 import { LessThan, MoreThan } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
-import { Booking, BookingStatus } from "../entities/Booking.ts";
-import { Equipment } from "../entities/Equipment.ts";
+import { MeetingRoom, Booking, BookingStatus, Equipment } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-export class BookingRepository{
-  private manager: EntityManager;
-
-  constructor(transactionalManager?: EntityManager){
-    this.manager = transactionalManager || AppDataSource.manager;
+export class BookingRepository extends Manager{
+  constructor(manager?: EntityManager) {
+    super(manager);
   }
 
   async findRoomWithBookings(roomId: number){
@@ -65,7 +61,7 @@ export class BookingRepository{
     });
   }
 
-  createBooking(data: Partial<Booking>){
+  async createBooking(data: Partial<Booking>){
     return this.manager.create(Booking, data);
   }
 

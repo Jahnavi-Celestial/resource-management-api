@@ -1,48 +1,44 @@
-import { EntityManager, Repository } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { Notification } from "../entities/Notification.ts";
+import { EntityManager } from "typeorm";
+import { Notification } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
-export class NotificationRepository {
-  private repository: Repository<Notification>;
-
+export class NotificationRepository extends Manager{
   constructor(manager?: EntityManager) {
-    this.repository = manager 
-      ? manager.getRepository(Notification) 
-      : AppDataSource.getRepository(Notification);
+    super(manager);
   }
 
   async findByRecipient(recipientId: number, unreadOnly: boolean){
     const conditions: any = { recipientId };
     if (unreadOnly) conditions.isRead = false;
 
-    return await this.repository.find({
+    return await this.manager.find(Notification, {
       where: conditions,
       order: { createdAt: "DESC" }
     });
   }
 
   async countUnread(recipientId: number){
-    return await this.repository.count({
+    return await this.manager.count(Notification, {
       where: { recipientId, isRead: false }
     });
   }
 
   async findByIdAndRecipient(id: number, recipientId: number){
-    return await this.repository.findOne({
+    return await this.manager.findOne(Notification, {
       where: { id, recipientId }
     });
   }
 
   async saveEntity(notification: Notification){
-    return await this.repository.save(notification);
+    return await this.manager.save(Notification, notification);
   }
 
   async createEntity(data: Partial<Notification>){
-    return this.repository.create(data);
+    return this.manager.create(Notification, data);
   }
 
   async markAllAsRead(recipientId: number){
-    await this.repository.update(
+    await this.manager.update(Notification, 
       { recipientId, isRead: false },
       { isRead: true }
     );

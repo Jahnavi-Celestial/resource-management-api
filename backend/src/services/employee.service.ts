@@ -1,12 +1,10 @@
 import bcrypt from "bcrypt";
-import { EmployeeRepository } from "../repositories/employee.repository.ts";
-import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, AssignRemoveRoleInput } from "../dto/employee.input.ts";
-import { Employee } from "../entities/Employee.ts";
+import { EmployeeRepository, UserRoleRepository, RoleRepository } from "../repositories/index.ts";
+import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, AssignRemoveRoleInput } from "../dto/index.ts";
+import { Employee } from "../entities/index.ts";
 import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
 import { FindOptionsWhere, ILike, In } from "typeorm";
 import { sendMail } from "../jobs/emailService.ts";
-import { UserRoleRepository } from "../repositories/userRole.repository.ts";
-import { RoleRepository } from "../repositories/role.repository.ts";
 
 export class EmployeeService {
   constructor(
@@ -27,6 +25,8 @@ export class EmployeeService {
     const employee = this.employeeRepo.create({
       ...employeeData,
       password: hashedPassword,
+      firstName: input.firstName?.toLowerCase(),
+      lastName: input.lastName?.toLowerCase()
     });
 
     const role = await this.roleRepo.findRoleById(roleId);
@@ -69,17 +69,17 @@ export class EmployeeService {
       sendMail(to, subject, text)
     }
 
-    if(input.roleIdFrom !== undefined && input.roleIdTo !== undefined){
+    if(input.roleIdFrom != undefined && input.roleIdTo != undefined){
       const changeUserRole = await this.userRoleRepo.findByEmployeeIdAndRoleId(employee.id, input.roleIdFrom)
 
       if(!changeUserRole){
-        throw new NotFoundError('Target Role not found', "roleIdTo");
+        throw new NotFoundError('Target Role', "roleIdTo");
       }
 
       const roleToChange = await this.roleRepo.findRoleById(input.roleIdTo)
 
       if (!roleToChange) {
-        throw new NotFoundError('Target Role not found', "roleIdTo");
+        throw new NotFoundError('Target Role', "roleIdTo");
       }
 
       changeUserRole.role = roleToChange
@@ -91,6 +91,8 @@ export class EmployeeService {
       ...employee,
       ...input,
       password: hashedPassword,
+      firstName: input.firstName != null ? input.firstName.toLowerCase() : employee.firstName,
+      lastName: input.lastName?.toLowerCase()
     });
   }
 
@@ -104,7 +106,7 @@ export class EmployeeService {
     )
 
     if (totalFound !== ids.length) {
-      throw new NotFoundError("One or more employees not found", "ids");
+      throw new NotFoundError("One or more employees", "ids");
     }
 
     const deletePromises = ids.map(id => this.employeeRepo.delete(id));

@@ -1,13 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { LoginInput, RegisterInput } from "../dto/auth.input.ts";
-import { EmployeeRepository } from "../repositories/employee.repository.ts";
+import { LoginInput, RegisterInput } from "../dto/index.ts";
 import { AppError, ConflictError, NotFoundError } from "../errors/AppErrors.ts";
-import { UserRoleRepository } from "../repositories/userRole.repository.ts";
-import { RoleRepository } from "../repositories/role.repository.ts";
-import { RolePermissionRepository } from "../repositories/rolePermission.repository.ts";
-import { PermissionRepository } from "../repositories/permission.repository.ts";
+import { EmployeeRepository, RolePermissionRepository, RoleRepository, UserRoleRepository } from "../repositories/index.ts";
 
 dotenv.config();
 
@@ -16,7 +12,6 @@ export class AuthService{
   private userRoleRepo = new UserRoleRepository();
   private roleRepo = new RoleRepository();
   private rolePermissionRepo = new RolePermissionRepository();
-  private permissionRepo = new PermissionRepository()
 
   async register(input: RegisterInput){
     const { firstName, lastName, email, password, roleId } = input;

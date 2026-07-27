@@ -27,8 +27,9 @@ export const formatError = (formattedError: GraphQLFormattedError, error: any): 
   }
 
   if (formattedError.extensions?.validationErrors) {
+    const error = (formattedError.extensions?.validationErrors as any)?.[0]
     return {
-      message: formattedError.message,
+      message: error?.constraints?.min || error?.constraints?.minLength || error?.constraints?.isEmail || error?.constraints?.isAlpha || formattedError.message,
       extensions: {
         code: formattedError.extensions.code || 'BAD_USER_INPUT',
         statusCode: formattedError.extensions.statusCode || 400,

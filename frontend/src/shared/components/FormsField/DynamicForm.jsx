@@ -24,12 +24,17 @@ const DynamicForm = memo(({ config, onSubmit, backendErrors, isSubmitting }) => 
         }
     }, [backendErrors])
 
-    const handleFieldChange = useCallback((name, value) => {
+    const handleFieldChange = useCallback((name, value, event = null) => {
         setFormData(prev => ({ ...prev, [name]: value }))
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }))
         }
-    }, [errors])
+
+        const fieldConfig = config.find(f => f.name === name);
+        if(fieldConfig && typeof fieldConfig.onChange === 'function'){
+            fieldConfig.onChange(event || { target: { name, value } });
+        }
+    }, [errors, config])
 
     const resetForm = useCallback(() => {
         const initialData = {}

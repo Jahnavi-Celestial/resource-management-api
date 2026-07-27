@@ -5,23 +5,16 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from '@as-integrations/express5';
 import dotenv from "dotenv";
 import { Employee } from "./entities/Employee.ts";
-import { AuthResolver } from "./resolvers/auth.resolver.ts";
-import { EmployeeResolver } from "./resolvers/employee.resolver.ts";
-import { MeetingRoomResolver } from "./resolvers/meetingRoom.resolver.ts";
-import { EquipmentResolver } from "./resolvers/equipment.resolver.ts";
-import { BookingResolver } from "./resolvers/booking.resolver.ts";
-import { ReportResolver } from "./resolvers/report.reolver.ts";
 import bookingCron from "./jobs/bookingCron.ts";
 import express from "express";
 import cors from "cors"; 
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { registerNotificationHandlers } from "./sockets/notification.socket.ts";
-import { RoleResolver } from "./resolvers/role.resolver.ts";
-import { PermissionResolver } from "./resolvers/permission.resolver.ts";
 import { authCheck } from "./middleware/auth.middleware.ts";
 import { formatError } from './utils/errorFormatter.ts';
 import { createLoaders, RecordLoaders } from "./utils/createLoaders.ts";
+import { resolver } from "./resolvers/index.ts";
 
 dotenv.config();
 
@@ -37,7 +30,7 @@ async function main() {
         console.log("Database connected successfully");
 
         const schema = await buildSchema({
-            resolvers: [AuthResolver, EmployeeResolver, MeetingRoomResolver, EquipmentResolver, BookingResolver, ReportResolver, RoleResolver, PermissionResolver],
+            resolvers: resolver,
             validate: true,
         }); 
 

@@ -1,16 +1,18 @@
 import { Field, InputType, Int, ObjectType } from "type-graphql";
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsInt, Min, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsInt, Min, IsString, IsAlpha } from "class-validator";
 import { Employee } from "../entities/Employee.ts";
 
 @InputType()
 export class CreateEmployeeInput{
   @Field(() => String)
   @IsNotEmpty({ message: "First name cannot be empty" })
+  @IsAlpha()
   firstName!: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "Last name cannot be empty" })
-  lastName!: string;
+  @IsOptional()
+  @IsAlpha()
+  lastName?: string;
 
   @Field(() => String)
   @IsNotEmpty({ message: "Email cannot be empty" })
@@ -37,10 +39,12 @@ export class UpdateEmployeeInput{
 
   @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsAlpha()
   firstName?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsAlpha()
   lastName?: string;
 
   @Field(() => String, { nullable: true })

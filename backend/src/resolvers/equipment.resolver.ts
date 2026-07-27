@@ -1,9 +1,8 @@
 import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
-import { Equipment } from "../entities/Equipment.ts";
-import { EquipmentService } from "../services/equipment.service.ts";
-import { CreateEquipmentInput, EquipmentsFilterInput, PaginatedEquipments, UpdateEquipmentInput } from "../dto/equipment.input.ts";
+import { Equipment, Booking } from "../entities/index.ts";
+import { EquipmentService } from "../services/index.ts";
+import { CreateEquipmentInput, EquipmentsFilterInput, PaginatedEquipments, UpdateEquipmentInput } from "../dto/index.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
-import { Booking } from "../entities/Booking.ts";
 import { type AppContext } from "../index.ts";
 
 @Resolver(() => Equipment)

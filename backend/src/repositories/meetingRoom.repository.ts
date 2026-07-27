@@ -1,30 +1,32 @@
-import { FindOptionsWhere } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
+import { EntityManager, FindOptionsWhere } from "typeorm";
+import { MeetingRoom } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
 
-export class MeetingRoomRepository {
-  private repo = AppDataSource.getRepository(MeetingRoom)
+export class MeetingRoomRepository extends Manager{
+  constructor(manager?: EntityManager) {
+    super(manager);
+  }
 
   async findById(id: number){
-    return this.repo.findOne({ where: { id } });
+    return this.manager.findOne(MeetingRoom, { where: { id } });
   }
 
   create(data: Partial<MeetingRoom>): MeetingRoom {
-    return this.repo.create(data);
+    return this.manager.create(MeetingRoom, data);
   }
 
   async save(room: MeetingRoom | Partial<MeetingRoom>){
-    return this.repo.save(room);
+    return this.manager.save(MeetingRoom, room);
   }
 
   async delete(id: number){
-    const result = await this.repo.delete(id);
+    const result = await this.manager.delete(MeetingRoom, id);
     return !!result.affected;
   }
 
   async findByIdWithRelations(id: number){
-    return this.repo.findOne({
+    return this.manager.findOne(MeetingRoom, {
       where: { id },
       relations: {
         bookings: {
@@ -42,7 +44,7 @@ export class MeetingRoomRepository {
     take: number,
     sortOrder: string
   ){
-    return this.repo.findAndCount({
+    return this.manager.findAndCount(MeetingRoom, {
       where: whereConditions,
       relations: {
         bookings: {
@@ -56,4 +58,13 @@ export class MeetingRoomRepository {
       take
     });
   }
+
+  async findOneByNameAndLocation(name: string, location: string){
+    return this.manager.findOne(MeetingRoom, {
+      where: {
+        name: name,
+        location: location
+      }
+    })
+  };
 }

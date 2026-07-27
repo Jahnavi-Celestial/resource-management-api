@@ -17,7 +17,7 @@ const UpdateRoom = memo(({ onSubmitSuccess, room }) => {
             id: room.id,
             name: formData.name,
             location: formData.location,
-            capacity: parseInt(formData.capacity, 10) || 1,
+            capacity: parseInt(formData.capacity, 10),
             isActive:
               formData.isActive === "true" || formData.isActive === true,
           },

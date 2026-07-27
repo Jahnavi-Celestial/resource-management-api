@@ -1,26 +1,10 @@
-import { CreatePermissionInput, UpdatePermissionInput } from "../dto/permission.input.ts";
-import { ConflictError, NotFoundError } from "../errors/AppErrors.ts";
-import { PermissionRepository } from "../repositories/permission.repository.ts";
+import { UpdatePermissionInput } from "../dto/index.ts";
+import { NotFoundError } from "../errors/AppErrors.ts";
+import { PermissionRepository, RolePermissionRepository } from "../repositories/index.ts";
 
 export class PermissionService{
   constructor(private permissionRepo = new PermissionRepository()) {}
-
-  async createPermission(input: CreatePermissionInput){
-    const { name } = input;
-
-    const isExist = await this.permissionRepo.findPermissionByName(
-      name.toLowerCase(),
-    );
-
-    if(isExist){
-      throw new ConflictError("Permission already exists, you can only update it.", "name")
-    }
-
-    const newPermission = await this.permissionRepo.createPermission({
-      permission_name: name
-    })
-    return await this.permissionRepo.savePermission(newPermission)
-  }
+  private rolePermissionRepo = new RolePermissionRepository()
 
   async updatePermission(input: UpdatePermissionInput){
     const { name, id } = input
@@ -33,7 +17,7 @@ export class PermissionService{
 
     return this.permissionRepo.savePermission({
       ...isExist,
-      permission_name: name,
+      permission_name: name.toUpperCase(),
     });
   }
 
@@ -49,5 +33,15 @@ export class PermissionService{
   async getAllPermission(){
     const permissions = await this.permissionRepo.findPermission();
     return permissions
+  }
+
+  async getAllPermissionForRole(roleId: number){
+    const isExist = await this.rolePermissionRepo.findByRoleId(roleId)
+
+    if(!isExist){
+      throw new NotFoundError('Role', "roleId")
+    }
+
+    return isExist
   }
 }

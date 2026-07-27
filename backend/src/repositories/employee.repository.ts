@@ -1,13 +1,15 @@
-import { FindOptionsWhere } from "typeorm";
-import AppDataSource from "../config/db.ts";
-import { Employee } from "../entities/Employee.ts";
+import { EntityManager, FindOptionsWhere } from "typeorm";
+import { Employee } from "../entities/index.ts";
+import { Manager } from "./index.ts";
 
 
-export class EmployeeRepository {
-  private repo = AppDataSource.getRepository(Employee);
+export class EmployeeRepository extends Manager {
+  constructor(manager?: EntityManager) {
+    super(manager);
+  }
 
   async findById(id: number){
-    return this.repo.findOne({ 
+    return this.manager.findOne(Employee,{ 
         where: { id },
         relations:{
           userRoles:{
@@ -18,7 +20,7 @@ export class EmployeeRepository {
   }
 
   async findByEmail(email: string){
-    return this.repo.findOne({ 
+    return this.manager.findOne(Employee, { 
         where: { email },
         relations:{
           userRoles:{
@@ -29,20 +31,20 @@ export class EmployeeRepository {
   }
 
   async save(employee: Employee){
-    return this.repo.save(employee);
+    return this.manager.save(Employee, employee);
   }
 
   async delete(id: number){
-    const result = await this.repo.delete(id);
+    const result = await this.manager.delete(Employee, id);
     return !!result.affected;
   }
 
   create(data: Partial<Employee>){
-    return this.repo.create(data);
+    return this.manager.create(Employee, data);
   }
 
   async findByIdWithRelations(id: number){
-    return this.repo.findOne({
+    return this.manager.findOne(Employee, {
       where: { id },
       relations: {
         bookings: {
@@ -64,7 +66,7 @@ export class EmployeeRepository {
     take: number,
     sortOrder: string
   ){
-    return this.repo.findAndCount({
+    return this.manager.findAndCount(Employee, {
       where: whereConditions,
       relations: {
         bookings: {

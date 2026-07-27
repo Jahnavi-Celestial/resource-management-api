@@ -1,9 +1,8 @@
 import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
-import { MeetingRoomService } from "../services/meetingRoom.service.ts";
-import { MeetingRoom } from "../entities/MeetingRoom.ts";
-import { CreateMeetingRoomInput, RoomsFilterInput, UpdateMeetingRoomInput, PaginatedRooms } from "../dto/meetingRoom.input.ts";
+import { MeetingRoomService } from "../services/index.ts";
+import { MeetingRoom, Booking } from "../entities/index.ts";
+import { CreateMeetingRoomInput, RoomsFilterInput, UpdateMeetingRoomInput, PaginatedRooms } from "../dto/index.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
-import { Booking } from "../entities/Booking.ts";
 import { type AppContext } from "../index.ts";
 
 @Resolver(() => MeetingRoom)

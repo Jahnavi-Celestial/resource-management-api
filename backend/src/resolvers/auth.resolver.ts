@@ -1,7 +1,7 @@
 import { Arg, Mutation, Resolver } from "type-graphql";
-import { AuthService } from "../services/auth.service.ts";
-import { Employee } from "../entities/Employee.ts";
-import { LoginInput, RegisterInput } from "../dto/auth.input.ts";
+import { AuthService } from "../services/index.ts";
+import { Employee } from "../entities/index.ts";
+import { LoginInput, RegisterInput } from "../dto/index.ts";
 
 @Resolver()
 export class AuthResolver {

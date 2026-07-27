@@ -1,12 +1,9 @@
 import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
-import { EmployeeService } from "../services/employee.service.ts";
-import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, PaginatedEmployees, AssignRemoveRoleInput } from "../dto/employee.input.ts";
-import { Employee } from "../entities/Employee.ts";
+import { EmployeeService } from "../services/index.ts";
+import { CreateEmployeeInput, EmployeesFilterInput, UpdateEmployeeInput, PaginatedEmployees, AssignRemoveRoleInput } from "../dto/index.ts";
+import { Employee, Booking, AuditLog, UserRole } from "../entities/index.ts";
 import { PermissionMiddleware } from "../middleware/permission.middleware.ts";
-import { Booking } from "../entities/Booking.ts";
 import { type AppContext } from "../index.ts";
-import { AuditLog } from "../entities/AuditLog.ts";
-import { UserRole } from "../entities/UserRole.ts";
 
 @Resolver(() => Employee)
 export class EmployeeResolver {

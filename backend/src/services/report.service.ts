@@ -1,5 +1,5 @@
-import { MostBookedRoom, BookingsPerEmployee, EquipmentUsage, MonthlyBookingStatics,BookingsPerEmployeeInput, EquipmentUsageInput, MonthlyBookingStatisticsInput } from "../dto/report.input.ts";
-import { ReportRepository } from "../repositories/report.repository.ts";
+import { MostBookedRoom, BookingsPerEmployee, EquipmentUsage, MonthlyBookingStatics,BookingsPerEmployeeInput, EquipmentUsageInput, MonthlyBookingStatisticsInput } from "../dto/index.ts";
+import { ReportRepository } from "../repositories/index.ts";
 import { AppError, NotFoundError } from "../errors/AppErrors.ts";
 
 export class ReportService {

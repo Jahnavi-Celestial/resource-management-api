@@ -125,8 +125,8 @@ const RoomDetail = () => {
                     Persons
                   </p>
                   <p>
-                    <strong>Timeline:</strong> {booking.startTime} -{" "}
-                    {booking.endTime}
+                    <strong>Timeline:</strong> {new Date(booking.startTime).toLocaleTimeString()} -{" "}
+                    {new Date(booking.endTime).toLocaleTimeString()}
                   </p>
                 </div>
 
