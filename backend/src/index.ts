@@ -1,116 +1,115 @@
 import "reflect-metadata";
 import AppDataSource from "./config/db.ts";
 import { buildSchema } from "type-graphql";
-import { ApolloServer } from "@apollo/server"; 
-import { expressMiddleware } from '@as-integrations/express5';
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@as-integrations/express5";
 import dotenv from "dotenv";
 import { Employee } from "./entities/Employee.ts";
 import bookingCron from "./jobs/bookingCron.ts";
 import express from "express";
-import cors from "cors"; 
+import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { registerNotificationHandlers } from "./sockets/notification.socket.ts";
 import { authCheck } from "./middleware/auth.middleware.ts";
-import { formatError } from './utils/errorFormatter.ts';
+import { formatError } from "./utils/errorFormatter.ts";
 import { createLoaders, RecordLoaders } from "./utils/createLoaders.ts";
 import { resolver } from "./resolvers/index.ts";
 
 dotenv.config();
 
 export interface AppContext {
-  user: Employee | null; 
+  user: Employee | null;
   io: Server;
   loaders: RecordLoaders;
 }
 
 async function main() {
-    try {
-        await AppDataSource.initialize();
-        console.log("Database connected successfully");
+  try {
+    await AppDataSource.initialize();
+    console.log("Database connected successfully");
 
-        const schema = await buildSchema({
-            resolvers: resolver,
-            validate: true,
-        }); 
+    const schema = await buildSchema({
+      resolvers: resolver,
+      validate: true,
+    });
 
-        const app = express();
-        app.use(
-            cors({
-                origin: process.env.FRONTEND_URL,
-                methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                allowedHeaders: [
-                    'Content-Type',
-                    'Authorization',
-                    'apollo-require-preflight',
-                    'x-apollo-operation-name'
-                ],
-                credentials: true,
-                optionsSuccessStatus: 200,
-            }),
-        );
-        const httpServer = createServer(app); 
+    const app = express();
+    app.use(
+      cors({
+        origin: process.env.FRONTEND_URL,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "apollo-require-preflight",
+          "x-apollo-operation-name",
+        ],
+        credentials: true,
+        optionsSuccessStatus: 200,
+      }),
+    );
+    const httpServer = createServer(app);
 
-        const io = new Server(httpServer, {
-            cors: {
-                origin: process.env.FRONTEND_URL,
-                methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                credentials: true,
-            },
-            transports: ["websocket", "polling"]
-        });
+    const io = new Server(httpServer, {
+      cors: {
+        origin: process.env.FRONTEND_URL,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        credentials: true,
+      },
+      transports: ["websocket", "polling"],
+    });
 
-        io.on("connection", (socket) => {
-            const employeeId = socket.handshake.query.employeeId as string;
-    
-            if (employeeId) {
-                socket.join(`employee_${employeeId}`);
-                console.log(`Employee connected: ${employeeId}`);
+    io.on("connection", (socket) => {
+      const employeeId = socket.handshake.query.employeeId as string;
 
-                registerNotificationHandlers(io, socket, Number(employeeId));
-            }
+      if (employeeId) {
+        socket.join(`employee_${employeeId}`);
+        console.log(`Employee connected: ${employeeId}`);
 
-            socket.on("disconnect", () => {
-                console.log(`Socket disconnected: ${socket.id}`);
-            });
-        });
+        registerNotificationHandlers(io, socket, Number(employeeId));
+      }
 
-        app.set("io", io);
+      socket.on("disconnect", () => {
+        console.log(`Socket disconnected: ${socket.id}`);
+      });
+    });
 
-        const server = new ApolloServer({
-            schema,
-            formatError,
-        });
-        await server.start();
+    app.set("io", io);
 
-        app.use(express.json());
-        
-        app.use(
-            "/graphql",
-            cors({ origin: process.env.FRONTEND_URL, credentials: true }),
-            expressMiddleware(server, {
-                context: async ({ req, res }) => {
-                    const baseContext = await authCheck()({ req });
-                    
-                    return {
-                        ...baseContext,
-                        loaders: createLoaders(),
-                    }
-                }
-            })
-        );
+    const server = new ApolloServer({
+      schema,
+      formatError,
+    });
+    await server.start();
 
-        bookingCron(io);
+    app.use(express.json());
 
-        const PORT = process.env.PORT || 10000;
+    app.use(
+      "/graphql",
+      cors({ origin: process.env.FRONTEND_URL, credentials: true }),
+      expressMiddleware(server, {
+        context: async ({ req, res }) => {
+          const baseContext = await authCheck()({ req });
 
-        httpServer.listen(PORT, () => {
-            console.log(`Server ready at http://localhost:${PORT}/graphql`);
-        });
+          return {
+            ...baseContext,
+            loaders: createLoaders(),
+          };
+        },
+      }),
+    );
 
-    } catch (err) {
-        console.log("Error in initialization", err);
-    }
+    bookingCron(io);
+
+    const PORT = process.env.PORT || 10000;
+
+    httpServer.listen(PORT, () => {
+      console.log(`Server ready at http://localhost:${PORT}/graphql`);
+    });
+  } catch (err) {
+    console.log("Error in initialization", err);
+  }
 }
 
 main();

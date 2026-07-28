@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "node-pg-migrate -m ./migrations --migration-file-language js",
-    "dev": "nodemon --exec tsx ./src/index.ts"
+    "dev": "nodemon --exec tsx ./src/index.ts",
+    "build": "npx tsup ./src/index.ts --format esm --clean --minify --no-splitting"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.3",
+    "tsup": "^8.5.1",
     "type-graphql": "^2.0.0-rc.3",
     "type-graphql-dataloader": "^0.5.1",
     "typeorm": "^1.0.0"
@@ -37,7 +39,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "tsc": "^2.0.4",
