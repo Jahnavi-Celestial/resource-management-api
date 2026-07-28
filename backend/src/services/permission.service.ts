@@ -12,7 +12,7 @@ export class PermissionService{
     const isExist = await this.permissionRepo.findPermissionById(id);
 
     if(!isExist){
-      throw new NotFoundError("Permission", "id");
+      throw new NotFoundError("Permission");
     }
 
     return this.permissionRepo.savePermission({
@@ -24,7 +24,7 @@ export class PermissionService{
   async deletePermission(id: number){
     const isExist = await this.permissionRepo.findPermissionById(id);
     if(!isExist){
-      throw new NotFoundError("Permission", "id");
+      throw new NotFoundError("Permission");
     }
 
     return this.permissionRepo.deletePermission(id);
@@ -39,7 +39,7 @@ export class PermissionService{
     const isExist = await this.rolePermissionRepo.findByRoleId(roleId)
 
     if(!isExist){
-      throw new NotFoundError('Role', "roleId")
+      throw new NotFoundError('Role')
     }
 
     return isExist

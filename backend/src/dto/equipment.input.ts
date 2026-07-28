@@ -1,5 +1,5 @@
 import { Field, InputType, Int, ObjectType } from "type-graphql";
-import { IsNotEmpty, IsInt, IsBoolean, IsString, IsOptional, Min } from "class-validator";
+import { IsNotEmpty, IsInt, IsBoolean, IsString, IsOptional, Min, IsAlpha } from "class-validator";
 import { Equipment } from "../entities/Equipment.ts";
 
 @InputType()
@@ -7,6 +7,7 @@ export class CreateEquipmentInput{
   @Field(() => String)
   @IsNotEmpty({ message: "Equipment name cannot be empty" })
   @IsString({ message: "Equipment name must be text" })
+  @IsAlpha()
   name!: string;
 
   @Field(() => Int)
@@ -31,6 +32,7 @@ export class UpdateEquipmentInput{
   @Field(() => String)
   @IsNotEmpty({ message: "Equipment name cannot be empty" })
   @IsString({ message: "Equipment name must be text" })
+  @IsAlpha()
   name!: string;
 
   @Field(() => Int)

@@ -19,7 +19,7 @@ export class AuthService{
     const isEmpExist = await this.employeeRepo.findByEmail(email);
 
     if (isEmpExist) {
-      throw new ConflictError("Employee already exists with this email.", "email");
+      throw new ConflictError("Employee already exists with this email.");
     }
 
     const password_hash = await bcrypt.hash(password, 10);
@@ -34,7 +34,7 @@ export class AuthService{
 
     const role = await this.roleRepo.findRoleById(roleId);
     if(!role){
-      throw new NotFoundError("Role", "roleId");
+      throw new NotFoundError("Role");
     }
 
     const user = await this.userRoleRepo.create({
@@ -54,12 +54,12 @@ export class AuthService{
     const isEmpExist = await this.employeeRepo.findByEmail(email);
     
     if (!isEmpExist) {
-      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED", "email");
+      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED");
     }
 
     const isPasswordValid = await bcrypt.compare(password, isEmpExist.password);
     if (!isPasswordValid) {
-      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED", "password");
+      throw new AppError("Invalid email or password", 401, "UNAUTHORIZED");
     }
 
     const roles = isEmpExist.userRoles.map(userRole => userRole.role.role_name);

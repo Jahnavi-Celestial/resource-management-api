@@ -16,7 +16,7 @@ export class EmployeeService {
   async createEmployee(input: CreateEmployeeInput){
     const existing = await this.employeeRepo.findByEmail(input.email);
     if (existing) {
-      throw new ConflictError("Employee email already registered", "email");
+      throw new ConflictError("Employee email already registered");
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 10);
@@ -32,7 +32,7 @@ export class EmployeeService {
     const role = await this.roleRepo.findRoleById(roleId);
 
     if(!role){
-      throw new NotFoundError("Role", "roleId");
+      throw new NotFoundError("Role");
     }
 
     const to = `${employee.email}`
@@ -73,13 +73,13 @@ export class EmployeeService {
       const changeUserRole = await this.userRoleRepo.findByEmployeeIdAndRoleId(employee.id, input.roleIdFrom)
 
       if(!changeUserRole){
-        throw new NotFoundError('Target Role', "roleIdTo");
+        throw new NotFoundError('Target Role');
       }
 
       const roleToChange = await this.roleRepo.findRoleById(input.roleIdTo)
 
       if (!roleToChange) {
-        throw new NotFoundError('Target Role', "roleIdTo");
+        throw new NotFoundError('Target Role');
       }
 
       changeUserRole.role = roleToChange
@@ -106,7 +106,7 @@ export class EmployeeService {
     )
 
     if (totalFound !== ids.length) {
-      throw new NotFoundError("One or more employees", "ids");
+      throw new NotFoundError("One or more employees");
     }
 
     const deletePromises = ids.map(id => this.employeeRepo.delete(id));
@@ -150,7 +150,7 @@ export class EmployeeService {
   async getEmployeeById(id: number){
     const employee = await this.employeeRepo.findByIdWithRelations(id);
     if (!employee) {
-      throw new NotFoundError("Employee", "id");
+      throw new NotFoundError("Employee");
     }
     return employee;
   }
@@ -161,13 +161,13 @@ export class EmployeeService {
     const employee = await this.employeeRepo.findById(userId);
 
     if(!employee){
-        throw new NotFoundError("Employee", "userId");
+        throw new NotFoundError("Employee");
     }
 
     const role = await this.roleRepo.findRoleById(roleId);
 
     if(!role){
-        throw new NotFoundError("Role", "roleId");
+        throw new NotFoundError("Role");
     }
 
     const existing = await this.userRoleRepo.findByEmployeeIdAndRoleId(userId, roleId);
@@ -194,7 +194,7 @@ export class EmployeeService {
     );
 
     if(!userRole){
-        throw new NotFoundError("Role Assignment", "roleId");
+        throw new NotFoundError("Role Assignment");
     }
 
     await this.userRoleRepo.remove(userRole);

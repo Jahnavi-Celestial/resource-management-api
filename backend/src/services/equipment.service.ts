@@ -14,7 +14,7 @@ export class EquipmentService {
     const isExist = await this.equipmentRepo.findByName(name.toLowerCase())
 
     if(isExist){
-        throw new ConflictError("Equipment already exists, you can only update it.", "name");
+        throw new ConflictError("Equipment already exists, you can only update it.");
     }
 
     const newEquip = this.equipmentRepo.create({
@@ -27,7 +27,7 @@ export class EquipmentService {
   async updateEquipment(input: UpdateEquipmentInput){
     const searchEquip = await this.equipmentRepo.findById(input.id);
     if (!searchEquip) {
-      throw new NotFoundError("Equipment", "id");
+      throw new NotFoundError("Equipment");
     }
 
     return this.equipmentRepo.save({
@@ -40,7 +40,7 @@ export class EquipmentService {
   async deleteEquipment(id: number){
     const searchEquip = await this.equipmentRepo.findById(id);
     if (!searchEquip) {
-      throw new NotFoundError("Equipment", "id");
+      throw new NotFoundError("Equipment");
     }
 
     await AppDataSource.query(`
@@ -78,7 +78,7 @@ export class EquipmentService {
   async getEquipmentById(id: number){
     const equipment = await this.equipmentRepo.findByIdWithRelations(id);
     if (!equipment) {
-      throw new NotFoundError("Equipment", "id");
+      throw new NotFoundError("Equipment");
     }
     return equipment;
   }

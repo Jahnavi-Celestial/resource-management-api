@@ -22,7 +22,6 @@ export class BookingService {
         "Start time must be before end time.",
         400,
         "BAD_USER_INPUT",
-        "startTime"
       );
     }
 
@@ -32,14 +31,13 @@ export class BookingService {
 
         const room = await repo.findRoomWithBookings(input.meetingRoomId);
         if (!room) {
-          throw new NotFoundError("Meeting Room", "meetingRoomId");
+          throw new NotFoundError("Meeting Room");
         }
         if (!room.isActive) {
           throw new AppError(
             "Meeting Room is not active",
             400,
             "ROOM_INACTIVE",
-            "meetingRoomId"
           );
         }
         if (room.capacity < input.numberOfAttendees) {
@@ -47,7 +45,6 @@ export class BookingService {
             `Meeting Room only have capacity of ${room.capacity}`,
             400,
             "CAPACITY_EXCEEDED",
-            "numberOfAttendees"
           );
         }
 
@@ -58,7 +55,7 @@ export class BookingService {
         );
         if (checkOverlapping) {
           throw new ConflictError(
-            "Meeting room is already booked for this time period", "startTime"
+            "Meeting room is already booked for this time period"
           );
         }
 
@@ -67,14 +64,13 @@ export class BookingService {
           for (const eqObj of input.equipmentRequested) {
             const equipment = await repo.findEquipmentById(eqObj.equipId);
             if (!equipment) {
-              throw new NotFoundError(`Equipment ID ${eqObj.equipId}`, "equipmentRequested");
+              throw new NotFoundError(`Equipment ID ${eqObj.equipId}`);
             }
             if (!equipment.isActive) {
               throw new AppError(
                 `Equipment ${equipment.name} is inactive`,
                 400,
                 "EQUIPMENT_INACTIVE",
-                "equipmentRequested"
               );
             }
             if (eqObj.quantity < 0) {
@@ -82,7 +78,6 @@ export class BookingService {
                 "Equipment quantity requested cant be negative",
                 400,
                 "BAD_USER_INPUT",
-                "equipmentRequested"
               );
             }
             if (equipment.quantityAvailable < eqObj.quantity) {
@@ -90,7 +85,6 @@ export class BookingService {
                 `Equipment ${equipment.name} only has ${equipment.quantityAvailable} units available`,
                 400,
                 "INSUFFICIENT_STOCK",
-                "equipmentRequested"
               );
             }
 
@@ -155,22 +149,20 @@ export class BookingService {
 
         const booking = await repo.findBookingForCancellation(bookingId);
         if (!booking) {
-          throw new NotFoundError("Booking", "bookingId");
+          throw new NotFoundError("Booking");
         }
         if (booking.employeeId !== user.id) {
           throw new AppError(
             "You cannot cancel another employees booking",
             403,
             "FORBIDDEN",
-            "bookingId"
           );
         }
         if (booking.status !== BookingStatus.PENDING) {
           throw new AppError(
             "Only pending bookings can be cancelled",
             400,
-            "BAD_REQUEST",
-            "bookingId"
+            "BAD_REQUEST"
           );
         }
 
@@ -237,14 +229,13 @@ export class BookingService {
 
         const booking = await repo.findBookingForResolution(input.bookingId);
         if (!booking) {
-          throw new NotFoundError("Booking record", "bookingId");
+          throw new NotFoundError("Booking record");
         }
         if (booking.status !== BookingStatus.PENDING) {
           throw new AppError(
             "Only pending requests can be resolved",
             400,
             "BAD_REQUEST",
-            "bookingId"
           );
         }
 
@@ -255,7 +246,7 @@ export class BookingService {
         );
         if (alreadyApproved) {
           throw new ConflictError(
-            "This room is already booked and approved for this time slot", "bookingId"
+            "This room is already booked and approved for this time slot",
           );
         }
 
@@ -373,14 +364,13 @@ export class BookingService {
 
         const booking = await repo.findBookingForResolution(input.bookingId);
         if (!booking) {
-          throw new NotFoundError("Booking record", "bookingId");
+          throw new NotFoundError("Booking record");
         }
         if (booking.status !== BookingStatus.PENDING) {
           throw new AppError(
             "Only pending requests can be resolved",
             400,
             "BAD_REQUEST",
-            "bookingId"
           );
         }
 
@@ -455,7 +445,7 @@ export class BookingService {
   async getBookingById(id: number){
     const booking = await this.bookingRepo.findByIdWithRelations(id);
     if (!booking) {
-      throw new NotFoundError("Booking", "id");
+      throw new NotFoundError("Booking");
     }
     return booking;
   }

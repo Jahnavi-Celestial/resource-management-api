@@ -25,7 +25,7 @@ export class MeetingRoomService {
   async updateRoom(input: UpdateMeetingRoomInput){
     const searchRoom = await this.meetingRoomRepo.findById(input.id);
     if (!searchRoom) {
-      throw new NotFoundError("Meeting Room", "id");
+      throw new NotFoundError("Meeting Room");
     }
 
     if(searchRoom.name.toLowerCase() != input.name.toLowerCase() || searchRoom.location.toLowerCase() != input.location.toLowerCase()){
@@ -47,7 +47,7 @@ export class MeetingRoomService {
   async deleteRoom(id: number){
     const searchRoom = await this.meetingRoomRepo.findById(id);
     if (!searchRoom) {
-      throw new NotFoundError("Meeting Room", "id");
+      throw new NotFoundError("Meeting Room");
     }
 
     return this.meetingRoomRepo.delete(id);
@@ -80,7 +80,7 @@ export class MeetingRoomService {
   async getRoomById(id: number){
     const room = await this.meetingRoomRepo.findByIdWithRelations(id);
     if (!room) {
-      throw new NotFoundError("Meeting Room", "id");
+      throw new NotFoundError("Meeting Room");
     }
     return room;
   }
