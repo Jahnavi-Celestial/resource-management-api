@@ -1,40 +1,40 @@
 import { Field, InputType, Int } from "type-graphql";
-import { IsNotEmpty, IsEmail, MinLength, IsOptional } from "class-validator";
+import { CustomIsEmail, CustomIsNotEmpty, CustomIsOptional, CustomMinLength } from "../utils/customDecorators.ts";
 
 @InputType()
 export class RegisterInput{
   @Field(() => String)
-  @IsNotEmpty({ message: "FirstName can't be empty" })
+  @CustomIsNotEmpty({ message: "FirstName can't be empty" })
   firstName!: string;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
+  @CustomIsOptional()
   lastName?: string | undefined;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "email can't be empty" })
-  @IsEmail({ require_tld: true }, { message: "Invalid email format" })
+  @CustomIsNotEmpty({ message: "email can't be empty" })
+  @CustomIsEmail({ message: "Invalid email format" })
   email!: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "password can't be empty" })
-  @MinLength(6, { message: "Password should contain atleast 6 characters" })
+  @CustomIsNotEmpty({ message: "password can't be empty" })
+  @CustomMinLength(6, { message: "Password should contain atleast 6 characters" })
   password!: string;
 
   @Field(() => Int)
-  @IsNotEmpty({ message: "role id can't be empty" })
+  @CustomIsNotEmpty({ message: "role id can't be empty" })
   roleId!: number;
 }
 
 @InputType()
 export class LoginInput{
   @Field(() => String)
-  @IsNotEmpty({ message: "email can't be empty" })
-  @IsEmail({ require_tld: true }, { message: "Invalid email format" })
+  @CustomIsNotEmpty({ message: "email can't be empty" })
+  @CustomIsEmail({ message: "Invalid email format" })
   email!: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "password can't be empty" })
-  @MinLength(6, { message: "Password should contain atleast 6 characters" })
+  @CustomIsNotEmpty({ message: "password can't be empty" })
+  @CustomMinLength(6, { message: "Password should contain atleast 6 characters" })
   password!: string;
 }

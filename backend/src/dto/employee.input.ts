@@ -1,98 +1,98 @@
 import { Field, InputType, Int, ObjectType } from "type-graphql";
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsInt, Min, IsString, IsAlpha } from "class-validator";
 import { Employee } from "../entities/Employee.ts";
+import { CustomIsAlpha, CustomMinLength, CustomIsEmail, CustomIsNotEmpty, CustomIsOptional, CustomIsInt, CustomMin, CustomIsString } from "../utils/customDecorators.ts";
 
 @InputType()
 export class CreateEmployeeInput{
   @Field(() => String)
-  @IsNotEmpty({ message: "First name cannot be empty" })
-  @IsAlpha()
+  @CustomIsNotEmpty({ message: "First name cannot be empty" })
+  @CustomIsAlpha()
   firstName!: string;
 
   @Field(() => String)
-  @IsOptional()
-  @IsAlpha()
+  @CustomIsOptional()
+  @CustomIsAlpha()
   lastName?: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "Email cannot be empty" })
-  @IsEmail({ require_tld: true }, { message: "Invalid email format" })
+  @CustomIsNotEmpty({ message: "Email cannot be empty" })
+  @CustomIsEmail({message: 'Invalid Email Format'})
   email!: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "Password cannot be empty" })
-  @MinLength(6, { message: "Password should contain at least 6 characters" })
+  @CustomIsNotEmpty({ message: "Password cannot be empty" })
+  @CustomMinLength(6, { message: "Password should contain at least 6 characters" })
   password!: string;
 
   @Field(() => Int)
-  @IsNotEmpty({ message: "Role ID cannot be empty" })
-  @IsInt({ message: "Role ID must be a number" })
+  @CustomIsNotEmpty({ message: "Role ID cannot be empty" })
+  @CustomIsInt({ message: "Role ID must be a number" })
   roleId!: number;
 }
 
 @InputType()
 export class UpdateEmployeeInput{
   @Field(() => Int)
-  @IsNotEmpty({ message: "Employee ID cannot be empty" })
-  @IsInt({ message: "Employee ID must be a number" })
+  @CustomIsNotEmpty({ message: "Employee ID cannot be empty" })
+  @CustomIsInt({ message: "Employee ID must be a number" })
   id!: number;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsAlpha()
+  @CustomIsOptional()
+  @CustomIsAlpha()
   firstName?: string;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsAlpha()
+  @CustomIsOptional()
+  @CustomIsAlpha()
   lastName?: string;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsEmail({ require_tld: true }, { message: "Invalid email format" })
+  @CustomIsOptional()
+  @CustomIsEmail({ message: "Invalid email format" })
   email?: string;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @MinLength(6, { message: "Password should contain at least 6 characters" })
+  @CustomIsOptional()
+  @CustomMinLength(6, { message: "Password should contain at least 6 characters" })
   password?: string;
 
   @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt({ message: "Source Role ID must be a number" })
+  @CustomIsOptional()
+  @CustomIsInt({ message: "Source Role ID must be a number" })
   roleIdFrom?: number;
 
   @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt({ message: "Target Role ID must be a number" })
+  @CustomIsOptional()
+  @CustomIsInt({ message: "Target Role ID must be a number" })
   roleIdTo?: number;
 }
 
 @InputType()
 export class EmployeesFilterInput{
   @Field(() => Int, { defaultValue: 1 })
-  @IsOptional()
-  @IsInt()
-  @Min(1, { message: "Page must be at least 1" })
+  @CustomIsOptional()
+  @CustomIsInt()
+  @CustomMin(1, { message: "Page must be at least 1" })
   page!: number;
 
   @Field(() => Int, { defaultValue: 10 })
-  @IsOptional()
-  @IsInt()
-  @Min(1, { message: "Limit must be at least 1" })
+  @CustomIsOptional()
+  @CustomIsInt()
+  @CustomMin(1, { message: "Limit must be at least 1" })
   limit!: number;
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsString()
+  @CustomIsOptional()
+  @CustomIsString()
   searchTerm?: string;
 
   @Field(() => String, { nullable: true, defaultValue: "DESC" })
   sortOrder?: "ASC" | "DESC";
 
   @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsString()
+  @CustomIsOptional()
+  @CustomIsString()
   role?: string;
 }
 
@@ -114,12 +114,12 @@ export class PaginatedEmployees{
 @InputType()
 export class AssignRemoveRoleInput{
   @Field(() => Int)
-  @IsNotEmpty({ message: "Role ID cannot be empty" })
-  @IsInt({ message: "Role ID must be a number" })
+  @CustomIsNotEmpty({ message: "Role ID cannot be empty" })
+  @CustomIsInt({ message: "Role ID must be a number" })
   roleId!: number;
 
   @Field(() => Int)
-  @IsNotEmpty({ message: "User ID cannot be empty" })
-  @IsInt({ message: "User ID must be a number" })
+  @CustomIsNotEmpty({ message: "User ID cannot be empty" })
+  @CustomIsInt({ message: "User ID must be a number" })
   userId!: number;
 }

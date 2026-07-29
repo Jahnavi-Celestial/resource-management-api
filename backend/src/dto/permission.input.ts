@@ -1,23 +1,24 @@
 import { IsInt, IsNotEmpty, IsString } from "class-validator";
 import { Field, InputType, Int } from "type-graphql";
+import { CustomIsInt, CustomIsNotEmpty, CustomIsString } from "../utils/customDecorators.ts";
 
 @InputType()
 export class CreatePermissionInput{
   @Field(() => String)
-  @IsNotEmpty({ message: "Permission name cannot be empty" })
-  @IsString({ message: "Permission name must be text" })
+  @CustomIsNotEmpty({ message: "Permission name cannot be empty" })
+  @CustomIsString({ message: "Permission name must be text" })
   name!: string;
 }
 
 @InputType()
 export class UpdatePermissionInput{
   @Field(() => Int)
-  @IsNotEmpty({ message: "Permission ID cannot be empty" })
-  @IsInt({ message: "Permission ID must be an integer" })
+  @CustomIsNotEmpty({ message: "Permission ID cannot be empty" })
+  @CustomIsInt({ message: "Permission ID must be an integer" })
   id!: number;
 
   @Field(() => String)
-  @IsNotEmpty({ message: "Permission name cannot be empty" })
-  @IsString({ message: "Permission name must be text" })
+  @CustomIsNotEmpty({ message: "Permission name cannot be empty" })
+  @CustomIsString({ message: "Permission name must be text" })
   name!: string;
 }
